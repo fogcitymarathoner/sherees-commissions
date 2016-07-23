@@ -10,6 +10,10 @@ from models import engine
 from models import Citem
 
 
+def full_comm_item_xml_path(data_dir, comm_item):
+    return os.path.join(data_dir, '%s.xml' % str(comm_item.id).zfill(5))
+
+
 def directory_date_dictionary(data_dir):
     """
     returns dictionary of a directory in (name: cdate} format
@@ -41,7 +45,7 @@ def db_date_dictionary_comm_item(data_dir):
     citems = session.query(Citem).order_by(Citem.id)
 
     for comm_item in citems:
-        f = os.path.join(data_dir, '%s.xml' % str(comm_item.id).zfill(5))
+        f = full_comm_item_xml_path(data_dir, comm_item)
         citem_dict[f] = comm_item.last_sync_time
 
     return citem_dict, citems
@@ -59,11 +63,29 @@ def get_list_of_comm_items_to_sync(data_dir):
 
     return sync_list
 
+
+def sync_comm_item(data_dir, comm_item):
+    """
+    writes xml file for commissions item
+    """
+    f = full_comm_item_xml_path(data_dir, comm_item)
+    with open(f, 'w') as f:
+        f.write(comm_item.to_xml())
+    print('%s written' % f)
+
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
 date_dict, citems = db_date_dictionary_comm_item(data_dir)
+disk_dict =directory_date_dictionary(data_dir)
+for comm_item in citems:
+    f = full_comm_item_xml_path(data_dir, comm_item)
+    if f not in disk_dict:
+        sync_comm_item(data_dir, comm_item)
+    else:
+        if comm_item.modified_date > comm_item.last_sync_time:
 
-for ci in citems:
-    print(ci.to_xml())
+            sync_comm_item(data_dir, comm_item)
+        else:
+            print('%s already synced' % comm_item)
 
 
 """

@@ -119,6 +119,7 @@ class Citem(Base):
     __tablename__ = 'invoices_items_commissions_items'
     
     id = Column(Integer, primary_key=True)
+    invoice_id = Column(Integer)
     employee_id = Column(Integer)
     invoices_item_id = Column(Integer)
     commissions_report_id = Column(Integer)
@@ -141,14 +142,17 @@ class Citem(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-       return "<Citem(description='%s', employee_id='%s', amount='%s')>" % (
-           self.description, self.employee_id, self.amount)
+       return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s')>" % (
+           self.description, self.id, self.employee_id, self.amount)
 
     def to_xml(self):
         doc = ET.Element('invoices-items-commissions-item')
 
         id = ET.SubElement(doc, 'id')
         id.text = str(self.id)
+
+        invoice_id = ET.SubElement(doc, 'invoice_id')
+        invoice_id.text = str(self.invoice_id)
 
         employee_id = ET.SubElement(doc, 'employee_id')
         employee_id.text = str(self.employee_id)
@@ -184,7 +188,7 @@ class Citem(Base):
         rel_item_amt.text = str(self.rel_item_amt)
 
         rel_item_quantity = ET.SubElement(doc, 'rel_item_quantity')
-        rel_item_quantity.texte = str(self.rel_item_quantity)
+        rel_item_quantity.text = str(self.rel_item_quantity)
 
         rel_item_cost = ET.SubElement(doc, 'rel_item_cost')
         rel_item_cost.text = str(self.rel_item_cost)
