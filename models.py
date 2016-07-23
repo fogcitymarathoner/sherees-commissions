@@ -114,7 +114,7 @@ class Iitem(Base):
     cost = Column(Float)
     ordering = Column(Integer)
     cleared = Column(Boolean)
-    comm_items = relationship("Citem", back_populates="invoices_items")
+    comm_items = relationship("Citem", back_populates="invoices_item")
 
 
 class Citem(Base):
@@ -127,7 +127,7 @@ class Citem(Base):
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer)
     invoices_item_id = Column(Integer, ForeignKey('invoices_items.id'))
-    invoice_item = relationship("Iitem", back_populates="invoices_items_commissions_items")
+    invoices_item = relationship("Iitem", back_populates="comm_items")
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
     description = Column(String)

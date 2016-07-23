@@ -71,6 +71,10 @@ def sync_comm_item(data_dir, comm_item):
     f = full_comm_item_xml_path(data_dir, comm_item)
     with open(f, 'w') as f:
         f.write(comm_item.to_xml())
+
+    comm_item.last_sync_time = dt.now()
+    comm_item.save()
+
     print('%s written' % f)
 
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
@@ -81,7 +85,16 @@ for comm_item in citems:
     if f not in disk_dict:
         sync_comm_item(data_dir, comm_item)
     else:
-        if comm_item.modified_date > comm_item.last_sync_time:
+        # correct Null modified dates
+        if comm_item.modified_date is None:
+            comm_item.modified_date = dt.now()
+            comm_item.save()
+
+        if comm_item.last_sync_time is None:
+
+            sync_comm_item(data_dir, comm_item)
+
+        elif comm_item.modified_date > comm_item.last_sync_time:
 
             sync_comm_item(data_dir, comm_item)
         else:
