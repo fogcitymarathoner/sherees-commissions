@@ -148,9 +148,10 @@ class Citem(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-       return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s'. mod_date='%s'. last_sync='%s')>" % (
-           self.description, self.id, self.employee_id, self.amount, self.modified_date.strftime(TIMESTAMP_FORMAT),
-           self.last_sync_time.strftime(TIMESTAMP_FORMAT))
+        print(type(self.modified_date))
+        return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s'. mod_date='%s'. last_sync='%s')>" % (
+            self.description, self.id, self.employee_id, self.amount, self.modified_date,
+            self.last_sync_time.strftime(TIMESTAMP_FORMAT))
 
     def to_xml(self):
         doc = ET.Element('invoices-items-commissions-item')
