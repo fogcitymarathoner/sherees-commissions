@@ -214,4 +214,4 @@ class Citem(Base):
         date_generated = ET.SubElement(doc, 'date_generated')
         date_generated.text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
 
-        return ET.dump(doc)
+        return doc

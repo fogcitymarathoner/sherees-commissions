@@ -82,7 +82,7 @@ def sync_comm_item(data_dir, comm_item):
     """
     f = full_comm_item_xml_path(data_dir, comm_item)
     with open(f, 'w') as f:
-        f.write(comm_item.to_xml())
+        f.write(comm_item.to_xml.tostring())
 
 
     session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
