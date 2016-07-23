@@ -10,6 +10,11 @@ from models import engine
 from models import Citem
 
 
+Session = sessionmaker(bind=engine)
+
+session = Session()
+
+
 def full_comm_item_xml_path(data_dir, comm_item):
     return os.path.join(data_dir, '%s.xml' % str(comm_item.id).zfill(5))
 
@@ -36,9 +41,6 @@ def db_date_dictionary_comm_item(data_dir):
     :param data_dir:
     :return:
     """
-    Session = sessionmaker(bind=engine)
-
-    session = Session()
 
     citem_dict = {}
 
@@ -47,7 +49,7 @@ def db_date_dictionary_comm_item(data_dir):
     for comm_item in citems:
         f = full_comm_item_xml_path(data_dir, comm_item)
         citem_dict[f] = comm_item.last_sync_time
-    session.close()
+
     return citem_dict, citems
 
 
@@ -82,14 +84,11 @@ def sync_comm_item(data_dir, comm_item):
     with open(f, 'w') as f:
         f.write(comm_item.to_xml())
 
-    Session = sessionmaker(bind=engine)
 
-    session = Session()
     session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
-    session.commit()
 
     print('%s written' % f)
-    session.close()
+
 
 
 def delete_orphen_comm_items(comm_items):
@@ -97,14 +96,9 @@ def delete_orphen_comm_items(comm_items):
     deletes list of orphened comm_items identified by get_comm_items_without_parents
     """
 
-    Session = sessionmaker(bind=engine)
-
-    session = Session()
     for ci in comm_items:
         session.delete(ci)
         print('deleted orphen invoice %s' % ci)
-    session.commit()
-    session.close()
 
     print('%s written' % f)
 
@@ -114,9 +108,6 @@ delete_orphen_comm_items(orphen_citems)
 
 date_dict, citems = db_date_dictionary_comm_item(data_dir)
 disk_dict = directory_date_dictionary(data_dir)
-Session = sessionmaker(bind=engine)
-
-session = Session()
 
 for comm_item in citems:
     print(comm_item)
@@ -128,7 +119,7 @@ for comm_item in citems:
         if comm_item.modified_date is None:
 
             session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
-            session.commit()
+
             comm_item.modified_date = dt.now()
 
         if comm_item.last_sync_time is None:
@@ -140,7 +131,7 @@ for comm_item in citems:
             sync_comm_item(data_dir, comm_item)
         else:
             print('%s already synced' % comm_item)
-
+session.commit()
 session.close()
 
 """
