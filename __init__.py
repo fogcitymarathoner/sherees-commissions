@@ -47,7 +47,7 @@ def db_date_dictionary_comm_item(data_dir):
     for comm_item in citems:
         f = full_comm_item_xml_path(data_dir, comm_item)
         citem_dict[f] = comm_item.last_sync_time
-
+    session.close()
     return citem_dict, citems
 
 
@@ -89,6 +89,7 @@ def sync_comm_item(data_dir, comm_item):
     session.commit()
 
     print('%s written' % f)
+    session.close()
 
 
 def delete_orphen_comm_items(comm_items):
@@ -103,6 +104,7 @@ def delete_orphen_comm_items(comm_items):
         session.delete(ci)
         print('deleted orphen invoice %s' % ci)
     session.commit()
+    session.close()
 
     print('%s written' % f)
 
@@ -113,6 +115,9 @@ delete_orphen_comm_items(orphen_citems)
 date_dict, citems = db_date_dictionary_comm_item(data_dir)
 disk_dict = directory_date_dictionary(data_dir)
 Session = sessionmaker(bind=engine)
+
+session = Session()
+
 for comm_item in citems:
     print(comm_item)
     f = full_comm_item_xml_path(data_dir, comm_item)
@@ -122,7 +127,6 @@ for comm_item in citems:
         # correct Null modified dates
         if comm_item.modified_date is None:
 
-            session = Session()
             session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
             session.commit()
             comm_item.modified_date = dt.now()
@@ -137,6 +141,7 @@ for comm_item in citems:
         else:
             print('%s already synced' % comm_item)
 
+session.close()
 
 """
 print(get_list_of_comm_items_to_sync('/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'))
