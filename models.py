@@ -147,61 +147,61 @@ class Citem(Base):
     def to_xml(self):
         doc = ET.Element('invoices-items-commissions-item')
 
-        se = ET.SubElement('id', doc)
+        se = ET.SubElement(doc, 'id')
         se.text = self.id
 
-        se = ET.SubElement('employee_id', doc)
+        se = ET.SubElement(doc, 'employee_id')
         se.text = self.employee_id
 
-        se = ET.SubElement('invoices_item_id', doc)
+        se = ET.SubElement(doc, 'invoices_item_id')
         se.text = self.invoices_item_id
 
-        se = ET.SubElement('invoice_id', doc)
+        se = ET.SubElement(doc, 'invoice_id')
         se.text = self.invoice_id
 
-        se = ET.SubElement('commissions_report_id', doc)
+        se = ET.SubElement(doc, 'commissions_report_id')
         se.text = self.commissions_report_id
 
-        se = ET.SubElement('commissions_reports_tag_id', doc)
+        se = ET.SubElement(doc, 'commissions_reports_tag_id')
         se.text = self.commissions_reports_tag_id
 
-        se = ET.SubElement('description', doc)
+        se = ET.SubElement(doc, 'description')
         se.text = self.description
 
-        se = ET.SubElement('date', doc)
+        se = ET.SubElement(doc, 'date')
         se.text = dt.strftime(self.date, TIMESTAMP_FORMAT)
 
-        se = ET.SubElement('percent', doc)
+        se = ET.SubElement(doc, 'percent')
         se.text = self.percent
 
-        se = ET.SubElement('amount', doc)
+        se = ET.SubElement(doc, 'amount')
         se.text = self.amount
 
-        se = ET.SubElement('rel_inv_amt', doc)
+        se = ET.SubElement(doc, 'rel_inv_amt')
         se.text = self.rel_inv_amt
 
-        se = ET.SubElement('rel_inv_line_item_amt', doc)
+        se = ET.SubElement(doc, 'rel_inv_line_item_amt')
         se.text = self.rel_inv_line_item_amt
 
-        se = ET.SubElement('rel_item_amt', doc)
+        se = ET.SubElement(doc, 'rel_item_amt')
         se.text = self.rel_item_amt
 
-        se = ET.SubElement('rel_item_quantity', doc)
+        se = ET.SubElement(doc, 'rel_item_quantity')
         sse.texte = self.rel_item_quantity
 
-        se = ET.SubElement('rel_item_cost', doc)
+        se = ET.SubElement(doc, 'rel_item_cost')
         se.text = self.rel_item_cost
 
-        se = ET.SubElement('rel_item_amt', doc)
+        se = ET.SubElement(doc, 'rel_item_amt')
         se.text = self.rel_item_amt
 
-        se = ET.SubElement('cleared', doc)
+        se = ET.SubElement(doc, 'cleared')
         se.text = self.cleared
 
-        se = ET.SubElement('voided', doc)
+        se = ET.SubElement(doc, 'voided')
         se.text = self.voided
 
-        se = ET.SubElement('date_generated', doc)
+        se = ET.SubElement(doc, ('date_generated')
         se.text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
 
         return ET.dump(se)
