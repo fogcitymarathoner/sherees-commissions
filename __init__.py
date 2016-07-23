@@ -72,14 +72,19 @@ def sync_comm_item(data_dir, comm_item):
     with open(f, 'w') as f:
         f.write(comm_item.to_xml())
 
-    comm_item.last_sync_time = dt.now()
-    comm_item.save()
+    Session = sessionmaker(bind=engine)
+
+    session = Session()
+    session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
+    session.commit()
 
     print('%s written' % f)
 
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
 date_dict, citems = db_date_dictionary_comm_item(data_dir)
 disk_dict =directory_date_dictionary(data_dir)
+Session = sessionmaker(bind=engine)
+session = Session()
 for comm_item in citems:
     f = full_comm_item_xml_path(data_dir, comm_item)
     if f not in disk_dict:
@@ -89,6 +94,9 @@ for comm_item in citems:
         if comm_item.modified_date is None:
             comm_item.modified_date = dt.now()
             comm_item.save()
+
+            session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
+            session.commit()
 
         if comm_item.last_sync_time is None:
 
