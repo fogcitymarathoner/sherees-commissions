@@ -156,16 +156,12 @@ class Citem(Base):
 
     def to_xml(self):
         doc = ET.Element('invoices-items-commissions-item')
-        if self.invoice_item:
-            iteminvoice_id = str(self.invoice_item.invoice_id)
-        else:
-            iteminvoice_id = 0
-            
+
         id = ET.SubElement(doc, 'id')
         id.text = str(self.id)
 
         invoice_id = ET.SubElement(doc, 'invoice_id')
-        invoice_id.text = iteminvoice_id
+        invoice_id.text = str(self.invoices_item.invoice_id)
 
         employee_id = ET.SubElement(doc, 'employee_id')
         employee_id.text = str(self.employee_id)
