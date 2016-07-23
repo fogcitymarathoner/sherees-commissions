@@ -1,8 +1,7 @@
 """
 does not work on alpine because libmysqlclient-dev package is not available.
 """
-import os 
-import sqlalchemy
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy import Column
@@ -13,7 +12,6 @@ from sqlalchemy import Float
 from sqlalchemy import Boolean
 from sqlalchemy import TIMESTAMP
 from sqlalchemy import TEXT
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -57,12 +55,14 @@ engine = create_engine(
              'mysql+mysqldb://%s:%s@%s:%s/rrg' % (
              DB_USER, DB_PASS, MYSQL_PORT_3306_TCP_ADDR, MYSQL_PORT_3306_TCP_PORT))
 
+
 Base = declarative_base()
 
-Session = sessionmaker(bind=engine)
 
 class Invoice(Base):
+
     __tablename__ = 'invoices'
+
     id = Column(Integer, primary_key=True)
     contract_id = Column(Integer)
     date = Column(Date)
@@ -97,6 +97,7 @@ class Invoice(Base):
 class Iitem(Base):
 
     __tablename__ = 'invoices_items'
+
     id = Column(Integer, primary_key=True)
     invoice_id = Column(Integer)
     description = Column(String)
@@ -134,7 +135,5 @@ class Citem(Base):
     def __repr__(self):
        return "<User(name='%s', fullname='%s', password='%s')>" % (self.name, self.fullname, self.password)
 
-session = Session()
-for instance in session.query(Invoice).order_by(Invoice.id):
-    print(instance.amount)
+
 
