@@ -81,8 +81,8 @@ def sync_comm_item(data_dir, comm_item):
     writes xml file for commissions item
     """
     f = full_comm_item_xml_path(data_dir, comm_item)
-    with open(f, 'w') as f:
-        f.write(ElementTree.tostring(comm_item.to_xml()))
+    with open(f, 'w') as fh:
+        fh.write(ElementTree.tostring(comm_item.to_xml()))
 
     session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
 
