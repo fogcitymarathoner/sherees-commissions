@@ -51,6 +51,16 @@ def db_date_dictionary_comm_item(data_dir):
     return citem_dict, citems
 
 
+def get_comm_items_without_parents(data_dir):
+    citem_dict, citems = db_date_dictionary_comm_item(data_dir)
+    orphens = []
+    for comm_item in citems:
+        if comm_item.invoices_item is None:
+            orphens.append(comm_item)
+
+    return orphens
+
+
 def get_list_of_comm_items_to_sync(data_dir):
 
     disk_dict = directory_date_dictionary(data_dir)
@@ -81,6 +91,8 @@ def sync_comm_item(data_dir, comm_item):
     print('%s written' % f)
 
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
+print(get_comm_items_without_parents(data_dir))
+
 date_dict, citems = db_date_dictionary_comm_item(data_dir)
 disk_dict =directory_date_dictionary(data_dir)
 Session = sessionmaker(bind=engine)
