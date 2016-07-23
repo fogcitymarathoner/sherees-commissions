@@ -148,19 +148,19 @@ class Citem(Base):
         doc = ET.Element('invoices-items-commissions-item')
 
         id = ET.SubElement(doc, 'id')
-        id.text = self.id
+        id.text = str(self.id)
 
         employee_id = ET.SubElement(doc, 'employee_id')
-        employee_id.text = self.employee_id
+        employee_id.text = str(self.employee_id)
 
         invoices_item_id = ET.SubElement(doc, 'invoices_item_id')
-        invoices_item_id.text = self.invoices_item_id
+        invoices_item_id.text = str(self.invoices_item_id)
 
         commissions_report_id = ET.SubElement(doc, 'commissions_report_id')
-        commissions_report_id.text = self.commissions_report_id
+        commissions_report_id.text = str(self.commissions_report_id)
 
         commissions_reports_tag_id = ET.SubElement(doc, 'commissions_reports_tag_id')
-        commissions_reports_tag_id.text = self.commissions_reports_tag_id
+        commissions_reports_tag_id.text = str(self.commissions_reports_tag_id)
 
         description = ET.SubElement(doc, 'description')
         description.text = self.description
@@ -169,34 +169,34 @@ class Citem(Base):
         date.text = dt.strftime(self.date, TIMESTAMP_FORMAT)
 
         percent = ET.SubElement(doc, 'percent')
-        percent.text = self.percent
+        percent.text = str(self.percent)
 
         amount = ET.SubElement(doc, 'amount')
-        amount.text = self.amount
+        amount.text = str(self.amount)
 
         rel_inv_amt = ET.SubElement(doc, 'rel_inv_amt')
-        rel_inv_amt.text = self.rel_inv_amt
+        rel_inv_amt.text = str(self.rel_inv_amt)
 
         rel_inv_line_item_amt = ET.SubElement(doc, 'rel_inv_line_item_amt')
-        rel_inv_line_item_amt.text = self.rel_inv_line_item_amt
+        rel_inv_line_item_amt.text = str(self.rel_inv_line_item_amt)
 
         rel_item_amt = ET.SubElement(doc, 'rel_item_amt')
-        rel_item_amt.text = self.rel_item_amt
+        rel_item_amt.text = str(self.rel_item_amt)
 
         rel_item_quantity = ET.SubElement(doc, 'rel_item_quantity')
-        rel_item_quantity.texte = self.rel_item_quantity
+        rel_item_quantity.texte = str(self.rel_item_quantity)
 
         rel_item_cost = ET.SubElement(doc, 'rel_item_cost')
-        rel_item_cost.text = self.rel_item_cost
+        rel_item_cost.text = str(self.rel_item_cost)
 
         rel_item_cost = ET.SubElement(doc, 'rel_item_amt')
-        rel_item_cost.text = self.rel_item_amt
+        rel_item_cost.text = str(self.rel_item_amt)
 
         cleared = ET.SubElement(doc, 'cleared')
-        cleared.text = self.cleared
+        cleared.text = str(self.cleared)
 
         voided = ET.SubElement(doc, 'voided')
-        voided.text = self.voided
+        voided.text = str(self.voided)
 
         date_generated = ET.SubElement(doc, 'date_generated')
         date_generated.text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
