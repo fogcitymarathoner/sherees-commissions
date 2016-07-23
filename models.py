@@ -156,9 +156,6 @@ class Citem(Base):
         se = ET.SubElement(doc, 'invoices_item_id')
         se.text = self.invoices_item_id
 
-        se = ET.SubElement(doc, 'invoice_id')
-        se.text = self.invoice_id
-
         se = ET.SubElement(doc, 'commissions_report_id')
         se.text = self.commissions_report_id
 
@@ -201,7 +198,7 @@ class Citem(Base):
         se = ET.SubElement(doc, 'voided')
         se.text = self.voided
 
-        se = ET.SubElement(doc, ('date_generated')
+        se = ET.SubElement(doc, 'date_generated')
         se.text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
 
         return ET.dump(se)
