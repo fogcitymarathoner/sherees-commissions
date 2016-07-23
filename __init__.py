@@ -90,11 +90,28 @@ def sync_comm_item(data_dir, comm_item):
 
     print('%s written' % f)
 
+
+def delete_orphen_comm_items(comm_items):
+    """
+    deletes list of orphened comm_items identified by get_comm_items_without_parents
+    """
+
+    Session = sessionmaker(bind=engine)
+
+    session = Session()
+    for ci in comm_items:
+        session.delete(ci)
+        print('deleted orphen invoice %s' % ci)
+    session.commit()
+
+    print('%s written' % f)
+
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
-print(get_comm_items_without_parents(data_dir))
+orphen_citems = get_comm_items_without_parents(data_dir)
+delete_orphen_comm_items(orphen_citems)
 
 date_dict, citems = db_date_dictionary_comm_item(data_dir)
-disk_dict =directory_date_dictionary(data_dir)
+disk_dict = directory_date_dictionary(data_dir)
 Session = sessionmaker(bind=engine)
 for comm_item in citems:
     print(comm_item)
