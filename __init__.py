@@ -85,6 +85,7 @@ date_dict, citems = db_date_dictionary_comm_item(data_dir)
 disk_dict =directory_date_dictionary(data_dir)
 Session = sessionmaker(bind=engine)
 for comm_item in citems:
+    print(comm_item)
     f = full_comm_item_xml_path(data_dir, comm_item)
     if f not in disk_dict:
         sync_comm_item(data_dir, comm_item)
