@@ -89,6 +89,8 @@ def sync_comm_item(data_dir, comm_item):
 
     print('%s written' % f)
 
+    session.commit()
+
 
 def delete_orphen_comm_items(comm_items):
     """
@@ -99,6 +101,7 @@ def delete_orphen_comm_items(comm_items):
         session.delete(ci)
         print('deleted orphen invoice %s' % ci)
 
+    session.commit()
 
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
 # orphen_citems = get_comm_items_without_parents(data_dir)
@@ -118,6 +121,7 @@ for comm_item in citems:
 
             session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
 
+            session.commit()
             comm_item.modified_date = dt.now()
 
         if comm_item.last_sync_time is None:
