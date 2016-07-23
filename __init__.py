@@ -96,7 +96,8 @@ for comm_item in citems:
             session = Session()
             session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
             session.commit()
-
+            comm_item.modified_date = dt.now()
+            
         if comm_item.last_sync_time is None:
 
             sync_comm_item(data_dir, comm_item)
