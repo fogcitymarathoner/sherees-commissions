@@ -2,7 +2,7 @@
 import os
 import time
 from datetime import datetime as dt
-
+from xml.etree import ElementTree
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 
 from sqlalchemy.orm import sessionmaker
@@ -82,8 +82,7 @@ def sync_comm_item(data_dir, comm_item):
     """
     f = full_comm_item_xml_path(data_dir, comm_item)
     with open(f, 'w') as f:
-        f.write(comm_item.to_xml.tostring())
-
+        f.write(ElementTree.tostring(comm_item.to_xml()))
 
     session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
 
