@@ -12,6 +12,10 @@ from sqlalchemy import Float
 from sqlalchemy import Boolean
 from sqlalchemy import TIMESTAMP
 from sqlalchemy import TEXT
+from sqlalchemy import ForeignKey
+
+from sqlalchemy.orm import relationship
+
 from sqlalchemy.ext.declarative import declarative_base
 import xml.etree.ElementTree as ET
 
@@ -97,6 +101,7 @@ class Invoice(Base):
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
 
+
 class Iitem(Base):
 
     __tablename__ = 'invoices_items'
@@ -109,6 +114,7 @@ class Iitem(Base):
     cost = Column(Float)
     ordering = Column(Integer)
     cleared = Column(Boolean)
+    comm_items = relationship("Citem", back_populates="invoices_items")
 
 
 class Citem(Base):
@@ -119,9 +125,9 @@ class Citem(Base):
     __tablename__ = 'invoices_items_commissions_items'
     
     id = Column(Integer, primary_key=True)
-    invoice_id = Column(Integer)
     employee_id = Column(Integer)
-    invoices_item_id = Column(Integer)
+    invoices_item_id = Column(Integer, ForeignKey('invoices_items.id'))
+    invoice_item = relationship("Iitem", back_populates="invoices_items_commissions_items")
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
     description = Column(String)
@@ -152,7 +158,7 @@ class Citem(Base):
         id.text = str(self.id)
 
         invoice_id = ET.SubElement(doc, 'invoice_id')
-        invoice_id.text = str(self.invoice_id)
+        invoice_id.text = str(self.invoice_item.invoice_id)
 
         employee_id = ET.SubElement(doc, 'employee_id')
         employee_id.text = str(self.employee_id)
