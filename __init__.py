@@ -40,12 +40,7 @@ def db_date_dictionary_comm_item(dir):
 
     for comm_item in session.query(Citem).order_by(Citem.id):
         f = os.path.join(dir, '%s.xml' % str(comm_item.id).zfill(5))
-        print(f)
         citem_dict[f] = comm_item.last_sync_time
 
     return citem_dict
-
-
-d1 = directory_date_dictionary('.')
-d2 = db_date_dictionary_comm_item('.')
 
