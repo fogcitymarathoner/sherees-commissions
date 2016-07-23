@@ -2,7 +2,7 @@
 does not work on alpine because libmysqlclient-dev package is not available.
 """
 import os
-
+from datetime import datetime as dt
 from sqlalchemy import create_engine
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -13,6 +13,9 @@ from sqlalchemy import Boolean
 from sqlalchemy import TIMESTAMP
 from sqlalchemy import TEXT
 from sqlalchemy.ext.declarative import declarative_base
+import xml.etree.ElementTree as ET
+
+from s3_mysql_backup import TIMESTAMP_FORMAT
 
 
 class MissingEnvVar(Exception):
@@ -107,11 +110,16 @@ class Iitem(Base):
     ordering = Column(Integer)
     cleared = Column(Boolean)
 
+
 class Citem(Base):
+    """
+    commissions item
+    """
 
     __tablename__ = 'invoices_items_commissions_items'
     
     id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer)
     invoices_item_id = Column(Integer)
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
@@ -133,7 +141,67 @@ class Citem(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-       return "<User(name='%s', fullname='%s', password='%s')>" % (self.name, self.fullname, self.password)
+       return "<Citem(description='%s', employee_id='%s', amount='%s')>" % (
+           self.description, self.employee_id, self.amount)
 
+    def to_xml(self):
+        doc = ET.Element('invoices-items-commissions-item')
 
+        se = ET.SubElement('id', doc)
+        se.text = self.id
 
+        se = ET.SubElement('employee_id', doc)
+        se.text = self.employee_id
+
+        se = ET.SubElement('invoices_item_id', doc)
+        se.text = self.invoices_item_id
+
+        se = ET.SubElement('invoice_id', doc)
+        se.text = self.invoice_id
+
+        se = ET.SubElement('commissions_report_id', doc)
+        se.text = self.commissions_report_id
+
+        se = ET.SubElement('commissions_reports_tag_id', doc)
+        se.text = self.commissions_reports_tag_id
+
+        se = ET.SubElement('description', doc)
+        se.text = self.description
+
+        se = ET.SubElement('date', doc)
+        se.text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+
+        se = ET.SubElement('percent', doc)
+        se.text = self.percent
+
+        se = ET.SubElement('amount', doc)
+        se.text = self.amount
+
+        se = ET.SubElement('rel_inv_amt', doc)
+        se.text = self.rel_inv_amt
+
+        se = ET.SubElement('rel_inv_line_item_amt', doc)
+        se.text = self.rel_inv_line_item_amt
+
+        se = ET.SubElement('rel_item_amt', doc)
+        se.text = self.rel_item_amt
+
+        se = ET.SubElement('rel_item_quantity', doc)
+        sse.texte = self.rel_item_quantity
+
+        se = ET.SubElement('rel_item_cost', doc)
+        se.text = self.rel_item_cost
+
+        se = ET.SubElement('rel_item_amt', doc)
+        se.text = self.rel_item_amt
+
+        se = ET.SubElement('cleared', doc)
+        se.text = self.cleared
+
+        se = ET.SubElement('voided', doc)
+        se.text = self.voided
+
+        se = ET.SubElement('date_generated', doc)
+        se.text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+
+        return ET.dump(se)

@@ -38,11 +38,13 @@ def db_date_dictionary_comm_item(data_dir):
 
     citem_dict = {}
 
-    for comm_item in session.query(Citem).order_by(Citem.id):
+    citems = session.query(Citem).order_by(Citem.id)
+
+    for comm_item in citems:
         f = os.path.join(data_dir, '%s.xml' % str(comm_item.id).zfill(5))
         citem_dict[f] = comm_item.last_sync_time
 
-    return citem_dict
+    return citem_dict, citems
 
 
 def get_list_of_comm_items_to_sync(data_dir):
@@ -56,6 +58,13 @@ def get_list_of_comm_items_to_sync(data_dir):
             sync_list.append(int(os.path.basename(ci).split('.')[0]))
 
     return sync_list
+
+data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
+date_dict, citems = db_date_dictionary_comm_item(data_dir)
+
+for ci in citems:
+    print(ci.to_xml())
+
 
 """
 print(get_list_of_comm_items_to_sync('/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'))
