@@ -3,6 +3,7 @@ import os
 import time
 from datetime import datetime as dt
 from xml.etree import ElementTree
+from s3_mysql_backup import mkdirs
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 
 from sqlalchemy.orm import sessionmaker
@@ -16,7 +17,8 @@ session = Session()
 
 
 def full_comm_item_xml_path(data_dir, comm_item):
-    return os.path.join(data_dir, '%s.xml' % str(comm_item.id).zfill(5))
+    rel_dir = os.path.join(comm_item.employee_id, comm_item.date.year, comm_item.date.month)
+    return os.path.join(data_dir, rel_dir, '%s.xml' % str(comm_item.id).zfill(5)), rel_dir
 
 
 def directory_date_dictionary(data_dir):
@@ -43,18 +45,19 @@ def db_date_dictionary_comm_item(data_dir):
     """
 
     citem_dict = {}
-
+    rel_dir_set = set()
     citems = session.query(Citem).order_by(Citem.id)
 
     for comm_item in citems:
-        f = full_comm_item_xml_path(data_dir, comm_item)
+        f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
+        rel_dir_set.add()
         citem_dict[f] = comm_item.last_sync_time
 
-    return citem_dict, citems
+    return citem_dict, citems, rel_dir_set
 
 
 def get_comm_items_without_parents(data_dir):
-    citem_dict, citems = db_date_dictionary_comm_item(data_dir)
+    citem_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
     orphens = []
     for comm_item in citems:
         if comm_item.invoices_item is None:
@@ -66,7 +69,7 @@ def get_comm_items_without_parents(data_dir):
 def get_list_of_comm_items_to_sync(data_dir):
 
     disk_dict = directory_date_dictionary(data_dir)
-    db_dict = db_date_dictionary_comm_item(data_dir)
+    db_dict, citems, rel_dir_set  = db_date_dictionary_comm_item(data_dir)
 
     sync_list = []
     for ci in db_dict:
@@ -80,7 +83,7 @@ def sync_comm_item(data_dir, comm_item):
     """
     writes xml file for commissions item
     """
-    f = full_comm_item_xml_path(data_dir, comm_item)
+    f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
     with open(f, 'w') as fh:
         fh.write(ElementTree.tostring(comm_item.to_xml()))
 
@@ -106,32 +109,39 @@ data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/in
 # orphen_citems = get_comm_items_without_parents(data_dir)
 # delete_orphen_comm_items(orphen_citems)
 
-date_dict, citems = db_date_dictionary_comm_item(data_dir)
+date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
+#
+# make directories in advance
+for d in rel_dir_set:
+    mkdirs(os.path.join(data_dir, d), writeable=True)
+
 disk_dict = directory_date_dictionary(data_dir)
 
 for comm_item in citems:
-    print(comm_item)
-    f = full_comm_item_xml_path(data_dir, comm_item)
-    if f not in disk_dict:
-        sync_comm_item(data_dir, comm_item)
-    else:
-        # correct Null modified dates
-        if comm_item.modified_date is None:
 
-            session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
-
-            session.commit()
-            comm_item.modified_date = dt.now()
-
-        if comm_item.last_sync_time is None:
-
-            sync_comm_item(data_dir, comm_item)
-
-        elif comm_item.modified_date > comm_item.last_sync_time:
-
-            sync_comm_item(data_dir, comm_item)
-        else:
-            print('%s already synced' % comm_item)
+    sync_comm_item(data_dir, comm_item)
+    # print(comm_item)
+    # f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
+    # if f not in disk_dict:
+    #     sync_comm_item(data_dir, comm_item)
+    # else:
+    #     # correct Null modified dates
+    #     if comm_item.modified_date is None:
+    #
+    #         session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
+    #
+    #         session.commit()
+    #         comm_item.modified_date = dt.now()
+    #
+    #     if comm_item.last_sync_time is None:
+    #
+    #         sync_comm_item(data_dir, comm_item)
+    #
+    #     elif comm_item.modified_date > comm_item.last_sync_time:
+    #
+    #         sync_comm_item(data_dir, comm_item)
+    #     else:
+    #         print('%s already synced' % comm_item)
 session.commit()
 session.close()
 
