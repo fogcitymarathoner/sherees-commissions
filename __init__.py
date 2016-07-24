@@ -28,11 +28,10 @@ def directory_date_dictionary(data_dir):
     :return:
     """
     dirFileList = []
-    for dirName, subdirList, fileList in os.walk(data_dir, topdown=False):
-        if data_dir == dirName:
-            for f in fileList:
+    for dirName, subdirList, fileList in os.walk(data_dir, topdown=True):
+        for f in fileList:
 
-                dirFileList.append(os.path.join(dirName, f))
+            dirFileList.append(os.path.join(dirName, f))
 
     return {f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT) for f in dirFileList}
 
@@ -91,7 +90,7 @@ def sync_comm_item(data_dir, comm_item):
 
     print('%s written' % f)
 
-    session.commit()
+    # session.commit()
 
 
 def delete_orphen_comm_items(comm_items):
@@ -106,16 +105,20 @@ def delete_orphen_comm_items(comm_items):
     session.commit()
 
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
+
+disk_dict = directory_date_dictionary(data_dir)
+print(disk_dict)
+quit()
+
 # orphen_citems = get_comm_items_without_parents(data_dir)
 # delete_orphen_comm_items(orphen_citems)
 
 date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
 #
 # make directories in advance
-for d in rel_dir_set:
-    mkdirs(os.path.join(data_dir, d), writeable=True)
+#for d in rel_dir_set:
+    #mkdirs(os.path.join(data_dir, d), writeable=True)
 
-disk_dict = directory_date_dictionary(data_dir)
 
 for comm_item in citems:
 
