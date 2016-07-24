@@ -91,8 +91,6 @@ def sync_comm_item(data_dir, comm_item):
 
     print('%s written' % f)
 
-    session.commit()
-
 
 def delete_orphen_comm_items(comm_items):
     """
