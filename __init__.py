@@ -50,7 +50,7 @@ def db_date_dictionary_comm_item(data_dir):
 
     for comm_item in citems:
         f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
-        rel_dir_set.add()
+        rel_dir_set.add(rel_dir)
         citem_dict[f] = comm_item.last_sync_time
 
     return citem_dict, citems, rel_dir_set
