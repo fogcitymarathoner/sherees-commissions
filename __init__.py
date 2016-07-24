@@ -28,11 +28,10 @@ def directory_date_dictionary(data_dir):
     :return:
     """
     dirFileList = []
-    for dirName, subdirList, fileList in os.walk(data_dir, topdown=False):
-        if data_dir == dirName:
-            for f in fileList:
+    for dirName, subdirList, fileList in os.walk(data_dir, topdown=True):
+        for f in fileList:
 
-                dirFileList.append(os.path.join(dirName, f))
+            dirFileList.append(os.path.join(dirName, f))
 
     return {f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT) for f in dirFileList}
 
@@ -104,20 +103,24 @@ def delete_orphen_comm_items(comm_items):
     session.commit()
 
 data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
+
+disk_dict = directory_date_dictionary(data_dir)
 # orphen_citems = get_comm_items_without_parents(data_dir)
 # delete_orphen_comm_items(orphen_citems)
 
 date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
 #
 # make directories in advance
-for d in rel_dir_set:
-    mkdirs(os.path.join(data_dir, d), writeable=True)
+#for d in rel_dir_set:
+    #mkdirs(os.path.join(data_dir, d), writeable=True)
 
-disk_dict = directory_date_dictionary(data_dir)
-
+to_sync = []
 for comm_item in citems:
+    if full_comm_item_xml_path(data_dir, comm_item) not in disk_dict:
+        to_sync.append(comm_item)
+print(to_sync)
 
-    sync_comm_item(data_dir, comm_item)
+    #sync_comm_item(data_dir, comm_item)
     # print(comm_item)
     # f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
     # if f not in disk_dict:
