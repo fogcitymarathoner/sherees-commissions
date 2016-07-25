@@ -3,7 +3,7 @@ import os
 import time
 from datetime import datetime as dt
 from xml.etree import ElementTree
-from s3_mysql_backup import mkdirs
+
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 
 from sqlalchemy.orm import sessionmaker
@@ -105,84 +105,27 @@ def delete_orphen_comm_items(comm_items):
 
     session.commit()
 
-data_dir = '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
 
-disk_dict = directory_date_dictionary(data_dir)
-# orphen_citems = get_comm_items_without_parents(data_dir)
-# delete_orphen_comm_items(orphen_citems)
+def cache_comm_items(data_dir):
 
-date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
-#
-# make directories in advance
-#for d in rel_dir_set:
-    #mkdirs(os.path.join(data_dir, d), writeable=True)
+    disk_dict = directory_date_dictionary(data_dir)
 
-to_sync = []
-for comm_item in citems:
-    file = full_comm_item_xml_path(data_dir, comm_item)
-    if file[0] not in disk_dict:
-        to_sync.append(comm_item)
-    else:
-        if comm_item.last_sync_time is None or comm_item.modified_date is None:
+    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
+    #
+
+    to_sync = []
+    for comm_item in citems:
+        file = full_comm_item_xml_path(data_dir, comm_item)
+        if file[0] not in disk_dict:
             to_sync.append(comm_item)
-            continue
-        if comm_item.modified_date > comm_item.last_sync_time:
-            to_sync.append(comm_item)
+        else:
+            if comm_item.last_sync_time is None or comm_item.modified_date is None:
+                to_sync.append(comm_item)
+                continue
+            if comm_item.modified_date > comm_item.last_sync_time:
+                to_sync.append(comm_item)
 
-for comm_item in to_sync:
+    for comm_item in to_sync:
 
-    sync_comm_item(data_dir, comm_item)
+        sync_comm_item(data_dir, comm_item)
 
-    #sync_comm_item(data_dir, comm_item)
-    # print(comm_item)
-    # f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
-    # if f not in disk_dict:
-    #     sync_comm_item(data_dir, comm_item)
-    # else:
-    #     # correct Null modified dates
-    #     if comm_item.modified_date is None:
-    #
-    #         session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
-    #
-    #         session.commit()
-    #         comm_item.modified_date = dt.now()
-    #
-    #     if comm_item.last_sync_time is None:
-    #
-    #         sync_comm_item(data_dir, comm_item)
-    #
-    #     elif comm_item.modified_date > comm_item.last_sync_time:
-    #
-    #         sync_comm_item(data_dir, comm_item)
-    #     else:
-    #         print('%s already synced' % comm_item)
-#session.commit()
-#session.close()
-
-"""
-print(get_list_of_comm_items_to_sync('/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'))
-
-
-<?xml version="1.0"?>
-<invoices-items-commissions-item>
-  <id>6431</id>
-  <employee_id>1479</employee_id>
-  <invoices_item_id>4298</invoices_item_id>
-  <invoice_id>3356</invoice_id>
-  <commissions_report_id>3356</commissions_report_id>
-  <commissions_reports_tag_id>361</commissions_reports_tag_id>
-  <description>xxx dddd - Overtime</description>
-  <date>2012-08-12</date>
-  <percent>38.5</percent>
-  <amount>22.45</amount>
-  <rel_inv_amt>1788.9</rel_inv_amt>
-  <rel_inv_line_item_amt>249.895</rel_inv_line_item_amt>
-  <rel_item_amt>57.7125</rel_item_amt>
-  <rel_item_quantity>4.33</rel_item_quantity>
-  <rel_item_cost>42.75</rel_item_cost>
-  <rel_item_amt>57.7125</rel_item_amt>
-  <cleared>1</cleared>
-  <voided>0</voided>
-  <date_generated>Mon, 11 Jul 2016 11:19:59</date_generated>
-</invoices-items-commissions-item>
-"""
