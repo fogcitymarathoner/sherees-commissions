@@ -86,8 +86,11 @@ def sync_comm_item(data_dir, comm_item):
     with open(f, 'w') as fh:
         fh.write(ElementTree.tostring(comm_item.to_xml()))
 
-    session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
+    # Fix bad modified_date
+    if comm_item.modified_date is None:
+        session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
 
+    session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -116,9 +119,19 @@ date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
 
 to_sync = []
 for comm_item in citems:
-    if full_comm_item_xml_path(data_dir, comm_item) not in disk_dict:
+    file = full_comm_item_xml_path(data_dir, comm_item)
+    if file[0] not in disk_dict:
         to_sync.append(comm_item)
-print(to_sync)
+    else:
+        if comm_item.last_sync_time is None or comm_item.modified_date is None:
+            to_sync.append(comm_item)
+            continue
+        if comm_item.modified_date > comm_item.last_sync_time:
+            to_sync.append(comm_item)
+
+for comm_item in to_sync:
+
+    sync_comm_item(data_dir, comm_item)
 
     #sync_comm_item(data_dir, comm_item)
     # print(comm_item)
@@ -143,8 +156,8 @@ print(to_sync)
     #         sync_comm_item(data_dir, comm_item)
     #     else:
     #         print('%s already synced' % comm_item)
-session.commit()
-session.close()
+#session.commit()
+#session.close()
 
 """
 print(get_list_of_comm_items_to_sync('/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'))
