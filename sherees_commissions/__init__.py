@@ -7,7 +7,8 @@ from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from sqlalchemy.orm import sessionmaker
 
 from sherees_commissions.models import engine
-from sherees_commissions.models import Citem
+
+from rrg.models import Citem
 
 Session = sessionmaker(bind=engine)
 
