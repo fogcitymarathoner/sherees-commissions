@@ -6,7 +6,7 @@ from xml.etree import ElementTree
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from sqlalchemy.orm import sessionmaker
 
-from sherees_commissions.models import engine
+from rrg.models import engine
 
 from rrg.models import Citem
 

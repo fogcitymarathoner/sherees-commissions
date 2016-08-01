@@ -1,7 +1,7 @@
+build
 
-dist/
+dist
+
+rrg.egg-info
 *.pyc
-*.egg-info/
-
-
-
+rrg/tmp

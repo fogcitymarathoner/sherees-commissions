@@ -18,17 +18,17 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='sherees_commissions',
+    name='rrg',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.8',
-    description='Utility Library for Taking Sherees commissions out of CakePHP DB',
+    version='0.0.19',
+    description='Utility Library for Taking AR report generating out of CakePHP DB',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/fogcitymarathoner/sherees-commissions',
+    url='https://github.com/fogcitymarathoner/rrg',
 
     # Author details
     author='Marc Condon',
@@ -62,7 +62,7 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    packages=find_packages(exclude=['contrib', 'docs', 'tests', 'scripts', 'fabfile', 'python']),
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
@@ -100,4 +100,5 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
     },
+
 )

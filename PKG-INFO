@@ -1,7 +1,0 @@
-PKG=SUNWcadap
-NAME: Chip designers need CAD application software to design abc chips.
-Runs only on xyz hardware and is installed in the usr partition.
-ARCH=sparc
-VERSION=release 1.0
-CATEGORY=system
-BASEDIR=/opt
