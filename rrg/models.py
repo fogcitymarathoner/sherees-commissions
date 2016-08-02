@@ -16,12 +16,12 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 from sqlalchemy import TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
-from .helpers import MissingEnvVar
 import xml.etree.ElementTree as ET
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
 
 from rrg.helpers import date_to_datetime
+from rrg.helpers import MissingEnvVar
 
 try:
     env_str = 'DB_USER'
@@ -170,6 +170,16 @@ class Invoice(Base):
             return True
         else:
             return False
+
+# XML 
+def invoice_archives(root, invoice_state='pastdue'):
+    """
+    returns xml invoice id list for invoice states 'pastdue', 'open', 'cleared' and 'all'
+    """
+    res = []
+    for i in root.findall('./%s/invoice' % invoice_state):
+        res.append(i.text)
+    return res
 
 
 class State(Base):

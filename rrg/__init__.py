@@ -60,19 +60,19 @@ def cache_clients_ar(data_dir):
     cleared = ET.SubElement(doc, 'cleared')
 
     for i in all_invs:
-
-        id = ET.SubElement(all, 'invoice')
-        id.text = str(i.id)
-        if not i.cleared:
-
-            id = ET.SubElement(open, 'invoice')
+        if not i.voided:
+            id = ET.SubElement(all, 'invoice')
             id.text = str(i.id)
-            if i.date:
-                if i.is_pastdue():
+            if not i.cleared:
 
-                    id = ET.SubElement(pastdue, 'invoice')
-                    id.text = str(i.id)
-        else:
+                id = ET.SubElement(open, 'invoice')
+                id.text = str(i.id)
+                if i.date:
+                    if i.is_pastdue():
+
+                        id = ET.SubElement(pastdue, 'invoice')
+                        id.text = str(i.id)
+            else:
                 id = ET.SubElement(cleared, 'invoice')
                 id.text = str(i.id)
 
