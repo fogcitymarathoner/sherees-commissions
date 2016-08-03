@@ -72,6 +72,38 @@ class Employee(Base):
     lastname = Column(String)
     dob = Column(Date)
 
+class Note(Base):
+    __tablename__ = 'notes'
+
+    id = Column(Integer, primary_key=True)
+
+    employee_id = Column(Integer, ForeignKey('employees.id'))
+    employee = relationship("Employee")
+    commissions_payment_id = Column(Integer, ForeignKey('commissions_payments.id'))
+    commissions_payment = relationship("CommPayment")
+    date = Column(Date)
+    amount = Column(Float)
+    notes = Column(String)
+    opening = Column(Boolean)
+    voided = Column(Boolean)
+    cleared = Column(Boolean)
+    created_date = Column(Date)
+    modified_date = Column(Date)
+    modified_user = Column(Integer)
+    created_user = Column(Integer)
+
+class CommPayment(Base):
+    __tablename__ = 'commissions_payments'
+
+    id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer, ForeignKey('employees.id'))
+    employee = relationship("Employee")
+    date = Column(Date)
+    amount = Column(Float)
+    description = Column(String)
+    check_number = Column(String)
+    cleared = Column(Boolean)
+    voided = Column(Boolean)
 
 class Client(Base):
 

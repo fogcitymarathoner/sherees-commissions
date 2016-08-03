@@ -14,6 +14,28 @@ Session = sessionmaker(bind=engine)
 
 session = Session()
 
+start = dt(year=2009, month=6, day=1)
+end = dt(year=2016, month=1, day=1)
+
+
+def comm_months(start=start, end=end):
+    """
+    returns dict of year/months between dates for comm report queries
+    """
+    date = start
+
+    year_months = []
+    while date < end:
+        
+        y = date.year
+        m = date.month + 1
+        year_months.append({'year': y, 'month': m})
+        if m == 13:
+            m = 1
+            y = y + 1
+        date = dt(year=y, month=m, day=1)
+        
+    return year_months
 
 def full_comm_item_xml_path(data_dir, comm_item):
     rel_dir = os.path.join(str(comm_item.employee_id), str(comm_item.date.year), str(comm_item.date.month))
