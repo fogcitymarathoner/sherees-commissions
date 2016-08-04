@@ -7,12 +7,35 @@ from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from sqlalchemy.orm import sessionmaker
 
 from rrg.models import engine
-
+from rrg.models import Employee
 from rrg.models import Citem
+from rrg.models import CommPayment
 
 Session = sessionmaker(bind=engine)
 
 session = Session()
+
+def sherees_comm_payments_year_month(y, m):
+    if m < 12:
+        nexty = y
+        nextm = m + 1
+    else:
+        nexty = int(y) + 1
+        nextm = 1
+
+    return session.query(CommPayment)\
+        .filter(CommPayment.employee==sa_sheree())\
+        .filter(CommPayment.date >= '%s-%s-01' % (y, m))\
+        .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm))\
+        .order_by(CommPayment.date)
+
+
+def sa_sheree():
+    """
+    return sheree's sa object
+    """
+    return session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
+
 
 start = dt(year=2009, month=6, day=1)
 end = dt(year=2016, month=1, day=1)
@@ -28,11 +51,14 @@ def comm_months(start=start, end=end):
     while date < end:
         
         y = date.year
-        m = date.month + 1
+        m = date.month
         year_months.append({'year': y, 'month': m})
-        if m == 13:
+        if m < 12:
+            m = m + 1
+        else:
             m = 1
             y = y + 1
+        
         date = dt(year=y, month=m, day=1)
         
     return year_months

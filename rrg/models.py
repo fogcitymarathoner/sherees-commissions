@@ -71,6 +71,7 @@ class Employee(Base):
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
+    salesforce = Column(Boolean)
 
 class Note(Base):
     __tablename__ = 'notes'
@@ -81,7 +82,7 @@ class Note(Base):
     employee = relationship("Employee")
     commissions_payment_id = Column(Integer, ForeignKey('commissions_payments.id'))
     commissions_payment = relationship("CommPayment")
-    date = Column(Date)
+    date = Column(Date, index=True)
     amount = Column(Float)
     notes = Column(String)
     opening = Column(Boolean)
@@ -98,7 +99,7 @@ class CommPayment(Base):
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer, ForeignKey('employees.id'))
     employee = relationship("Employee")
-    date = Column(Date)
+    date = Column(Date, index=True)
     amount = Column(Float)
     description = Column(String)
     check_number = Column(String)
@@ -152,7 +153,7 @@ class Invoice(Base):
     contract_id = Column(Integer, ForeignKey('clients_contracts.id'))
 
     contract = relationship("Contract", backref="clients_contracts")
-    date = Column(Date)
+    date = Column(Date, index=True)
     po = Column(String)
     employerexpenserate = Column(Float)
     terms = Column(Integer)
@@ -250,7 +251,7 @@ class Citem(Base):
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
     description = Column(String)
-    date = Column(Date)
+    date = Column(Date, index=True)
     percent = Column(Float)
     amount = Column(Float)
     rel_inv_amt = Column(Float)
