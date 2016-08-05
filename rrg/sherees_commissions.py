@@ -1,4 +1,5 @@
 import os
+import re
 import time
 from datetime import datetime as dt
 from xml.etree import ElementTree
@@ -14,6 +15,29 @@ from rrg.models import CommPayment
 Session = sessionmaker(bind=engine)
 
 session = Session()
+
+
+def sherees_commissions_transactions_year_month(data_dir, year, month):
+
+    return sherees_comm_payments_year_month(year, month), \
+        sherees_comm_items_year_month(data_dir, year, month)
+
+
+
+
+def sherees_comm_items_year_month(data_dir, y, m):
+    xml_comm_items = []
+    dir = sherees_comm_path_year_month(data_dir, y, m)
+
+    for dirName, subdirList, fileList in os.walk(dir, topdown=False):
+       
+        for fname in fileList:
+            filename = os.path.join(dir, dirName, fname)
+            if re.search('transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[1-9][1-2]/[0-9]{5}\.xml$', filename):
+                xml_comm_items.append(Citem.from_xml(filename))
+
+    return xml_comm_items
+
 
 def sherees_comm_payments_year_month(y, m):
     if m < 12:

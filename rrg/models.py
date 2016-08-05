@@ -336,6 +336,12 @@ class Citem(Base):
 
         return doc
 
+    @staticmethod
+    def from_xml(xml_file_name):
+        """
+        returns DOM of comm item from file
+        """
+        return ET.parse(xml_file_name).getroot()
 
 class Iitem(Base):
 
