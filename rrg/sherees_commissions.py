@@ -186,7 +186,7 @@ def delete_orphen_comm_items(comm_items):
 def cache_comm_items(data_dir):
 
     disk_dict = directory_date_dictionary(data_dir)
-
+    # Make query, assemble lists
     date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
     #
 
@@ -202,7 +202,7 @@ def cache_comm_items(data_dir):
             if comm_item.modified_date > comm_item.last_sync_time:
                 to_sync.append(comm_item)
 
+    # Write out xml
     for comm_item in to_sync:
-
         sync_comm_item(data_dir, comm_item)
 

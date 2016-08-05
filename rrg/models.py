@@ -145,14 +145,34 @@ class Contract(Base):
     enddate = Column(Date)
 
 
+class Iitem(Base):
+
+    __tablename__ = 'invoices_items'
+
+    id = Column(Integer, primary_key=True)
+
+    invoice_id = Column(Integer, ForeignKey('invoice.id'))
+    invoice = relationship("Invoice")
+
+    description = Column(String)
+    amount = Column(Float)
+    quantity = Column(Float)
+    cost = Column(Float)
+    ordering = Column(Integer)
+    cleared = Column(Boolean)
+    comm_items = relationship("Citem", back_populates="invoices_item")
+
 class Invoice(Base):
 
     __tablename__ = 'invoices'
 
     id = Column(Integer, primary_key=True)
-    contract_id = Column(Integer, ForeignKey('clients_contracts.id'))
 
+    contract_id = Column(Integer, ForeignKey('clients_contracts.id'))
     contract = relationship("Contract", backref="clients_contracts")
+
+    # invoice_items = relationship("Iitem", backref="invoice")
+
     date = Column(Date, index=True)
     po = Column(String)
     employerexpenserate = Column(Float)
@@ -246,8 +266,10 @@ class Citem(Base):
 
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer)
+
     invoices_item_id = Column(Integer, ForeignKey('invoices_items.id'))
     invoices_item = relationship("Iitem", back_populates="comm_items")
+
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
     description = Column(String)
@@ -343,16 +365,3 @@ class Citem(Base):
         """
         return ET.parse(xml_file_name).getroot()
 
-class Iitem(Base):
-
-    __tablename__ = 'invoices_items'
-
-    id = Column(Integer, primary_key=True)
-    invoice_id = Column(Integer)
-    description = Column(String)
-    amount = Column(Float)
-    quantity = Column(Float)
-    cost = Column(Float)
-    ordering = Column(Integer)
-    cleared = Column(Boolean)
-    comm_items = relationship("Citem", back_populates="invoices_item")
