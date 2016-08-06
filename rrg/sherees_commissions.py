@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from s3_mysql_backup import mkdirs
+from s3_mysql_backup import YMD_FORMAT
 
 from rrg.models import engine
 from rrg.models import Employee
@@ -245,3 +246,29 @@ def comm_item_xml_to_dict(citem):
 def comm_item_xml_to_sa(citem):
     ci_dict = comm_item_xml_to_dict(citem)
     return Citem(id=ci_dict['id'], date=ci_dict['date'], description=ci_dict['description'], amount=ci_dict['amount'], employee_id=ci_dict['employee_id'], voided=ci_dict['voided'])
+
+def year_month_statement(data_dir, y, m):
+    sum = 0
+    res = []
+
+    payments, commissions = \
+        sherees_commissions_transactions_year_month(data_dir, y, m)
+    for payment in payments:
+        res.append({
+              'id': payment.id, 'date': payment.date, 'description': payment.description,
+              'amount': -payment.amount, 'employee_id': payment.employee_id})
+        sum -= payment.amount
+    for citem in commissions:
+        ci = comm_item_xml_to_sa(citem)
+        if ci.voided != 1:
+            res.append({
+                  'id': ci.id,
+                  'date': dt.strftime(ci.date, YMD_FORMAT),
+                  'description': ci.description,
+                  'amount': round(ci.amount),
+                  'employee_id': ci.employee_id,
+                 })
+            sum += ci.amount
+
+    return sum, res
+
