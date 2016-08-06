@@ -92,7 +92,7 @@ def sherees_comm_path_year_month(data_dir, year, month):
 
 
 def full_comm_item_xml_path(data_dir, comm_item):
-    rel_dir = os.path.join(str(comm_item.employee_id), str(comm_item.date.year), str(comm_item.date.month))
+    rel_dir = os.path.join(str(comm_item.employee_id), str(comm_item.date.year), str(comm_item.date.month).zfill(2))
     return os.path.join(data_dir, rel_dir, '%s.xml' % str(comm_item.id).zfill(5)), rel_dir
 
 
