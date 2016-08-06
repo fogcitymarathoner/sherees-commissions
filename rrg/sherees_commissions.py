@@ -4,8 +4,11 @@ import time
 from datetime import datetime as dt
 from xml.etree import ElementTree
 
-from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from sqlalchemy.orm import sessionmaker
+
+from s3_mysql_backup import TIMESTAMP_FORMAT
+from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
+from s3_mysql_backup import mkdirs
 
 from rrg.models import engine
 from rrg.models import Employee
@@ -25,13 +28,12 @@ def sherees_commissions_transactions_year_month(data_dir, year, month):
 
 def sherees_comm_items_year_month(data_dir, y, m):
     xml_comm_items = []
-    dir = sherees_comm_path_year_month(data_dir, y, m)
-
+    dir = sherees_comm_path_year_month(data_dir, y, str(m).zfill(2))
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
        
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
-            if re.search('transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[1-9][1-2]/[0-9]{5}\.xml$', filename):
+            if re.search('transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/[0-9]{5}\.xml$', filename):
                 xml_comm_items.append(Citem.from_xml(filename))
 
     return xml_comm_items
@@ -98,7 +100,7 @@ def full_comm_item_xml_path(data_dir, comm_item):
 
 def directory_date_dictionary(data_dir):
     """
-    returns dictionary of a directory in (name: cdate} format
+    returns dictionary of a directory in [{name: creation_date}] format
     :param data_dir:
     :return:
     """
@@ -141,6 +143,9 @@ def get_comm_items_without_parents(data_dir):
 
 
 def get_list_of_comm_items_to_sync(data_dir):
+    """
+    collect list comm items not on list
+    """
 
     disk_dict = directory_date_dictionary(data_dir)
     db_dict, citems, rel_dir_set  = db_date_dictionary_comm_item(data_dir)
@@ -181,19 +186,35 @@ def delete_orphen_comm_items(comm_items):
     session.commit()
 
 
+def verify_comm_dirs_ready(data_dir, rel_dir_set):
+    """
+    run through the list of commissions directories created by db_data_dictionary_comm_item()
+    """
+    for d in rel_dir_set:
+        dest = os.path.join(data_dir, d)
+        mkdirs(dest)
+
 def cache_comm_items(data_dir):
 
     disk_dict = directory_date_dictionary(data_dir)
+
     # Make query, assemble lists
     date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
+
     #
+    # Make sure destination directories exist
+    #
+    verify_comm_dirs_ready(data_dir, rel_dir_set)
 
     to_sync = []
     for comm_item in citems:
         file = full_comm_item_xml_path(data_dir, comm_item)
+        # add to sync list if comm item not on disk
         if file[0] not in disk_dict:
             to_sync.append(comm_item)
         else:
+            # check the rest of the business rules for syncing
+            # no time stamps, timestamps out of sync
             if comm_item.last_sync_time is None or comm_item.modified_date is None:
                 to_sync.append(comm_item)
                 continue
@@ -204,3 +225,23 @@ def cache_comm_items(data_dir):
     for comm_item in to_sync:
         sync_comm_item(data_dir, comm_item)
 
+
+def comm_item_xml_to_dict(citem):
+    """
+    returns dictionary from xml comm doc root
+    generated from from_xml(xml_file_name)
+    this function does not work in models??? date is casted as a VisitableType from SQLAlchemy
+    """
+    date_str =  citem.findall('date')[0].text
+    return {
+       'id': citem.findall('id')[0].text,
+       'date': dt.strptime(date_str, TIMESTAMP_FORMAT),
+       'description': citem.findall('description')[0].text,
+       'amount': round(float(citem.findall('amount')[0].text)),
+       'employee_id': citem.findall('employee_id')[0].text,
+       'voided': int(citem.findall('voided')[0].text)
+     }
+
+def comm_item_xml_to_sa(citem):
+    ci_dict = comm_item_xml_to_dict(citem)
+    return Citem(id=ci_dict['id'], date=ci_dict['date'], description=ci_dict['description'], amount=ci_dict['amount'], employee_id=ci_dict['employee_id'], voided=ci_dict['voided'])
