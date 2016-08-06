@@ -72,6 +72,7 @@ class Employee(Base):
     lastname = Column(String)
     dob = Column(Date)
     salesforce = Column(Boolean)
+    comm_items = relationship("Citem", back_populates="employee")
 
 class Note(Base):
     __tablename__ = 'notes'
@@ -145,23 +146,6 @@ class Contract(Base):
     enddate = Column(Date)
 
 
-class Iitem(Base):
-
-    __tablename__ = 'invoices_items'
-
-    id = Column(Integer, primary_key=True)
-
-    invoice_id = Column(Integer, ForeignKey('invoice.id'))
-    invoice = relationship("Invoice")
-
-    description = Column(String)
-    amount = Column(Float)
-    quantity = Column(Float)
-    cost = Column(Float)
-    ordering = Column(Integer)
-    cleared = Column(Boolean)
-    comm_items = relationship("Citem", back_populates="invoices_item")
-
 class Invoice(Base):
 
     __tablename__ = 'invoices'
@@ -171,7 +155,7 @@ class Invoice(Base):
     contract_id = Column(Integer, ForeignKey('clients_contracts.id'))
     contract = relationship("Contract", backref="clients_contracts")
 
-    # invoice_items = relationship("Iitem", backref="invoice")
+    invoice_items = relationship("Iitem", back_populates="invoice")
 
     date = Column(Date, index=True)
     po = Column(String)
@@ -257,6 +241,24 @@ class User(Base):
     lastname = Column(String)
 
 
+class Iitem(Base):
+
+    __tablename__ = 'invoices_items'
+
+    id = Column(Integer, primary_key=True)
+
+    invoice_id = Column(Integer, ForeignKey('invoices.id'))
+    invoice = relationship("Invoice", back_populates='invoice_items')
+
+    description = Column(String)
+    amount = Column(Float)
+    quantity = Column(Float)
+    cost = Column(Float)
+    ordering = Column(Integer)
+    cleared = Column(Boolean)
+    comm_items = relationship("Citem", back_populates="invoices_item")
+
+
 class Citem(Base):
     """
     commissions item
@@ -265,7 +267,9 @@ class Citem(Base):
     __tablename__ = 'invoices_items_commissions_items'
 
     id = Column(Integer, primary_key=True)
-    employee_id = Column(Integer)
+
+    employee_id = Column(Integer, ForeignKey('employees.id'))
+    employee = relationship("Employee", back_populates="comm_items")
 
     invoices_item_id = Column(Integer, ForeignKey('invoices_items.id'))
     invoices_item = relationship("Iitem", back_populates="comm_items")

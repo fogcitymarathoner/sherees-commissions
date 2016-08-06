@@ -23,8 +23,6 @@ def sherees_commissions_transactions_year_month(data_dir, year, month):
         sherees_comm_items_year_month(data_dir, year, month)
 
 
-
-
 def sherees_comm_items_year_month(data_dir, y, m):
     xml_comm_items = []
     dir = sherees_comm_path_year_month(data_dir, y, m)
