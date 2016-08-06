@@ -23,7 +23,7 @@ session = Session()
 def sherees_commissions_transactions_year_month(data_dir, year, month):
 
     return sherees_comm_payments_year_month(year, month), \
-        sherees_comm_items_year_month(data_dir, year, month)
+        sorted(sherees_comm_items_year_month(data_dir, year, month), key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
 
 
 def sherees_comm_items_year_month(data_dir, y, m):
