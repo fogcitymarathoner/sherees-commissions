@@ -41,6 +41,8 @@ def sherees_comm_items_year_month(data_dir, y, m):
 
 
 def sherees_comm_payments_year_month(y, m):
+    m = int(m)
+    y = int(y)
     if m < 12:
         nexty = y
         nextm = m + 1
