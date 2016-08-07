@@ -75,6 +75,22 @@ class Employee(Base):
     salesforce = Column(Boolean)
     comm_items = relationship("Citem", back_populates="employee")
 
+class NotePayment(Base):
+    __tablename__ = 'notes_payments'
+
+    id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer, ForeignKey('employees.id'))
+    employee = relationship("Employee")
+    check_number = Column(String)
+    date = Column(Date, index=True)
+    amount = Column(Float)
+    notes = Column(String)
+    voided = Column(Boolean)
+    created_date = Column(Date)
+    modified_date = Column(Date)
+    modified_user_id = Column(Integer)
+    created_user_id = Column(Integer)
+
 class Note(Base):
     __tablename__ = 'notes'
 
@@ -92,8 +108,8 @@ class Note(Base):
     cleared = Column(Boolean)
     created_date = Column(Date)
     modified_date = Column(Date)
-    modified_user = Column(Integer)
-    created_user = Column(Integer)
+    modified_user_id = Column(Integer)
+    created_user_id = Column(Integer)
 
 class CommPayment(Base):
     __tablename__ = 'commissions_payments'

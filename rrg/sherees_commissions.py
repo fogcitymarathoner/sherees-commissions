@@ -5,6 +5,7 @@ from datetime import datetime as dt
 from xml.etree import ElementTree
 
 from sqlalchemy.orm import sessionmaker
+from tabulate import tabulate
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
@@ -14,12 +15,99 @@ from s3_mysql_backup import YMD_FORMAT
 from rrg.models import engine
 from rrg.models import Employee
 from rrg.models import Citem
+from rrg.models import Note
+from rrg.models import NotePayment
 from rrg.models import CommPayment
 
 Session = sessionmaker(bind=engine)
 
 session = Session()
 
+
+monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
+
+
+def sherees_notes_report(format='plain'):
+
+    if format not in ['plain', 'latex']:
+        print('Wrong format')
+        quit()
+    notes = session.query(Note).order_by(Note.id)
+
+    notes_payments = session.query(NotePayment).order_by(NotePayment.id)
+    res_dict_transposed = {
+        'id': [np.check_number for np in notes_payments] + ['' for n in notes],
+        'date': [np.date for np in notes_payments] + [n.date for n in notes],
+        'description': [np.notes for np in notes_payments] + [''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for n in notes],
+        'amount': [-np.amount for np in notes_payments] + [n.amount for n in notes]
+    }
+
+    amounts = [-np.amount for np in notes_payments] + [n.amount for n in notes]
+    total = 0
+    for a in amounts:
+        total += a
+
+    res_dict_transposed['id'].append('')
+    res_dict_transposed['date'].append('')
+    res_dict_transposed['description'].append('Balance')
+    res_dict_transposed['amount'].append(total)
+
+    if format == 'plain':
+        return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
+    elif format == 'latex':
+        return tabulate(res_dict_transposed, headers='keys', tablefmt='latex')
+
+def sherees_commissions_report(data_dir, format='plain'):
+    if format not in ['plain', 'latex']:
+        print('Wrong format')
+        quit()
+    balance = 0
+    report = ''
+    if format == 'plain':
+        for cm in comm_months(end=dt.now()):
+            report += monthly_statement_ym_header % (cm['month'], cm['year'])
+            sum, res = year_month_statement(data_dir, cm['year'], cm['month'])
+            balance += sum
+            res_dict_transposed = {
+                'id': map(lambda x: x['id'], res),
+                'date': map(lambda x: x['date'], res),
+                'description': map(lambda x: x['description'], res),
+                'amount': map(lambda x: x['amount'], res)
+            }
+            res_dict_transposed['id'].append('')
+            res_dict_transposed['date'].append('')
+            res_dict_transposed['description'].append('New Balance: %s' % balance)
+            res_dict_transposed['amount'].append('Period Total %s' % sum)
+            report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
+    elif format == 'latex':
+
+        report += '\documentclass[11pt, a4paper]{report}\n'
+
+        report += '\usepackage{booktabs}\n'
+        report += '\usepackage{ltxtable}\n'
+
+        report += '\\begin{document}\n'
+        report += '\\title{Sherees Commissions - %s}\n' % dt.strftime(dt.now(), '%m/%d/%Y')
+        report += '\\maketitle\n'
+        for cm in comm_months(end=dt.now()):
+            report +='\n\section{%s/%s}\n' % (cm['year'], cm['month'])
+            sum, res = year_month_statement(data_dir, cm['year'], cm['month'])
+            balance += sum
+            res_dict_transposed = {
+                'id': map(lambda x: x['id'], res),
+                'date': map(lambda x: x['date'], res),
+                'description': map(lambda x: x['description'], res),
+                'amount': map(lambda x: x['amount'], res)
+            }
+            res_dict_transposed['id'].append('')
+            res_dict_transposed['date'].append('')
+            res_dict_transposed['description'].append('New Balance: %s' % balance)
+            res_dict_transposed['amount'].append(sum)
+            report += tabulate(res_dict_transposed, headers='keys', tablefmt='latex').replace('tabular', 'longtable')
+
+        report += '\n\end{document}\n'
+
+    return report
 
 def sherees_commissions_transactions_year_month(data_dir, year, month):
 
