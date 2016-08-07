@@ -19,6 +19,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import xml.etree.ElementTree as ET
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
+from s3_mysql_backup import YMD_FORMAT
 
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
@@ -322,7 +323,10 @@ class Citem(Base):
         commissions_reports_tag_id.text = str(self.commissions_reports_tag_id)
 
         description = ET.SubElement(doc, 'description')
-        description.text = self.description
+        description.text = '%s-%s %s' % (
+            dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
+            dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),
+            self.description)
 
         date = ET.SubElement(doc, 'date')
         date.text = dt.strftime(self.date, TIMESTAMP_FORMAT)
