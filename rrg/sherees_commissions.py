@@ -55,14 +55,31 @@ def sherees_notes_report(format='plain'):
     if format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
     elif format == 'latex':
-        return tabulate(res_dict_transposed, headers='keys', tablefmt='latex')
+        report = ''
+        report += comm_latex_header(title='Sherees Notes Report')
+        report +=  tabulate(res_dict_transposed, headers='keys', tablefmt='latex')
+        report += '\n\end{document}\n'
+        return report.replace('tabular', 'longtable')
+
+
+def comm_latex_header(title='needs title'):
+    report = ''
+    report += '\documentclass[11pt, a4paper]{report}\n'
+
+    report += '\usepackage{booktabs}\n'
+    report += '\usepackage{ltxtable}\n'
+
+    report += '\\begin{document}\n'
+    report += '\\title{%s - %s}\n' % (dt.strftime(dt.now(), '%m/%d/%Y'), title)
+    report += '\\maketitle\n'
+    return report
+
 
 def sherees_commissions_report(data_dir, format='plain'):
     if format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
     balance = 0
-    report = ''
     if format == 'plain':
         for cm in comm_months(end=dt.now()):
             report += monthly_statement_ym_header % (cm['month'], cm['year'])
@@ -80,15 +97,8 @@ def sherees_commissions_report(data_dir, format='plain'):
             res_dict_transposed['amount'].append('Period Total %s' % sum)
             report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
     elif format == 'latex':
-
-        report += '\documentclass[11pt, a4paper]{report}\n'
-
-        report += '\usepackage{booktabs}\n'
-        report += '\usepackage{ltxtable}\n'
-
-        report += '\\begin{document}\n'
-        report += '\\title{Sherees Commissions - %s}\n' % dt.strftime(dt.now(), '%m/%d/%Y')
-        report += '\\maketitle\n'
+        report = ''
+        report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
             report +='\n\section{%s/%s}\n' % (cm['year'], cm['month'])
             sum, res = year_month_statement(data_dir, cm['year'], cm['month'])

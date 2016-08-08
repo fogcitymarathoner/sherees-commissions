@@ -27,27 +27,27 @@ from rrg.helpers import MissingEnvVar
 try:
     env_str = 'DB_USER'
     if os.getenv(env_str) is None:
-       raise MissingEnvVar('%s is not set' % env_str)
+        raise MissingEnvVar('%s is not set' % env_str)
     else:
-       DB_USER = os.getenv(env_str)
+        DB_USER = os.getenv(env_str)
 
     env_str = 'DB_PASS'
     if os.getenv(env_str) is None:
-       raise MissingEnvVar('%s is not set' % env_str)
+        raise MissingEnvVar('%s is not set' % env_str)
     else:
-       DB_PASS = os.getenv(env_str)
+        DB_PASS = os.getenv(env_str)
 
     env_str = 'MYSQL_SERVER_PORT_3306_TCP_ADDR'
     if os.getenv(env_str) is None:
-       raise MissingEnvVar('%s is not set' % env_str)
+        raise MissingEnvVar('%s is not set' % env_str)
     else:
-       MYSQL_PORT_3306_TCP_ADDR = os.getenv(env_str)
+        MYSQL_PORT_3306_TCP_ADDR = os.getenv(env_str)
 
     env_str = 'MYSQL_SERVER_PORT_3306_TCP_PORT'
     if os.getenv(env_str) is None:
-       raise MissingEnvVar('%s is not set' % env_str)
+        raise MissingEnvVar('%s is not set' % env_str)
     else:
-       MYSQL_PORT_3306_TCP_PORT = os.getenv(env_str)
+        MYSQL_PORT_3306_TCP_PORT = os.getenv(env_str)
 
 except MissingEnvVar as e:
     print(e.value)
@@ -55,13 +55,14 @@ except MissingEnvVar as e:
 
 
 engine = create_engine(
-             'mysql+mysqldb://%s:%s@%s:%s/rrg' % (
-             DB_USER, DB_PASS, MYSQL_PORT_3306_TCP_ADDR, MYSQL_PORT_3306_TCP_PORT))
+    'mysql+mysqldb://%s:%s@%s:%s/rrg' % (
+        DB_USER, DB_PASS, MYSQL_PORT_3306_TCP_ADDR, MYSQL_PORT_3306_TCP_PORT))
 
 
 Base = declarative_base()
 
-# Models for Commissions, Invoices, and Invoice Items are in sherees_commissions
+# Models for Commissions, Invoices, and Invoice Items are in
+# sherees_commissions
 
 
 class Employee(Base):
@@ -74,6 +75,8 @@ class Employee(Base):
     dob = Column(Date)
     salesforce = Column(Boolean)
     comm_items = relationship("Citem", back_populates="employee")
+    contracts = relationship("Contract", back_populates="employee")
+
 
 class NotePayment(Base):
     __tablename__ = 'notes_payments'
@@ -91,6 +94,7 @@ class NotePayment(Base):
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
+
 class Note(Base):
     __tablename__ = 'notes'
 
@@ -98,8 +102,11 @@ class Note(Base):
 
     employee_id = Column(Integer, ForeignKey('employees.id'))
     employee = relationship("Employee")
-    commissions_payment_id = Column(Integer, ForeignKey('commissions_payments.id'))
+
+    commissions_payment_id = Column(
+        Integer, ForeignKey('commissions_payments.id'))
     commissions_payment = relationship("CommPayment")
+
     date = Column(Date, index=True)
     amount = Column(Float)
     notes = Column(String)
@@ -110,6 +117,7 @@ class Note(Base):
     modified_date = Column(Date)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
+
 
 class CommPayment(Base):
     __tablename__ = 'commissions_payments'
@@ -123,6 +131,7 @@ class CommPayment(Base):
     check_number = Column(String)
     cleared = Column(Boolean)
     voided = Column(Boolean)
+
 
 class Client(Base):
 
@@ -161,6 +170,10 @@ class Contract(Base):
     title = Column(String)
     startdate = Column(Date)
     enddate = Column(Date)
+
+    def __repr__(self):
+        return "<Contract(id='%s', title='%s', employee='%s %s')>" % (
+            self.id, self.title, self.employee.firstname, self.employee.lastname)
 
 
 class Invoice(Base):
@@ -225,7 +238,9 @@ class Invoice(Base):
         else:
             return False
 
-# XML 
+# XML
+
+
 def invoice_archives(root, invoice_state='pastdue'):
     """
     returns xml invoice id list for invoice states 'pastdue', 'open', 'cleared' and 'all'
@@ -335,7 +350,8 @@ class Citem(Base):
         commissions_report_id = ET.SubElement(doc, 'commissions_report_id')
         commissions_report_id.text = str(self.commissions_report_id)
 
-        commissions_reports_tag_id = ET.SubElement(doc, 'commissions_reports_tag_id')
+        commissions_reports_tag_id = ET.SubElement(
+            doc, 'commissions_reports_tag_id')
         commissions_reports_tag_id.text = str(self.commissions_reports_tag_id)
 
         description = ET.SubElement(doc, 'description')
@@ -388,5 +404,3 @@ class Citem(Base):
         returns DOM of comm item from file
         """
         return ET.parse(xml_file_name).getroot()
-
-
