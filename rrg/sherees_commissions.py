@@ -18,8 +18,12 @@ from rrg.models import Citem
 from rrg.models import Note
 from rrg.models import NotePayment
 from rrg.models import CommPayment
+from rrg.models import Contract
+from rrg.models import Invoice
+from rrg.models import Iitem
 
 Session = sessionmaker(bind=engine)
+
 
 session = Session()
 
@@ -371,4 +375,24 @@ def year_month_statement(data_dir, y, m):
             sum += ci.amount
 
     return sum, res
+
+
+def remaining_payroll():
+    """
+    gather sherees remaining payroll with invoice and invoice items lists to use to exclude from deletion
+    """
+
+    scontract = session.query(Contract).filter(Contract.employee == sa_sheree())[2]
+    sherees_paychecks_due = session.query(Invoice).filter(Invoice.contract == scontract, Invoice.voided == 0,
+                                Invoice.prcleared == 0, Invoice.posted == 1)
+    do_not_delete_items = []
+    total_due = 0
+    for pc in sherees_paychecks_due:
+        iitems = session.query(Iitem).filter(Iitem.invoice == pc)
+        pay = 0
+        for i in iitems:
+            do_not_delete_items.append(i)
+            pay += i.quantity * i.cost
+        total_due += pay
+    return sherees_paychecks_due, do_not_delete_items, total_due
 
