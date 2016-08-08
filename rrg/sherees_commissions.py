@@ -396,3 +396,44 @@ def remaining_payroll():
         total_due += pay
     return sherees_paychecks_due, do_not_delete_items, total_due
 
+
+def payroll_due_report(format='plain'):
+    """
+    """
+
+    if format not in ['plain', 'latex']:
+        print('Wrong format')
+        quit()
+
+    sherees_paychecks_due, iitems, total = remaining_payroll()
+    res = {
+            'id': [],
+            'date':[],
+            'description':[],
+            'amount': [],
+    }
+    res['id'] = [ i.id for i in sherees_paychecks_due ]
+    res['date'] = [ i.date for i in sherees_paychecks_due ]
+    res['description'] = [ i.period_start for i in sherees_paychecks_due ]
+
+    for pc in sherees_paychecks_due:
+        pay = 0
+        for i in pc.invoice_items:
+            pay += i.quantity * i.cost
+        res['amount'].append(pay)
+
+    res['id'].append('')
+    res['date'].append('')
+    res['description'].append('Total Due')
+    res['amount'].append(total)
+
+    if format == 'plain':
+        return tabulate(res, headers='keys', tablefmt='plain')
+    elif format == 'latex':
+
+        report = ''
+        report += comm_latex_header(title='Sherees Paychecks Due Report')
+        report +=  tabulate(res, headers='keys', tablefmt='latex')
+        report += '\n\end{document}\n'
+        return report
+
