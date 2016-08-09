@@ -70,6 +70,9 @@ class Employee(Base):
     __tablename__ = 'employees'
 
     id = Column(Integer, primary_key=True)
+
+    active = Column(Boolean)
+
     firstname = Column(String)
     lastname = Column(String)
     dob = Column(Date)
@@ -77,6 +80,7 @@ class Employee(Base):
     comm_items = relationship("Citem", back_populates="employee")
     contracts = relationship("Contract", back_populates="employee")
 
+    voided = Column(Boolean)
 
 class NotePayment(Base):
     __tablename__ = 'notes_payments'
@@ -166,14 +170,26 @@ class Contract(Base):
     employee_id = Column(Integer, ForeignKey('employees.id'))
     employee = relationship("Employee")
 
+    period_id = Column(Integer)
+    active = Column(Boolean)
     notes = Column(String)
     title = Column(String)
     startdate = Column(Date)
     enddate = Column(Date)
 
     def __repr__(self):
-        return "<Contract(id='%s', title='%s', employee='%s %s')>" % (
-            self.id, self.title, self.employee.firstname, self.employee.lastname)
+        if self.employee is not None and self.client is not None:
+            return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
+                self.id, self.client.name, self.title, self.employee.firstname, self.employee.lastname)
+        elif self.employee is not None:
+            return "<BAD - Contract(id='%s', title='%s', employee='%s %s')>" % (
+                self.id, self.title, self.employee.firstname, self.employee.lastname)
+        elif self.client is not None:
+            return "<BAD - Contract(id='%s', title='%s', employee='%s %s')>" % (
+                self.id, self.title, self.client.name)
+        else:
+            return "<BAD - Contract(id='%s', title='%s')>" % (
+                self.id, self.title)
 
 
 class Invoice(Base):
@@ -326,8 +342,6 @@ class Citem(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-
-        print(type(self.modified_date))
         return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s'. mod_date='%s'. last_sync='%s')>" % (
             self.description, self.id, self.employee_id, self.amount, self.modified_date,
             self.last_sync_time.strftime(TIMESTAMP_FORMAT))
