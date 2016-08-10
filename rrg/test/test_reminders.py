@@ -1,5 +1,5 @@
-from datetime import datetime as dt 
-import pytest
+from datetime import datetime as dt
+
 import logging
 from rrg.reminders import current_week
 from rrg.reminders import current_semiweek
@@ -12,71 +12,70 @@ from rrg.reminders import biweeks_between_dates
 from rrg.reminders import previous_monday
 from rrg.reminders import next_sunday
 
-
-
-
-
 logging.basicConfig(filename='testing.log',level=logging.DEBUG)
 logger = logging.getLogger('test')
 
 
-payroll_run_date = dt(year=2016, month=8, day=8)
+class TestClass:
+
+    def __init__(self):
+
+        self.payroll_run_date = dt(year=2016, month=8, day=8)
 
 
-def test_current_week():
+    def test_current_week(self):
     """
-test previous_monday():
-"""
-    logger.debug(payroll_run_date.weekday())
-    monday = previous_monday(payroll_run_date)
-    assert dt(year=2016, month=8, day=8) == monday
-
-def test_next_sunday():
+    test previous_monday():
     """
-test next_sunday
-"""
+        logger.debug(self.payroll_run_date.weekday())
+        monday = previous_monday(self.payroll_run_date)
+        assert dt(year=2016, month=8, day=8) == monday
 
-    sunday = next_sunday(payroll_run_date)
-    assert dt(year=2016, month=8, day=1) == sunday
+    def test_next_sunday(self):
+        """
+        test next_sunday
+        """
+
+        sunday = next_sunday(self.payroll_run_date)
+        assert dt(year=2016, month=8, day=1) == sunday
+
+    def test_reminders(self):
+        """
 
 
-def test_reminders():
-    """
+        """
+        # current week 8/8/2015 - 8/15/2015
+        period_start, period_end = current_week(self.payroll_run_date)
+        assert dt(year=2016, month=8, day=8) == period_start
+        assert dt(year=2016, month=8, day=15) == period_end
 
+        # current semiweek
+        period_start, period_end = current_semiweek(self.payroll_run_date)
+        assert dt(year=2016, month=8, day=1) == period_start
+        assert dt(year=2016, month=8, day=15) == period_end
 
-"""
-    # current week 8/8/2015 - 8/15/2015
-    period_start, period_end = current_week(payroll_run_date)
-    assert dt(year=2016, month=8, day=8) == period_start
-    assert dt(year=2016, month=8, day=15) == period_end
+        # current month
+        period_start, period_end = current_month(self.payroll_run_date)
+        assert dt(year=2016, month=8, day=1) == period_start
+        assert dt(year=2016, month=8, day=31) == period_end
 
-    # current semiweek    
-    period_start, period_end = current_semiweek(payroll_run_date)
-    assert dt(year=2016, month=8, day=1) == period_start
-    assert dt(year=2016, month=8, day=15) == period_end
+        # first biweek
+        period_start, period_end = first_biweek_of_year(self.payroll_run_date)
+        assert dt(year=2015, month=12, day=28) == period_start
+        assert dt(year=2016, month=1, day=10) == period_end
 
-    # current month
-    period_start, period_end = current_month(payroll_run_date)
-    assert dt(year=2016, month=8, day=1) == period_start
-    assert dt(year=2016, month=8, day=31) == period_end
-
-    # first biweek
-    period_start, period_end = first_biweek_of_year(payroll_run_date)
-    assert dt(year=2015, month=12, day=28) == period_start
-    assert dt(year=2016, month=1, day=10) == period_end
-
-    period_start, period_end = next_biweek(*first_biweek_of_year(payroll_run_date))
-    assert dt(year=2016, month=1, day=11) == period_start
-    assert dt(year=2016, month=1, day=24) == period_end
-    # current_biweek
-    period_start, period_end = current_biweek(payroll_run_date)
-    assert dt(year=2016, month=8, day=8) == period_starty
-    assert dt(year=2016, month=8, day=21) == period_end
-
-    biweeks = biweeks_between_dates(dt(year=2016, month=7, day=4), payroll_run_date)
-    assert len(biweeks) == 4
-    assert biweeks[0] == (dt(year=2016, month=6, day=27), dt(year=2016, month=7, day=10)) 
-    assert biweeks[1] == (dt(year=2016, month=7, day=11), dt(year=2016, month=7, day=24))
-    assert biweeks[2] == (dt(year=2016, month=7, day=25), dt(year=2016, month=8, day=7)) 
-    assert biweeks[3] == (dt(year=2016, month=8, day=8), dt(year=2016, month=8, day=21))
+        period_start, period_end = next_biweek(*first_biweek_of_year(self.payroll_run_date))
+        assert dt(year=2016, month=1, day=11) == period_start
+        assert dt(year=2016, month=1, day=24) == period_end
+        # current_biweek
+        period_start, period_end = current_biweek(self.payroll_run_date)
+        assert dt(year=2016, month=8, day=8) == period_start
+        assert dt(year=2016, month=8, day=21) == period_end
+    
+        biweeks = biweeks_between_dates(dt(year=2016, month=7, day=4), payroll_run_date)
+        assert len(biweeks) == 4
+        assert biweeks[0] == (dt(year=2016, month=6, day=27), dt(year=2016, month=7, day=10)) 
+        assert biweeks[1] == (dt(year=2016, month=7, day=11), dt(year=2016, month=7, day=24))
+        assert biweeks[2] == (dt(year=2016, month=7, day=25), dt(year=2016, month=8, day=7)) 
+        assert biweeks[3] == (dt(year=2016, month=8, day=8), dt(year=2016, month=8, day=21))
 

@@ -1,4 +1,5 @@
 import os
+import argparse
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import sessionmaker
 
@@ -16,6 +17,10 @@ from rrg.helpers import date_to_datetime
 Session = sessionmaker(bind=engine)
 
 session = Session()
+
+parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
+parser.add_argument('reminders', metavar='N', type=int, nargs='+',
+                    help='setup reminders for timecards')
 
 
 def cleared_invoices_client(client, all_invs):
@@ -81,6 +86,10 @@ def cache_clients_ar(data_dir):
 
     print('Wrote to %s' % outfile)
 
+
 def main():
+
+    args = parser.parse_args()
+    print(args)
     print('hi world!')
 
