@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import sessionmaker
@@ -10,7 +11,10 @@ from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
 from rrg.helpers import date_to_datetime
-
+if hasattr(sys, '_called_from_test'):
+    print('TeStInG')
+else:
+    print('normal call')
 try:
     env_str = 'DB_USER'
     if os.getenv(env_str) is None:

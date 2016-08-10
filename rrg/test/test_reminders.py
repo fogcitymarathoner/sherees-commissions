@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime as dt
 
 import logging
@@ -21,6 +22,9 @@ class Test:
     def setup_class(self):
 
         self.payroll_run_date = dt(year=2016, month=8, day=8)
+
+    def test_in_test(self):
+        assert True == sys._called_from_test
 
     def test_previous_monday(self, capsys):
         """
