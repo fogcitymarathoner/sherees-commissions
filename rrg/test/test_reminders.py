@@ -22,11 +22,10 @@ class TestClass:
 
         self.payroll_run_date = dt(year=2016, month=8, day=8)
 
-
     def test_current_week(self):
-    """
-    test previous_monday():
-    """
+        """
+        test previous_monday():
+        """
         logger.debug(self.payroll_run_date.weekday())
         monday = previous_monday(self.payroll_run_date)
         assert dt(year=2016, month=8, day=8) == monday
