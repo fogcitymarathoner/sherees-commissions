@@ -1,7 +1,8 @@
 build
-
 dist
-
+.cache/
+.eggs/
 rrg.egg-info
 *.pyc
 rrg/tmp
+*.log

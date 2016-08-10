@@ -80,3 +80,7 @@ def cache_clients_ar(data_dir):
     tree.write(outfile)
 
     print('Wrote to %s' % outfile)
+
+def main():
+    print('hi world!')
+

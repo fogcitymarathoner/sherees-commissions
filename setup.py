@@ -23,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.168',
+    version='0.0.169',
     description='Utility Library for Taking AR report generating out of CakePHP DB',
     long_description=long_description,
 
@@ -100,6 +100,10 @@ setup(
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
+        'console_scripts': [
+            'rrg-cli=rrg:main',
+        ],
     },
-
+    setup_requires=['pytest-runner', ],
+    tests_require=['pytest', ],
 )
