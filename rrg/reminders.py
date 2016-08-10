@@ -2,10 +2,11 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_
-from rrg.models import engine
+from rrg import engine
 from rrg.models import Contract
 from rrg.models import Client
 from rrg.models import Employee
+from rrg import session
 from rrg.queries import contracts_per_period
 """
 Python utility library for payroll calendars - weekly, biweekly, semimonthly
@@ -13,10 +14,6 @@ and monthly
 
 https://payroll.unca.edu/sites/default/files/2016%20Payroll%20Calendar.pdf`
 """
-
-Session = sessionmaker(bind=engine)
-
-session = Session()
 
 
 def generate_period_reminders(period='week'):
@@ -84,8 +81,8 @@ def next_sunday(date):
 
 
 def previous_monday(date):
-    if date.weekday == 0:
-        previous_monday = date
+    if date.weekday() == 0:
+        return date
     else:
         day = date
         while day > date - td(days=7):
@@ -94,7 +91,8 @@ def previous_monday(date):
             if day.weekday()== 0:
                 break
         previous_monday = day
-    return day
+    return previous_monday
+
 
 def current_week(date):
     period_start = previous_monday(date)
@@ -156,6 +154,7 @@ def current_biweek(date):
             start, end = next_biweek(start, end)
             
     return start, end
+
 
 def biweeks_between_dates(start, end):
     if start > end:

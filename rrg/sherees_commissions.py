@@ -12,7 +12,7 @@ from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
 
-from rrg.models import engine
+from rrg import session
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import Note
@@ -21,11 +21,6 @@ from rrg.models import CommPayment
 from rrg.models import Contract
 from rrg.models import Invoice
 from rrg.models import Iitem
-
-Session = sessionmaker(bind=engine)
-
-
-session = Session()
 
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'

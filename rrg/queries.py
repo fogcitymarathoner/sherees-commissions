@@ -1,7 +1,7 @@
 from datetime import datetime as dt
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_
-from rrg.models import engine
+from rrg import engine
 from rrg.models import Contract
 from rrg.models import Client
 from rrg.models import Employee

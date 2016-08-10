@@ -1,12 +1,8 @@
 from datetime import datetime as dt
 from sqlalchemy.orm import sessionmaker
 
-from rrg.models import engine
+from rrg import session
 from rrg.models import Contract
-
-Session = sessionmaker(bind=engine)
-
-session = Session()
 
 
 def clear_out_bad_contracts():
