@@ -11,43 +11,49 @@ from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
 from rrg.helpers import date_to_datetime
+from rrg.helpers import MissingEnvVar
+
 if hasattr(sys, '_called_from_test'):
-    print('TeStInG')
+    DB_USER = 'root'
+    DB_PASS = 'my_very_secret_password'
+    MYSQL_PORT_3306_TCP_ADDR = 'localhost'
+    MYSQL_PORT_3306_TCP_PORT = 3306
+    DATABASE = 'rrg_test'
 else:
-    print('normal call')
-try:
-    env_str = 'DB_USER'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        DB_USER = os.getenv(env_str)
 
-    env_str = 'DB_PASS'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        DB_PASS = os.getenv(env_str)
+    try:
+        env_str = 'DB_USER'
+        if os.getenv(env_str) is None:
+            raise MissingEnvVar('%s is not set' % env_str)
+        else:
+            DB_USER = os.getenv(env_str)
 
-    env_str = 'MYSQL_SERVER_PORT_3306_TCP_ADDR'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        MYSQL_PORT_3306_TCP_ADDR = os.getenv(env_str)
+        env_str = 'DB_PASS'
+        if os.getenv(env_str) is None:
+            raise MissingEnvVar('%s is not set' % env_str)
+        else:
+            DB_PASS = os.getenv(env_str)
 
-    env_str = 'MYSQL_SERVER_PORT_3306_TCP_PORT'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        MYSQL_PORT_3306_TCP_PORT = os.getenv(env_str)
+        env_str = 'MYSQL_SERVER_PORT_3306_TCP_ADDR'
+        if os.getenv(env_str) is None:
+            raise MissingEnvVar('%s is not set' % env_str)
+        else:
+            MYSQL_PORT_3306_TCP_ADDR = os.getenv(env_str)
 
-except MissingEnvVar as e:
-    print(e.value)
-    raise
+        env_str = 'MYSQL_SERVER_PORT_3306_TCP_PORT'
+        if os.getenv(env_str) is None:
+            raise MissingEnvVar('%s is not set' % env_str)
+        else:
+            MYSQL_PORT_3306_TCP_PORT = os.getenv(env_str)
+        DATABASE = 'rrg'
+    except MissingEnvVar as e:
+        print(e.value)
+        raise
 
 
 engine = create_engine(
-    'mysql+mysqldb://%s:%s@%s:%s/rrg' % (
-        DB_USER, DB_PASS, MYSQL_PORT_3306_TCP_ADDR, MYSQL_PORT_3306_TCP_PORT))
+    'mysql+mysqldb://%s:%s@%s:%s/%s' % (
+        DB_USER, DB_PASS, MYSQL_PORT_3306_TCP_ADDR, MYSQL_PORT_3306_TCP_PORT, DATABASE))
 
 Session = sessionmaker(bind=engine)
 

@@ -1,10 +1,10 @@
 from datetime import datetime as dt
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import and_
 from rrg import engine
 from rrg.models import Contract
 from rrg.models import Client
 from rrg.models import Employee
+from rrg.models import periods
 
 Session = sessionmaker(bind=engine)
 

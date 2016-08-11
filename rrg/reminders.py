@@ -1,12 +1,6 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import and_
-from rrg import engine
-from rrg.models import Contract
-from rrg.models import Client
-from rrg.models import Employee
-from rrg import session
+
 from rrg.queries import contracts_per_period
 """
 Python utility library for payroll calendars - weekly, biweekly, semimonthly
@@ -22,7 +16,6 @@ def generate_period_reminders(period='week'):
     """
 
     return contracts_per_period(period=period)
-
 
 
 def subtract_one_month(t):
@@ -41,6 +34,7 @@ def subtract_one_month(t):
     while one_month_earlier.month == t.month or one_month_earlier.day > t.day:
         one_month_earlier -= one_day
     return one_month_earlier
+
 
 def add_one_month(t):
     """Return a `datetime.date` or `datetime.datetime` (as given) that is
@@ -77,7 +71,7 @@ def next_sunday(date):
             if day.weekday()== 6:
                 break
         next_sunday = day
-    return day
+    return next_sunday
 
 
 def previous_monday(date):
@@ -137,12 +131,19 @@ def last_monday_previous_year(date):
         mon = mon - td(days=1)
     return mon
 
+
 def first_biweek_of_year(date):
     return last_monday_previous_year(dt.now()), \
         last_monday_previous_year(dt.now()) + td(days=13)
 
+
 def next_biweek(start, end):
     return start + td(14), end + td(14)
+
+
+def next_week(start, end):
+    return start + td(7), end + td(7)
+
 
 def current_biweek(date):
     start, end = first_biweek_of_year(date)
@@ -169,3 +170,17 @@ def biweeks_between_dates(start, end):
 
     return biweeks
 
+
+def weeks_between_dates(start, end):
+
+    if start > end:
+        print('start date is greater than end date')
+        quit()
+    week = current_week(start)
+
+    weeks = [week]
+    while week[1] < end:
+        week = next_week(*week)
+        weeks.append(week)
+
+    return weeks

@@ -1,6 +1,3 @@
-from datetime import datetime as dt
-from sqlalchemy.orm import sessionmaker
-
 from rrg import session
 from rrg.models import Contract
 

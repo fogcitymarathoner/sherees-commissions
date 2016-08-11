@@ -3,8 +3,6 @@ import re
 import time
 from datetime import datetime as dt
 from xml.etree import ElementTree
-
-from sqlalchemy.orm import sessionmaker
 from tabulate import tabulate
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
@@ -22,12 +20,10 @@ from rrg.models import Contract
 from rrg.models import Invoice
 from rrg.models import Iitem
 
-
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
 
 def sherees_notes_report(format='plain'):
-
     if format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
@@ -37,7 +33,8 @@ def sherees_notes_report(format='plain'):
     res_dict_transposed = {
         'id': [np.check_number for np in notes_payments] + ['' for n in notes],
         'date': [np.date for np in notes_payments] + [n.date for n in notes],
-        'description': [np.notes for np in notes_payments] + [''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for n in notes],
+        'description': [np.notes for np in notes_payments] + [''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for
+                                                              n in notes],
         'amount': [-np.amount for np in notes_payments] + [n.amount for n in notes]
     }
 
@@ -56,7 +53,7 @@ def sherees_notes_report(format='plain'):
     elif format == 'latex':
         report = ''
         report += comm_latex_header(title='Sherees Notes Report')
-        report +=  tabulate(res_dict_transposed, headers='keys', tablefmt='latex')
+        report += tabulate(res_dict_transposed, headers='keys', tablefmt='latex')
         report += '\n\end{document}\n'
         return report.replace('tabular', 'longtable')
 
@@ -99,7 +96,7 @@ def sherees_commissions_report(data_dir, format='plain'):
         report = ''
         report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
-            report +='\n\section{%s/%s}\n' % (cm['year'], cm['month'])
+            report += '\n\section{%s/%s}\n' % (cm['year'], cm['month'])
             sum, res = year_month_statement(data_dir, cm['year'], cm['month'])
             balance += sum
             res_dict_transposed = {
@@ -118,20 +115,23 @@ def sherees_commissions_report(data_dir, format='plain'):
 
     return report
 
-def sherees_commissions_transactions_year_month(data_dir, year, month):
 
+def sherees_commissions_transactions_year_month(data_dir, year, month):
     return sherees_comm_payments_year_month(year, month), \
-        sorted(sherees_comm_items_year_month(data_dir, year, month), key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
+           sorted(sherees_comm_items_year_month(data_dir, year, month),
+                  key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
 
 
 def sherees_comm_items_year_month(data_dir, y, m):
     xml_comm_items = []
     dir = sherees_comm_path_year_month(data_dir, y, str(m).zfill(2))
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
-       
+
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
-            if re.search('transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/[0-9]{5}\.xml$', filename):
+            if re.search(
+                    'transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/[0-9]{5}\.xml$',
+                    filename):
                 xml_comm_items.append(Citem.from_xml(filename))
 
     return xml_comm_items
@@ -147,10 +147,10 @@ def sherees_comm_payments_year_month(y, m):
         nexty = int(y) + 1
         nextm = 1
 
-    return session.query(CommPayment)\
-        .filter(CommPayment.employee==sa_sheree())\
-        .filter(CommPayment.date >= '%s-%s-01' % (y, m))\
-        .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm))\
+    return session.query(CommPayment) \
+        .filter(CommPayment.employee == sa_sheree()) \
+        .filter(CommPayment.date >= '%s-%s-01' % (y, m)) \
+        .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm)) \
         .order_by(CommPayment.date)
 
 
@@ -173,7 +173,7 @@ def comm_months(start=start, end=end):
 
     year_months = []
     while date < end:
-        
+
         y = date.year
         m = date.month
         year_months.append({'year': y, 'month': m})
@@ -182,14 +182,14 @@ def comm_months(start=start, end=end):
         else:
             m = 1
             y = y + 1
-        
+
         date = dt(year=y, month=m, day=1)
-        
+
     return year_months
 
 
 def sherees_comm_path_year_month(data_dir, year, month):
-    sheree = sa_sheree()    
+    sheree = sa_sheree()
     return os.path.join(data_dir, str(sheree.id), str(year), str(month))
 
 
@@ -207,7 +207,6 @@ def directory_date_dictionary(data_dir):
     dirFileList = []
     for dirName, subdirList, fileList in os.walk(data_dir, topdown=True):
         for f in fileList:
-
             dirFileList.append(os.path.join(dirName, f))
 
     return {f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT) for f in dirFileList}
@@ -248,7 +247,7 @@ def get_list_of_comm_items_to_sync(data_dir):
     """
 
     disk_dict = directory_date_dictionary(data_dir)
-    db_dict, citems, rel_dir_set  = db_date_dictionary_comm_item(data_dir)
+    db_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
 
     sync_list = []
     for ci in db_dict:
@@ -294,8 +293,8 @@ def verify_comm_dirs_ready(data_dir, rel_dir_set):
         dest = os.path.join(data_dir, d)
         mkdirs(dest)
 
-def cache_comm_items(data_dir):
 
+def cache_comm_items(data_dir):
     disk_dict = directory_date_dictionary(data_dir)
 
     # Make query, assemble lists
@@ -332,19 +331,22 @@ def comm_item_xml_to_dict(citem):
     generated from from_xml(xml_file_name)
     this function does not work in models??? date is casted as a VisitableType from SQLAlchemy
     """
-    date_str =  citem.findall('date')[0].text
+    date_str = citem.findall('date')[0].text
     return {
-       'id': citem.findall('id')[0].text,
-       'date': dt.strptime(date_str, TIMESTAMP_FORMAT),
-       'description': citem.findall('description')[0].text,
-       'amount': round(float(citem.findall('amount')[0].text)),
-       'employee_id': citem.findall('employee_id')[0].text,
-       'voided': int(citem.findall('voided')[0].text)
-     }
+        'id': citem.findall('id')[0].text,
+        'date': dt.strptime(date_str, TIMESTAMP_FORMAT),
+        'description': citem.findall('description')[0].text,
+        'amount': round(float(citem.findall('amount')[0].text)),
+        'employee_id': citem.findall('employee_id')[0].text,
+        'voided': int(citem.findall('voided')[0].text)
+    }
+
 
 def comm_item_xml_to_sa(citem):
     ci_dict = comm_item_xml_to_dict(citem)
-    return Citem(id=ci_dict['id'], date=ci_dict['date'], description=ci_dict['description'], amount=ci_dict['amount'], employee_id=ci_dict['employee_id'], voided=ci_dict['voided'])
+    return Citem(id=ci_dict['id'], date=ci_dict['date'], description=ci_dict['description'], amount=ci_dict['amount'],
+                 employee_id=ci_dict['employee_id'], voided=ci_dict['voided'])
+
 
 def year_month_statement(data_dir, y, m):
     sum = 0
@@ -354,19 +356,19 @@ def year_month_statement(data_dir, y, m):
         sherees_commissions_transactions_year_month(data_dir, y, m)
     for payment in payments:
         res.append({
-              'id': payment.check_number, 'date': payment.date, 'description': payment.description,
-              'amount': -payment.amount, 'employee_id': payment.employee_id})
+            'id': payment.check_number, 'date': payment.date, 'description': payment.description,
+            'amount': -payment.amount, 'employee_id': payment.employee_id})
         sum -= payment.amount
     for citem in commissions:
         ci = comm_item_xml_to_sa(citem)
         if ci.voided != 1:
             res.append({
-                  'id': '',
-                  'date': dt.strftime(ci.date, YMD_FORMAT),
-                  'description': ci.description,
-                  'amount': round(ci.amount),
-                  'employee_id': ci.employee_id,
-                 })
+                'id': '',
+                'date': dt.strftime(ci.date, YMD_FORMAT),
+                'description': ci.description,
+                'amount': round(ci.amount),
+                'employee_id': ci.employee_id,
+            })
             sum += ci.amount
 
     return sum, res
@@ -379,7 +381,7 @@ def remaining_payroll():
 
     scontract = session.query(Contract).filter(Contract.employee == sa_sheree())[2]
     sherees_paychecks_due = session.query(Invoice).filter(Invoice.contract == scontract, Invoice.voided == 0,
-                                Invoice.prcleared == 0, Invoice.posted == 1)
+                                                          Invoice.prcleared == 0, Invoice.posted == 1)
     do_not_delete_items = []
     total_due = 0
     for pc in sherees_paychecks_due:
@@ -401,15 +403,10 @@ def payroll_due_report(format='plain'):
         quit()
 
     sherees_paychecks_due, iitems, total = remaining_payroll()
-    res = {
-            'id': [],
-            'date':[],
-            'description':[],
-            'amount': [],
-    }
-    res['id'] = [ i.id for i in sherees_paychecks_due ]
-    res['date'] = [ i.date for i in sherees_paychecks_due ]
-    res['description'] = [ i.period_start for i in sherees_paychecks_due ]
+    res = dict(id=[], date=[], description=[], amount=[])
+    res['id'] = [i.id for i in sherees_paychecks_due]
+    res['date'] = [i.date for i in sherees_paychecks_due]
+    res['description'] = [i.period_start for i in sherees_paychecks_due]
 
     for pc in sherees_paychecks_due:
         pay = 0
@@ -428,7 +425,6 @@ def payroll_due_report(format='plain'):
 
         report = ''
         report += comm_latex_header(title='Sherees Paychecks Due Report')
-        report +=  tabulate(res, headers='keys', tablefmt='latex')
+        report += tabulate(res, headers='keys', tablefmt='latex')
         report += '\n\end{document}\n'
         return report
-

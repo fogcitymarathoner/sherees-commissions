@@ -1,8 +1,7 @@
 """
 does not work on alpine because libmysqlclient-dev package is not available.
 """
-import os
-import sys
+
 from datetime import datetime as dt
 from datetime import timedelta as td
 
@@ -24,7 +23,14 @@ from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import YMD_FORMAT
 
 from rrg.helpers import date_to_datetime
-from rrg.helpers import MissingEnvVar
+
+periods = {
+    'week': 1,
+    'semimonth': 2,
+    'month': 3,
+    'biweek': 5,
+}
+
 
 Base = declarative_base()
 
