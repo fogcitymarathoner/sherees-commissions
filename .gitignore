@@ -2,7 +2,8 @@ build
 dist
 .cache/
 .eggs/
-rrg.egg-info
+*egg-info
+.idea/
 *.pyc
 rrg/tmp
 *.log

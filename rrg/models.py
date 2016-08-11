@@ -46,8 +46,8 @@ class Employee(Base):
 
     active = Column(Boolean)
 
-    firstname = Column(String)
-    lastname = Column(String)
+    firstname = Column(String(20))
+    lastname = Column(String(20))
     dob = Column(Date)
     salesforce = Column(Boolean)
     comm_items = relationship("Citem", back_populates="employee")
@@ -55,16 +55,17 @@ class Employee(Base):
 
     voided = Column(Boolean)
 
+
 class NotePayment(Base):
     __tablename__ = 'notes_payments'
 
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer, ForeignKey('employees.id'))
     employee = relationship("Employee")
-    check_number = Column(String)
+    check_number = Column(String(25))
     date = Column(Date, index=True)
     amount = Column(Float)
-    notes = Column(String)
+    notes = Column(String(100))
     voided = Column(Boolean)
     created_date = Column(Date)
     modified_date = Column(Date)
@@ -86,7 +87,7 @@ class Note(Base):
 
     date = Column(Date, index=True)
     amount = Column(Float)
-    notes = Column(String)
+    notes = Column(String(100))
     opening = Column(Boolean)
     voided = Column(Boolean)
     cleared = Column(Boolean)
@@ -104,8 +105,8 @@ class CommPayment(Base):
     employee = relationship("Employee")
     date = Column(Date, index=True)
     amount = Column(Float)
-    description = Column(String)
-    check_number = Column(String)
+    description = Column(TEXT)
+    check_number = Column(String(10))
     cleared = Column(Boolean)
     voided = Column(Boolean)
 
@@ -115,12 +116,12 @@ class Client(Base):
     __tablename__ = 'clients'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    street1 = Column(String)
-    street2 = Column(String)
-    city = Column(String)
+    name = Column(String(50))
+    street1 = Column(String(50))
+    street2 = Column(String(50))
+    city = Column(String(50))
     state_id = Column(Integer)
-    zip = Column(String)
+    zip = Column(String(50))
     active = Column(Boolean)
     terms = Column(Integer)
     hq = Column(Boolean)
@@ -145,8 +146,8 @@ class Contract(Base):
 
     period_id = Column(Integer)
     active = Column(Boolean)
-    notes = Column(String)
-    title = Column(String)
+    notes = Column(TEXT)
+    title = Column(TEXT)
     startdate = Column(Date)
     enddate = Column(Date)
 
@@ -177,11 +178,11 @@ class Invoice(Base):
     invoice_items = relationship("Iitem", back_populates="invoice")
 
     date = Column(Date, index=True)
-    po = Column(String)
+    po = Column(String(30))
     employerexpenserate = Column(Float)
     terms = Column(Integer)
     timecard = Column(Boolean)
-    notes = Column(String)
+    notes = Column(String(160))
     period_start = Column(Date)
     period_end = Column(Date)
 
@@ -195,7 +196,7 @@ class Invoice(Base):
     amount = Column(Float)
     voided = Column(Boolean)
 
-    token = Column(String)
+    token = Column(String(64))
     view_count = Column(Integer)
     mock = Column(Boolean)
     timecard_document = Column(TEXT)
@@ -245,12 +246,12 @@ class State(Base):
     __tablename__ = 'states'
 
     id = Column(Integer, primary_key=True)
-    post_ab = Column(String)
-    capital = Column(String)
-    date = Column(String)
-    flower = Column(String)
-    name = Column(String)
-    state_no = Column(String)
+    post_ab = Column(String(2))
+    capital = Column(String(14))
+    date = Column(String(10))
+    flower = Column(String(27))
+    name = Column(String(14))
+    state_no = Column(String(9))
 
 
 class User(Base):
@@ -258,8 +259,8 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    firstname = Column(String)
-    lastname = Column(String)
+    firstname = Column(String(60))
+    lastname = Column(String(60))
 
 
 class Iitem(Base):
@@ -271,7 +272,7 @@ class Iitem(Base):
     invoice_id = Column(Integer, ForeignKey('invoices.id'))
     invoice = relationship("Invoice", back_populates='invoice_items')
 
-    description = Column(String)
+    description = Column(String(60))
     amount = Column(Float)
     quantity = Column(Float)
     cost = Column(Float)
@@ -297,7 +298,7 @@ class Citem(Base):
 
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
-    description = Column(String)
+    description = Column(String(50))
     date = Column(Date, index=True)
     percent = Column(Float)
     amount = Column(Float)

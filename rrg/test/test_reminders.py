@@ -1,7 +1,7 @@
 import sys
 from datetime import datetime as dt
-
 import logging
+from sqlalchemy import MetaData
 
 from rrg import MYSQL_PORT_3306_TCP_ADDR
 from rrg.models import Contract
@@ -9,9 +9,13 @@ from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import periods
 from rrg import session
+from rrg import engine
+from rrg.models import Base
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
+
+metadata = MetaData()
 
 
 class Test:
@@ -22,8 +26,12 @@ class Test:
         self.payroll_run_date = dt(year=2016, month=8, day=8)
         logger.debug('Setup test db')
 
+        Base.metadata.create_all(engine)
+
+
     def teardown_class(self):
         logger.debug('Teardown test db')
+        Base.metadata.drop_all(engine)
 
     def test_in_test(self):
         """
