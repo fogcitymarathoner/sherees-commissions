@@ -145,6 +145,39 @@ def next_week(start, end):
     return start + td(7), end + td(7)
 
 
+def next_month(start, end):
+    if start.month != end.month:
+        print('start and end month are different')
+    if start.month < 12:
+        return (dt(year=start.year, month=start.month + 1, day=start.day),
+                dt(year=end.year, month=end.month + 1, day=end.day))
+    else:
+        return (dt(year=start.year + 1, month= 1, day=start.day),
+                dt(year=end.year + 1, month=  1, day=end.day))
+
+def next_semimonth(start, end):
+    if end.day == 15:
+        return (dt(year=start.year, month=start.month, day=16),
+                dt(year=end.year, month=end.month + 1, day=1) -
+                td(days=1))
+    else:
+        if end.month < 12:
+            return (dt(year=start.year, month=start.month + 1, day=1),
+                    dt(year=end.year, month=end.month + 1, day=15))
+        else:
+            return (dt(year=start.year + 1, month=1, day=1),
+                    dt(year=end.year + 1, month=1, day=15))
+
+def current_semimonth(date):
+    if date.day < 16:
+        return (dt(year=date.year, month=date.month, day=1),
+                dt(year=date.year, month=date.month, day=15))
+    else:
+        return (dt(year=date.year, month=date.month, day=16),
+                dt(year=date.year, month=date.month, day=11) +
+                td(months=1) - td(days=1))
+
+
 def current_biweek(date):
     start, end = first_biweek_of_year(date)
     if date >= start and date <= end + td(days=1):
@@ -184,3 +217,33 @@ def weeks_between_dates(start, end):
         weeks.append(week)
 
     return weeks
+
+
+def months_between_dates(start, end):
+
+    if start > end:
+        print('start date is greater than end date')
+        quit()
+    month = current_month(start)
+
+    months = [month]
+    while month[1] < end:
+        month = next_month(*month)
+        months.append(month)
+
+    return months
+
+
+def semimonths_between_dates(start, end):
+
+    if start > end:
+        print('start date is greater than end date')
+        quit()
+    semimonth = current_semimonth(start)
+
+    semimonths = [semimonth]
+    while semimonth[1] < end:
+        semimonth = next_semimonth(*semimonth)
+        semimonths.append(semimonth)
+
+    return semimonths
