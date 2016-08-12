@@ -9,8 +9,6 @@ from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import periods
 from rrg import session
-from rrg import engine
-from rrg.models import Base
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -20,18 +18,15 @@ metadata = MetaData()
 
 class Test:
 
-
     def setup_class(self):
 
         self.payroll_run_date = dt(year=2016, month=8, day=8)
-        logger.debug('Setup test db')
-
-        Base.metadata.create_all(engine)
-
+        logger.debug('Setup test reminders test')
+        session.begin_nested()
 
     def teardown_class(self):
-        logger.debug('Teardown test db')
-        Base.metadata.drop_all(engine)
+        logger.debug('Teardown reminders')
+        session.rollback()
 
     def test_in_test(self):
         """
@@ -54,6 +49,10 @@ class Test:
             .filter(Contract.period_id == periods['week']) \
             .filter(Contract.startdate > dt.strptime('1970-01-01', '%Y-%m-%d')) \
             .all()
-
+        e = Employee(firstname='x', lastname='y')
+        session.add(e)
+        logger.debug('employees')
+        logger.debug(session.query(Employee).all())
+        logger.debug('contracts')
         logger.debug(contracts)
         assert False

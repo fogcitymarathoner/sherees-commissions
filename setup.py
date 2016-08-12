@@ -102,6 +102,7 @@ setup(
     entry_points={
         'console_scripts': [
             'rrg-cli=rrg:main',
+            'rrg-create-test-db=rrg.utils:create_db'
         ],
     },
     setup_requires=['pytest-runner', ],
