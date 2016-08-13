@@ -1,6 +1,6 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
-
+import calendar
 from rrg.queries import contracts_per_period
 """
 Python utility library for payroll calendars - weekly, biweekly, semimonthly
@@ -150,10 +150,11 @@ def next_month(start, end):
         print('start and end month are different')
     if start.month < 12:
         return (dt(year=start.year, month=start.month + 1, day=start.day),
-                dt(year=end.year, month=end.month + 1, day=end.day))
+                dt(year=end.year, month=end.month + 1, day=calendar.monthrange(end.year, end.month + 1)[1]))
     else:
-        return (dt(year=start.year + 1, month= 1, day=start.day),
-                dt(year=end.year + 1, month=  1, day=end.day))
+        return (dt(year=start.year + 1, month=1, day=start.day),
+                dt(year=end.year + 1, month=1, day=calendar.monthrange(end.year, 1)[1]))
+
 
 def next_semimonth(start, end):
     if end.day == 15:
@@ -168,14 +169,14 @@ def next_semimonth(start, end):
             return (dt(year=start.year + 1, month=1, day=1),
                     dt(year=end.year + 1, month=1, day=15))
 
+
 def current_semimonth(date):
     if date.day < 16:
         return (dt(year=date.year, month=date.month, day=1),
                 dt(year=date.year, month=date.month, day=15))
     else:
         return (dt(year=date.year, month=date.month, day=16),
-                dt(year=date.year, month=date.month, day=11) +
-                td(months=1) - td(days=1))
+                dt(year=date.year, month=date.month, day=calendar.monthrange(date.year, date.month)[1]))
 
 
 def current_biweek(date):

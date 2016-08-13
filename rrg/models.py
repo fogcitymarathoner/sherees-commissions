@@ -12,6 +12,7 @@ from sqlalchemy import Date
 from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import TEXT
+from sqlalchemy import Table
 from sqlalchemy import Float
 from sqlalchemy.orm import relationship
 from sqlalchemy import TIMESTAMP
@@ -207,8 +208,10 @@ class Invoice(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<Invoice(contract.title='%s', amount='%s', duedate='%s')>" % (
-            self.contract.title, self.amount, self.duedate())
+        return "<Invoice(id='%s', amount='%s', duedate='%s', start='%s', end='%s')>" % (self.id, self.amount, self.duedate(),
+                                                                                        self.period_start, self.period_end)
+        # return "<Invoice(contract.title='%s', amount='%s', duedate='%s')>" % (
+        #     self.contract.title, self.amount, self.duedate())
 
     def duedate(self):
         if self.date:
