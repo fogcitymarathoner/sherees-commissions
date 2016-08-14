@@ -35,6 +35,8 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 class Test:
     def setup_class(self):
 
+        assert sys._called_from_test
+        assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
         self.payroll_run_date = dt(year=2016, month=8, day=8)
         self.common_contract_start = dt(year=2016, month=7, day=1)
         logger.debug('Setup test reminders test')
