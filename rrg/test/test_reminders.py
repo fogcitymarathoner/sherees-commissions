@@ -2,10 +2,11 @@ import sys
 from datetime import datetime as dt
 from datetime import timedelta as td
 import logging
+import re
 from tabulate import tabulate
 
-
 from rrg import MYSQL_PORT_3306_TCP_ADDR
+from rrg import DATABASE
 from rrg.models import Contract
 from rrg.models import Client
 from rrg.models import Employee
@@ -37,6 +38,9 @@ class Test:
 
         assert sys._called_from_test
         assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
+        if not re.search('.*test.*', DATABASE):
+            print('You have a non test database set')
+        assert re.search('.*test.*', DATABASE)
         self.payroll_run_date = dt(year=2016, month=8, day=8)
         self.common_contract_start = dt(year=2016, month=7, day=1)
         logger.debug('Setup test reminders test')

@@ -1,5 +1,4 @@
 import os
-import sys
 import argparse
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import sessionmaker
