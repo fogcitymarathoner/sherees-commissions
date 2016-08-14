@@ -13,27 +13,9 @@ https://payroll.unca.edu/sites/default/files/2016%20Payroll%20Calendar.pdf`
 def generate_period_reminders(period='week'):
     """
     generates reminders per period type
+    IS THIS USED?
     """
-
     return contracts_per_period(period=period)
-
-
-def subtract_one_month(t):
-    """Return a `datetime.date` or `datetime.datetime` (as given) that is
-    one month later.
-    
-    Note that the resultant day of the month might change if the following
-    month has fewer days:
-    
-        >>> subtract_one_month(datetime.date(2010, 3, 31))
-        datetime.date(2010, 2, 28)
-    """
-    import datetime
-    one_day = datetime.timedelta(days=1)
-    one_month_earlier = t - one_day
-    while one_month_earlier.month == t.month or one_month_earlier.day > t.day:
-        one_month_earlier -= one_day
-    return one_month_earlier
 
 
 def add_one_month(t):
@@ -46,8 +28,7 @@ def add_one_month(t):
         >>> add_one_month(datetime.date(2010, 1, 31))
         datetime.date(2010, 2, 28)
     """
-    import datetime
-    one_day = datetime.timedelta(days=1)
+    one_day = td(days=1)
     one_month_later = t + one_day
     while one_month_later.month == t.month:  # advance to start of next month
         one_month_later += one_day
@@ -94,32 +75,12 @@ def current_week(date):
     return period_start, period_end
 
 
-def current_semiweek(date):
-    if date.day < 16:
-        period_start = dt(year=date.year,
-                          month=date.month,
-                          day=1)
-
-        period_end = subtract_one_month(add_one_month(dt(year=date.year,
-                          month=date.month,
-                          day=15)))
-    else:
-
-        period_start = dt(year=date.year,
-                          month=date.month,
-                          day=1)
-        period_end = subtract_one_month(add_one_month(date - td(days=1)))
-
-    return period_start, period_end
-
-
 def current_month(date):
     period_start = dt(year=date.year,
                       month=date.month,
                       day=1)
 
-    period_end = add_one_month(dt(year=date.year, month=date.month, day=1)) \
-                               - td(days=1)
+    period_end = add_one_month(dt(year=date.year, month=date.month, day=1)) - td(days=1)
     return period_start, period_end
 
 
@@ -194,7 +155,7 @@ def current_biweek(date):
 def biweeks_between_dates(start, end):
     if start > end:
         print('start date is greater than end date')
-        quit()
+        return None
     biweek = current_biweek(start)
 
     biweeks = [biweek]
@@ -209,7 +170,7 @@ def weeks_between_dates(start, end):
 
     if start > end:
         print('start date is greater than end date')
-        quit()
+        return None
     week = current_week(start)
 
     weeks = [week]
@@ -224,7 +185,7 @@ def months_between_dates(start, end):
 
     if start > end:
         print('start date is greater than end date')
-        quit()
+        return None
     month = current_month(start)
 
     months = [month]
@@ -239,7 +200,7 @@ def semimonths_between_dates(start, end):
 
     if start > end:
         print('start date is greater than end date')
-        quit()
+        return None
     semimonth = current_semimonth(start)
 
     semimonths = [semimonth]

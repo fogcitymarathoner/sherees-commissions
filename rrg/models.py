@@ -31,15 +31,14 @@ periods = {
     'biweek': 5,
 }
 
-
 Base = declarative_base()
+
 
 # Models for Commissions, Invoices, and Invoice Items are in
 # sherees_commissions
 
 
 class Employee(Base):
-
     __tablename__ = 'employees'
 
     id = Column(Integer, primary_key=True)
@@ -54,6 +53,10 @@ class Employee(Base):
     contracts = relationship("Contract", back_populates="employee")
 
     voided = Column(Boolean)
+
+    def __repr__(self):
+        return "<Employee(id='%s', firstname='%s', lastname='%s')>" % (
+            self.id, self.firstname, self.lastname)
 
 
 class NotePayment(Base):
@@ -112,7 +115,6 @@ class CommPayment(Base):
 
 
 class Client(Base):
-
     __tablename__ = 'clients'
 
     id = Column(Integer, primary_key=True)
@@ -131,9 +133,11 @@ class Client(Base):
     created_user = Column(Integer)
     last_sync_time = Column(Date)
 
+    def __repr__(self):
+        return "<Client(id='%s', name='%s')>" % (self.id, self.name)
+
 
 class Contract(Base):
-
     __tablename__ = 'clients_contracts'
 
     id = Column(Integer, primary_key=True)
@@ -150,26 +154,16 @@ class Contract(Base):
     active = Column(Boolean)
     notes = Column(TEXT)
     title = Column(TEXT)
+    terms = Column(Integer, nullable=False)
     startdate = Column(Date)
     enddate = Column(Date)
 
     def __repr__(self):
-        if self.employee and self.client:
-            return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
-                self.id, self.client.name, self.title, self.employee.firstname, self.employee.lastname)
-        elif self.employee:
-            return "<BAD - Contract(id='%s', title='%s', employee='%s %s')>" % (
-                self.id, self.title, self.employee.firstname, self.employee.lastname)
-        elif self.client:
-            return "<BAD - Contract(id='%s', title='%s', employee='%s %s')>" % (
-                self.id, self.title, self.client.name)
-        else:
-            return "<BAD - Contract(id='%s', title='%s')>" % (
-                self.id, self.title)
+        return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
+            self.id, self.client.name, self.title, self.employee.firstname, self.employee.lastname)
 
 
 class Invoice(Base):
-
     __tablename__ = 'invoices'
 
     id = Column(Integer, primary_key=True)
@@ -180,11 +174,11 @@ class Invoice(Base):
 
     invoice_items = relationship("Iitem", back_populates="invoice")
 
-    date = Column(Date, index=True, nullable=False)
+    date = Column(Date, nullable=False)
 
     po = Column(String(30))
     employerexpenserate = Column(Float)
-    terms = Column(Integer)
+    terms = Column(Integer, nullable=False)
     timecard = Column(Boolean)
     notes = Column(String(160))
     period_start = Column(Date, nullable=False)
@@ -211,28 +205,28 @@ class Invoice(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<Invoice(id='%s', amount='%s', duedate='%s', period_start='%s', period_end='%s', date='%s')>" % (self.id, self.amount, self.duedate(),
-                                                                                        self.period_start, self.period_end, self.date)
-        # return "<Invoice(contract.title='%s', amount='%s', duedate='%s')>" % (
-        #     self.contract.title, self.amount, self.duedate())
+        return "<Invoice(id='%s', contract_id='%s', amount='%s', duedate='%s', period_start='%s', " \
+               "period_end='%s', date='%s')>" % (
+                   self.id, self.contract_id, self.amount, self.duedate(),
+                   self.period_start, self.period_end, self.date)
 
     def duedate(self):
-        if self.date and self.terms:
-            return date_to_datetime(self.date) + td(days=self.terms)
-        else:
-            return None
+        return date_to_datetime(self.date) + td(days=self.terms)
 
-    def is_pastdue(self):
-        """
-        returns true or false if invoice is pastdue, server day
 
-        :return:
-        """
+def is_pastdue(inv, date=None):
+    """
+    returns true or false if invoice is pastdue, server day
 
-        if self.duedate() >= dt.now():
-            return True
-        else:
-            return False
+    :return:
+    """
+    if not date:
+        date = dt.now()
+    if inv.duedate() >= date:
+        return True
+    else:
+        return False
+
 
 # XML
 
@@ -248,7 +242,6 @@ def invoice_archives(root, invoice_state='pastdue'):
 
 
 class State(Base):
-
     __tablename__ = 'states'
 
     id = Column(Integer, primary_key=True)
@@ -261,7 +254,6 @@ class State(Base):
 
 
 class User(Base):
-
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
@@ -270,7 +262,6 @@ class User(Base):
 
 
 class Iitem(Base):
-
     __tablename__ = 'invoices_items'
 
     id = Column(Integer, primary_key=True)

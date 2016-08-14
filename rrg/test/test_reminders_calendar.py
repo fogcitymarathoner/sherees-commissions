@@ -1,9 +1,9 @@
 import sys
 from datetime import datetime as dt
+from datetime import timedelta as td
 
 import logging
 from rrg.reminders import current_week
-from rrg.reminders import current_semiweek
 from rrg.reminders import current_month
 from rrg.reminders import first_biweek_of_year
 from rrg.reminders import next_biweek
@@ -51,6 +51,7 @@ class Test:
         """
 
         sunday = next_sunday(self.payroll_run_date)
+        sunday = next_sunday(sunday)
         assert dt(year=2016, month=8, day=14) == sunday
 
     def test_reminders(self):
@@ -62,11 +63,6 @@ class Test:
         period_start, period_end = current_week(self.payroll_run_date)
         assert dt(year=2016, month=8, day=8) == period_start
         assert dt(year=2016, month=8, day=14) == period_end
-
-        # current semiweek
-        period_start, period_end = current_semiweek(self.payroll_run_date)
-        assert dt(year=2016, month=8, day=1) == period_start
-        assert dt(year=2016, month=8, day=15) == period_end
 
         # current month
         period_start, period_end = current_month(self.payroll_run_date)
@@ -86,6 +82,9 @@ class Test:
         period_start, period_end = current_biweek(self.payroll_run_date)
         assert dt(year=2016, month=8, day=8) == period_start
         assert dt(year=2016, month=8, day=21) == period_end
+        period_start, period_end = current_biweek(dt(year=self.payroll_run_date.year, month=1, day=1))
+        assert dt(year=2015, month=12, day=28) == period_start
+        assert dt(year=2016, month=1, day=10) == period_end
 
         biweeks = biweeks_between_dates(dt(year=2016, month=7, day=4),
                                         self.payroll_run_date)
@@ -98,6 +97,9 @@ class Test:
         dt(year=2016, month=7, day=25), dt(year=2016, month=8, day=7))
         assert biweeks[3] == (
         dt(year=2016, month=8, day=8), dt(year=2016, month=8, day=21))
+
+        assert not biweeks_between_dates(self.payroll_run_date + td(days=1),
+                                         self.payroll_run_date)
 
         weeks = weeks_between_dates(dt(year=2016, month=7, day=4),
                                     self.payroll_run_date)
@@ -134,4 +136,8 @@ class Test:
         dt(year=2016, month=7, day=16), dt(year=2016, month=7, day=31))
         assert semimonths[2] == (
         dt(year=2016, month=8, day=1), dt(year=2016, month=8, day=15))
-       
+
+        assert not months_between_dates(self.payroll_run_date + td(1),
+                                        self.payroll_run_date)
+        assert not semimonths_between_dates(self.payroll_run_date + td(1),
+                                            self.payroll_run_date)
