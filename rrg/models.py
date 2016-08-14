@@ -12,7 +12,6 @@ from sqlalchemy import Date
 from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import TEXT
-from sqlalchemy import Table
 from sqlalchemy import Float
 from sqlalchemy.orm import relationship
 from sqlalchemy import TIMESTAMP
@@ -124,7 +123,7 @@ class Client(Base):
     state_id = Column(Integer)
     zip = Column(String(50))
     active = Column(Boolean)
-    terms = Column(Integer)
+    terms = Column(Integer, nullable=False)
     hq = Column(Boolean)
     modified_date = Column(Date)
     created_date = Column(Date)
@@ -139,10 +138,12 @@ class Contract(Base):
 
     id = Column(Integer, primary_key=True)
 
-    client_id = Column(Integer, ForeignKey('clients.id'))
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
+
     client = relationship("Client")
 
-    employee_id = Column(Integer, ForeignKey('employees.id'))
+    employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
+
     employee = relationship("Employee")
 
     period_id = Column(Integer)
@@ -153,13 +154,13 @@ class Contract(Base):
     enddate = Column(Date)
 
     def __repr__(self):
-        if self.employee is not None and self.client is not None:
+        if self.employee and self.client:
             return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
                 self.id, self.client.name, self.title, self.employee.firstname, self.employee.lastname)
-        elif self.employee is not None:
+        elif self.employee:
             return "<BAD - Contract(id='%s', title='%s', employee='%s %s')>" % (
                 self.id, self.title, self.employee.firstname, self.employee.lastname)
-        elif self.client is not None:
+        elif self.client:
             return "<BAD - Contract(id='%s', title='%s', employee='%s %s')>" % (
                 self.id, self.title, self.client.name)
         else:
@@ -173,19 +174,21 @@ class Invoice(Base):
 
     id = Column(Integer, primary_key=True)
 
-    contract_id = Column(Integer, ForeignKey('clients_contracts.id'))
+    contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
+
     contract = relationship("Contract", backref="clients_contracts")
 
     invoice_items = relationship("Iitem", back_populates="invoice")
 
-    date = Column(Date, index=True)
+    date = Column(Date, index=True, nullable=False)
+
     po = Column(String(30))
     employerexpenserate = Column(Float)
     terms = Column(Integer)
     timecard = Column(Boolean)
     notes = Column(String(160))
-    period_start = Column(Date)
-    period_end = Column(Date)
+    period_start = Column(Date, nullable=False)
+    period_end = Column(Date, nullable=False)
 
     posted = Column(Boolean)
     cleared = Column(Boolean)
@@ -208,13 +211,13 @@ class Invoice(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<Invoice(id='%s', amount='%s', duedate='%s', start='%s', end='%s')>" % (self.id, self.amount, self.duedate(),
-                                                                                        self.period_start, self.period_end)
+        return "<Invoice(id='%s', amount='%s', duedate='%s', period_start='%s', period_end='%s', date='%s')>" % (self.id, self.amount, self.duedate(),
+                                                                                        self.period_start, self.period_end, self.date)
         # return "<Invoice(contract.title='%s', amount='%s', duedate='%s')>" % (
         #     self.contract.title, self.amount, self.duedate())
 
     def duedate(self):
-        if self.date:
+        if self.date and self.terms:
             return date_to_datetime(self.date) + td(days=self.terms)
         else:
             return None

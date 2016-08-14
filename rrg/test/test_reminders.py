@@ -2,8 +2,10 @@ import sys
 from datetime import datetime as dt
 from datetime import timedelta as td
 import logging
-from sqlalchemy import MetaData
 from tabulate import tabulate
+import pytest
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import InvalidRequestError
 
 from rrg import MYSQL_PORT_3306_TCP_ADDR
 from rrg.models import Contract
@@ -18,7 +20,6 @@ from rrg.reminders import semimonths_between_dates
 from rrg.reminders import months_between_dates
 from rrg.queries import contracts_per_period
 from rrg.reminders_generation import timecard_hash
-from rrg.reminders_generation import reminder_hash
 from rrg.reminders_generation import reminders_set
 from rrg.reminders_generation import reminders
 from rrg.reminders_generation import timecards_set
@@ -27,8 +28,6 @@ from rrg import session
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
-
-metadata = MetaData()
 
 
 class Test:
@@ -40,8 +39,8 @@ class Test:
         session.begin_nested()
         with session.no_autoflush:
             objects = []
-            client_active = Client(name='weekly', active=True)
-            client_inactive = Client(name='weekly-inactive', active=False)
+            client_active = Client(name='weekly', active=True, terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
             objects.append(client_active)
             objects.append(client_inactive)
 
@@ -68,7 +67,7 @@ class Test:
 
             objects = []
 
-            # Active Contracts
+            # Active Contract
             objects.append(Contract(employee_id=employees[0].id, title='weekly-active-client-active-employee',
                                     client_id=clients[0].id, active=True,
                                     period_id=periods['week'], startdate=self.common_contract_start))
@@ -130,36 +129,65 @@ class Test:
             weeks = weeks_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             second_week_start, second_week_end = weeks[1]
-            objects.append(Invoice(contract=contracts[0], period_start=second_week_start, period_end=second_week_end))
-            objects.append(Invoice(contract=contracts[4], period_start=second_week_start, period_end=second_week_end))
-            objects.append(Invoice(contract=contracts[8], period_start=second_week_start, period_end=second_week_end))
+            itbl = Invoice.__table__
+            from sqlalchemy import insert
+            i = insert(itbl)
+            i.values({'date': '2016-01-01'})
+            logger.debug('insert')
+            logger.debug(str(i))
+            session.add(
+                Invoice(contract=contracts[0], period_start=second_week_start.date(), period_end=second_week_end.date(),
+                        date=self.payroll_run_date.date()))
+            logger.debug(str(session.add(
+                Invoice(contract=contracts[0], period_start=second_week_start.date(), period_end=second_week_end.date(),
+                        date=self.payroll_run_date.date()))))
+            logger.debug('session.query(Invoice).all()')
+            logger.debug(session.query(Invoice).all())
+            quit()
+            objects.append(
+                Invoice(contract=contracts[4], period_start=second_week_start.date(), period_end=second_week_end.date(),
+                        date=self.payroll_run_date.date()))
+            objects.append(
+                Invoice(contract=contracts[8], period_start=second_week_start.date(), period_end=second_week_end.date(),
+                        date=self.payroll_run_date.date()))
 
             biweeks = biweeks_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             start, end = biweeks[1]
-            objects.append(Invoice(contract=contracts[1], period_start=start, period_end=end))
-            objects.append(Invoice(contract=contracts[5], period_start=start, period_end=end))
-            objects.append(Invoice(contract=contracts[9], period_start=start, period_end=end))
+            objects.append(Invoice(contract=contracts[1], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
+            objects.append(Invoice(contract=contracts[5], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
+            objects.append(Invoice(contract=contracts[9], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
 
             semimonths = semimonths_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             start, end = semimonths[1]
-            objects.append(Invoice(contract=contracts[2], period_start=start, period_end=end))
-            objects.append(Invoice(contract=contracts[6], period_start=start, period_end=end))
-            objects.append(Invoice(contract=contracts[10], period_start=start, period_end=end))
+            objects.append(Invoice(contract=contracts[2], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
+            objects.append(Invoice(contract=contracts[6], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
+            objects.append(Invoice(contract=contracts[10], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
 
             months = months_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             start, end = months[1]
-            objects.append(Invoice(contract=contracts[3], period_start=start, period_end=end))
-            objects.append(Invoice(contract=contracts[7], period_start=start, period_end=end))
-            objects.append(Invoice(contract=contracts[11], period_start=start, period_end=end))
-
+            objects.append(Invoice(contract=contracts[3], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
+            objects.append(Invoice(contract=contracts[7], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
+            objects.append(Invoice(contract=contracts[11], period_start=start.date(), period_end=end.date(),
+                                   date=self.payroll_run_date.date()))
+            for o in objects:
+                logger.debug(o)
             session.bulk_save_objects(objects)
 
     def teardown_class(self):
         logger.debug('Teardown reminders')
         session.rollback()
+        session.flush()
 
     def test_in_test(self):
         """
@@ -168,6 +196,15 @@ class Test:
         """
         assert sys._called_from_test
         assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
+
+    def test_due_date(self, capsys):
+        """
+        test invoice due date calculation
+        """
+        logger.debug('testing duedate')
+        first_inv = session.query(Invoice).all()[0]
+        logger.debug(first_inv)
+        logger.debug(first_inv.duedate())
 
     def test_models(self, capsys):
         """
@@ -204,7 +241,8 @@ class Test:
         t_set = timecards_set()
         for t in tcards:
             logger.debug(t)
-            tbl.append([t[0].id, t[0].period_start, t[0].period_end, t[1].active, t[1].title, t[2].active, t[3].active, 1 if timecard_hash(t[0]) in r_set else 0,
+            tbl.append([t[0].id, t[0].period_start, t[0].period_end, t[1].active, t[1].title, t[2].active, t[3].active,
+                        1 if timecard_hash(t[0]) in r_set else 0,
                         timecard_hash(t[0])])
         logger.debug(tabulate(tbl,
                               headers=['id', 'start', 'end', 'contract-active', 'contract-title', 'employee-active',
@@ -234,18 +272,19 @@ class Test:
         assert True is tcards[3][2].active
         assert True is tcards[3][3].active
 
-
         logger.debug('biweekly')
         for c, ws, we in reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set, period='biweek'):
             logger.debug('%s %s %s' % (c, ws, we))
         logger.debug('semimonthly')
-        for c, ws, we in reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set, period='semimonth'):
+        for c, ws, we in reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set,
+                                   period='semimonth'):
             logger.debug('%s %s %s' % (c, ws, we))
         logger.debug('monthly')
         for c, ws, we in reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set, period='month'):
             logger.debug('%s %s %s' % (c, ws, we))
 
-        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set, period='week')
+        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set,
+                                         period='week')
 
         # weekly
 
@@ -268,7 +307,8 @@ class Test:
 
         # biweekly
 
-        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set, period='biweek')
+        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set,
+                                         period='biweek')
         assert dt(year=2016, month=6, day=27) == reminders_to_be_sent[0][1]
         assert dt(year=2016, month=7, day=10) == reminders_to_be_sent[0][2]
         assert True is reminders_to_be_sent[0][0].active
@@ -284,7 +324,8 @@ class Test:
         assert True is reminders_to_be_sent[1][0].client.active
 
         # semimonthly
-        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set, period='semimonth')
+        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set,
+                                         period='semimonth')
         assert dt(year=2016, month=7, day=1) == reminders_to_be_sent[0][1]
         assert dt(year=2016, month=7, day=15) == reminders_to_be_sent[0][2]
         assert True is reminders_to_be_sent[0][0].active
@@ -300,7 +341,8 @@ class Test:
 
         # monthly
 
-        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set, period='month')
+        reminders_to_be_sent = reminders(self.payroll_run_date - td(days=30), self.payroll_run_date, t_set,
+                                         period='month')
         assert dt(year=2016, month=7, day=1) == reminders_to_be_sent[0][1]
         assert dt(year=2016, month=7, day=31) == reminders_to_be_sent[0][2]
         assert True is reminders_to_be_sent[0][0].active
@@ -309,3 +351,62 @@ class Test:
         # Second month missing
         assert 1 == len(reminders_to_be_sent)
 
+
+class TestIntegrity:
+    def setup_class(self):
+        self.payroll_run_date = dt(year=2016, month=8, day=8)
+        self.common_contract_start = dt(year=2016, month=7, day=1)
+
+        session.rollback()
+        session.begin_nested()
+        with session.no_autoflush:
+            objects = []
+            client_active = Client(name='weekly', active=True, terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
+            objects.append(client_active)
+            objects.append(client_inactive)
+
+            session.bulk_save_objects(objects)
+
+            self.clients = session.query(Client).all()
+
+            objects = []
+
+            employee_active = Employee(firstname='firstname', lastname='lastname', active=True)
+            employee_inactive = Employee(firstname='firstname', lastname='lastname', active=False)
+
+            objects.append(employee_active)
+            objects.append(employee_inactive)
+
+            session.bulk_save_objects(objects)
+
+            self.employees = session.query(Employee).all()
+
+    def teardown_class(self):
+        logger.debug('Teardown reminders')
+        session.rollback()
+
+    def test_non_null_constraints(self):
+        # Miscellaneous Contracts with integrity errors
+
+
+        objects = []
+        objects.append(
+            Contract(employee_id=None, title='no-employee', client_id=self.clients[1].id, active=False,
+                     period_id=periods['week'], startdate=self.common_contract_start))
+        with pytest.raises(OperationalError):
+            session.bulk_save_objects(objects)
+
+        objects = []
+        objects.append(
+            Contract(employee_id=self.employees[1].id, title='no-client', client_id=None, active=False,
+                     period_id=periods['week'], startdate=self.common_contract_start))
+        with pytest.raises(InvalidRequestError):
+            session.bulk_save_objects(objects)
+
+        objects = []
+        objects.append(
+            Contract(employee_id=None, title='no-client-no-employee', client_id=None, active=False,
+                     period_id=periods['week'], startdate=self.common_contract_start))
+        with pytest.raises(InvalidRequestError):
+            session.bulk_save_objects(objects)
