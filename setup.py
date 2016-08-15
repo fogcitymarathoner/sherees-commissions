@@ -103,8 +103,24 @@ setup(
         'console_scripts': [
             'rrg-cli=rrg:main',
             'rrg-create-test-db=rrg.utils:create_db',
-            'rrg-weekly-reminders=rrg.utils:week_reminders',
-            'rrg-ar=rrg.utils:ar_report',
+            'rrg-ar=rrg.scripts.ar_reports:ar_report',
+            'rrg-cache-clients-ar:scripts.cache_clients_ar:'
+            'cache_client_accounts_receivable',
+            'rrg-cache-comm-items:scripts.cache_comm_items:cache_comm_items',
+
+            'rrg-comm-monthly=rrg.scripts.commissions:'
+            'comm',
+
+            'rrg-comm-monthlies=rrg.scripts.commissions_monthly_summaries:'
+            'monthlies_summary',
+            'rrg-comm-monthly=rrg.scripts.commissions_monthly_summary:'
+            'monthly_detail',
+
+            'rrg-get-last-db-backup:get_last_backup:get_last_db_backup',
+
+            'rrg-notes=rrg.scripts.notes_report:'
+            'notes',
+            'rrg-weekly-reminders=rrg.scripts.reminders:week_reminders',
         ],
     },
     setup_requires=['pytest-runner', ],
