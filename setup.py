@@ -103,7 +103,7 @@ setup(
         'console_scripts': [
             'rrg-cli=rrg:main',
             'rrg-create-test-db=rrg.utils:create_db',
-            'rrg-weekly-reminders=rrg.utils.week_reminders'
+            'rrg-weekly-reminders=rrg.utils.week_reminders',
         ],
     },
     setup_requires=['pytest-runner', ],
