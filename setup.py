@@ -23,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.0.171',
+    version='0.0.172',
     description='Utility Library for Taking AR report generating out of CakePHP DB',
     long_description=long_description,
 
@@ -102,7 +102,8 @@ setup(
     entry_points={
         'console_scripts': [
             'rrg-cli=rrg:main',
-            'rrg-create-test-db=rrg.utils:create_db'
+            'rrg-create-test-db=rrg.utils:create_db',
+            'rrg-weekly-reminders=rrg.utils.week_reminders'
         ],
     },
     setup_requires=['pytest-runner', ],
