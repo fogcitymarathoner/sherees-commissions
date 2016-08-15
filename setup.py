@@ -104,6 +104,7 @@ setup(
             'rrg-cli=rrg:main',
             'rrg-create-test-db=rrg.utils:create_db',
             'rrg-weekly-reminders=rrg.utils:week_reminders',
+            'rrg-ar=rrg.utils:ar_report',
         ],
     },
     setup_requires=['pytest-runner', ],
