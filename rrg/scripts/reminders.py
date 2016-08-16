@@ -1,10 +1,12 @@
+
+import argparse
 from datetime import datetime as dt
 from datetime import timedelta as td
 from tabulate import tabulate
 
 from rrg.reminders_generation import timecards_set
 from rrg.reminders_generation import reminders as period_reminders
-import argparse
+from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Weekly Reminders')
 
