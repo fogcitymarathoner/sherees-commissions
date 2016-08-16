@@ -121,7 +121,7 @@ setup(
 
             'rrg-notes=rrg.scripts.notes_report:'
             'notes',
-            'rrg-weekly-reminders=rrg.scripts.reminders:week_reminders',
+            'rrg-reminders=rrg.scripts.reminders:reminders',
         ],
     },
     setup_requires=['pytest-runner', ],
