@@ -91,7 +91,7 @@ def sherees_commissions_report(data_dir, format='plain'):
             res_dict_transposed['id'].append('')
             res_dict_transposed['date'].append('')
             res_dict_transposed['description'].append('New Balance: %s' % balance)
-            res_dict_transposed['amount'].append('Period Total %s' % sum)
+            res_dict_transposed['amount'].append('Period Total %s' % total)
             report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
     elif format == 'latex':
         report += comm_latex_header(title='Sherees Commissions Report')
@@ -108,7 +108,7 @@ def sherees_commissions_report(data_dir, format='plain'):
             res_dict_transposed['id'].append('')
             res_dict_transposed['date'].append('')
             res_dict_transposed['description'].append('New Balance: %s' % balance)
-            res_dict_transposed['amount'].append(sum)
+            res_dict_transposed['amount'].append(total)
             report += tabulate(res_dict_transposed, headers='keys', tablefmt='latex').replace('tabular', 'longtable')
 
         report += '\n\end{document}\n'
