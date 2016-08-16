@@ -103,7 +103,7 @@ setup(
         'console_scripts': [
             'rrg-cli=rrg:main',
             'rrg-create-test-db=rrg.utils:create_db',
-            'rrg-ar=rrg.scripts.ar_reports:ar_report',
+            'rrg-ar=rrg.scripts.ar_report:ar_report',
 
             'rrg-cache-clients-ar=scripts.cache_clients_ar:'
             'cache_client_accounts_receivable',
