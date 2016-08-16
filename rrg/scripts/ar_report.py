@@ -29,18 +29,9 @@ def ar_report():
     if os.path.isfile(infile):
         tree = ET.parse(infile)
         root = tree.getroot()
-        if args.type == 'all':
-            recs = invoice_archives(root, 'all')
-        elif type == 'open':
-            args.type = invoice_archives(root, 'open')
-        elif type == 'pastdue':
-            args.type = invoice_archives(root, 'pastdue')
-        else:
-            args.type = invoice_archives(root, 'cleared')
-
-        # display invoices primatively
+        recs = invoice_archives(root, args.type)
         for i in recs:
-            xmlpath = os.path.join(datadir, '%05d.xml' % int(i))
+            xmlpath = os.path.join(args.datadir, '%05d.xml' % int(i))
             date, amount, employee, voided = read_inv_xml_file(xmlpath)
             if not int(voided):
                 print('%s %s %s %s' % (amount, date, voided, employee))
