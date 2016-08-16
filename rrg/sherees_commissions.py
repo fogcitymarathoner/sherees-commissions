@@ -123,7 +123,7 @@ def sherees_commissions_transactions_year_month(session, args):
 
 def sherees_comm_items_year_month(args):
     xml_comm_items = []
-    dir = sherees_comm_path_year_month(args))
+    dir = sherees_comm_path_year_month(args)
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
 
         for fname in fileList:
