@@ -1,13 +1,7 @@
 
-from tabulate import tabulate
-from datetime import datetime as dt
-
 from rrg import engine
 from rrg.models import Contract
 from rrg.models import Base
-
-from rrg.sherees_commissions import year_month_statement
-from rrg.sherees_commissions import comm_months
 
 
 def clear_out_bad_contracts():
@@ -30,25 +24,3 @@ def create_db():
     :return:
     """
     Base.metadata.create_all(engine)
-
-
-monthy_statement_ym_header = '%s/%s - ###################################' \
-                             '######################'
-
-
-def test_summary(data_dir='/php-apps/cake.rocketsredglare.com/rrg/data/'
-                          'transactions/invoices/invoice_items/'
-                          'commissions_items/'):
-    balance = 0
-    for cm in comm_months(end=dt.now()):
-        print(monthy_statement_ym_header % (cm['month'], cm['year']))
-        sum, res = year_month_statement(data_dir, cm['year'], cm['month'])
-        balance += sum
-
-        res_dict_transposed = {
-            'id': [''],
-            'date': ['%s/%s' % (cm['month'], cm['year'])],
-            'description': ['New Balance: %s' % balance],
-            'amount': ['Period Total %s' % sum]
-        }
-        print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))

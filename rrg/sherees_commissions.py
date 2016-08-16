@@ -70,7 +70,7 @@ def comm_latex_header(title='needs title'):
     return report
 
 
-def sherees_commissions_report(data_dir, format='plain'):
+def sherees_commissions_report(session, args):
     if format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
@@ -78,8 +78,8 @@ def sherees_commissions_report(data_dir, format='plain'):
     report = str()
     if format == 'plain':
         for cm in comm_months(end=dt.now()):
-            report += monthly_statement_ym_header % (cm['month'], cm['year'])
-            total, res = year_month_statement(data_dir, cm['year'], cm['month'])
+            report += monthly_statement_ym_header % (args.month, args.year)
+            total, res = year_month_statement(session, args)
             balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),
@@ -96,7 +96,7 @@ def sherees_commissions_report(data_dir, format='plain'):
         report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
             report += '\n\section{%s/%s}\n' % (cm['year'], cm['month'])
-            total, res = year_month_statement(data_dir, cm['year'], cm['month'])
+            total, res = year_month_statement(session, args)
             balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),
