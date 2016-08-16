@@ -3,7 +3,7 @@ from datetime import timedelta as td
 from tabulate import tabulate
 
 from rrg.reminders_generation import timecards_set
-from rrg.reminders_generation import reminders
+from rrg.reminders_generation import reminders as period_reminders
 import argparse
 
 parser = argparse.ArgumentParser(description='RRG Weekly Reminders')
@@ -22,7 +22,7 @@ def reminders():
     args = parser.parse_args()
 
     t_set = timecards_set(args)
-    w_reminders = reminders(dt.now() - td(days=90), dt.now(), t_set, args)
+    w_reminders = period_reminders(dt.now() - td(days=90), dt.now(), t_set, args)
     tbl = []
     for r in w_reminders:
         tbl.append(
