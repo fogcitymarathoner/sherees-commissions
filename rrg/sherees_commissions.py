@@ -79,6 +79,8 @@ def sherees_commissions_report(session, args):
     if args.format == 'plain':
         for cm in comm_months(end=dt.now()):
             report += monthly_statement_ym_header % (cm['month'], cm['year'])
+            args.month = cm['month']
+            args.year = cm['year']
             total, res = year_month_statement(session, args)
             balance += total
             res_dict_transposed = {
@@ -96,6 +98,8 @@ def sherees_commissions_report(session, args):
         report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
             report += '\n\section{%s/%s}\n' % (cm['year'], cm['month'])
+            args.month = cm['month']
+            args.year = cm['year']
             total, res = year_month_statement(session, args)
             balance += total
             res_dict_transposed = {
