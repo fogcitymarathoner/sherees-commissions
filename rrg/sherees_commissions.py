@@ -22,7 +22,7 @@ from rrg.models import Iitem
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
 
-def sherees_notes_report(format='plain'):
+def sherees_notes_report(session, args):
     if format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
@@ -47,9 +47,9 @@ def sherees_notes_report(format='plain'):
     res_dict_transposed['description'].append('Balance')
     res_dict_transposed['amount'].append(total)
 
-    if format == 'plain':
+    if args.format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
-    elif format == 'latex':
+    elif args.format == 'latex':
         report = ''
         report += comm_latex_header(title='Sherees Notes Report')
         report += tabulate(res_dict_transposed, headers='keys', tablefmt='latex')
