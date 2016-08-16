@@ -2,12 +2,8 @@ import os
 from tabulate import tabulate
 from datetime import datetime as dt
 from datetime import timedelta as td
-import xml.etree.ElementTree as ET
-import argparse
 
 from rrg import engine
-from rrg.helpers import read_inv_xml_file
-from rrg.models import invoice_archives
 from rrg import session
 from rrg.models import Contract
 from rrg.models import Base

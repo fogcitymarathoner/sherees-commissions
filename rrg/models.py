@@ -24,6 +24,18 @@ from s3_mysql_backup import YMD_FORMAT
 
 from rrg.helpers import date_to_datetime
 
+from sqlalchemy.orm import sessionmaker
+
+from sqlalchemy import create_engine
+
+
+def session_maker(args):
+    engine = create_engine(
+        'mysql+mysqldb://%s:%s@%s:%s/%s' % (args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db))
+
+    session = sessionmaker(bind=engine)
+    return session()
+
 periods = {
     'week': 1,
     'semimonth': 2,

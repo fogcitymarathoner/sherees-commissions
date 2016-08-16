@@ -10,14 +10,6 @@ https://payroll.unca.edu/sites/default/files/2016%20Payroll%20Calendar.pdf`
 """
 
 
-def generate_period_reminders(period='week'):
-    """
-    generates reminders per period type
-    IS THIS USED?
-    """
-    return contracts_per_period(period=period)
-
-
 def add_one_month(t):
     """Return a `datetime.date` or `datetime.datetime` (as given) that is
     one month earlier.

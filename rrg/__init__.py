@@ -2,15 +2,13 @@ import os
 from datetime import datetime as dt
 import argparse
 import xml.etree.ElementTree as ET
-from sqlalchemy.orm import sessionmaker
-
-from sqlalchemy import create_engine
 from rrg.models import Client
 from rrg.models import Contract
 from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
 from rrg.models import is_pastdue
+from rrg.models import session_maker
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
 
@@ -52,14 +50,6 @@ except MissingEnvVar as e:
     raise
 
 
-engine = create_engine(
-    'mysql+mysqldb://%s:%s@%s:%s/%s' % (
-        DB_USER, DB_PASS, MYSQL_PORT_3306_TCP_ADDR, MYSQL_PORT_3306_TCP_PORT, DATABASE))
-
-Session = sessionmaker(bind=engine)
-
-session = Session()
-
 parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
 parser.add_argument('reminders', metavar='N', type=int, nargs='+',
                     help='setup reminders for timecards')
@@ -95,9 +85,10 @@ def open_invoices_client(client, all_invs):
     return open_invoices
 
 
-def cache_clients_ar(data_dir):
+def cache_clients_ar(args):
 
-    outfile = os.path.join(data_dir, 'ar.xml')
+    session = session_maker(args)
+    outfile = os.path.join(args.datadir, 'ar.xml')
     all_invs = session.query(Invoice).order_by(Invoice.date)
 
     doc = ET.Element('invoices')

@@ -5,7 +5,7 @@ from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import periods
 
-from rrg import session
+from rrg.models import session_maker
 
 periods = {
     'week': 1,
