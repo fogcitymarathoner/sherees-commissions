@@ -14,7 +14,7 @@ from rrg.reminders import semimonths_between_dates
 from rrg.reminders import months_between_dates
 from rrg.helpers import date_to_datetime
 from rrg.queries import contracts_per_period
-from rrg import session
+from rrg.models import session_maker
 
 """
 this module differs from reminders in that it depends on models
