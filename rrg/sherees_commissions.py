@@ -193,7 +193,7 @@ def comm_months(start=start, end=end):
 
 def sherees_comm_path_year_month(session,args):
     sheree = sa_sheree(session)
-    return os.path.join(args.datadir, str(sheree.id), str(args.year), str(args.month))
+    return os.path.join(args.datadir, str(sheree.id), str(args.year), str(args.month).zfill(2))
 
 
 def full_comm_item_xml_path(data_dir, comm_item):
