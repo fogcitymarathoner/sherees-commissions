@@ -40,12 +40,13 @@ def timecard_hash(timecard):
         dt.strftime(timecard.period_end, YMD_FORMAT))).hexdigest()
 
 
-def timecards():
+def timecards(args):
     """
     returns set of timecard hashs of contract.id+startdate+enddate
     :return:
     """
 
+    session = session_maker(args)
     with session.no_autoflush:
         return session.query(Invoice, Contract, Employee, Client).join(Contract).join(Employee).join(Client).filter(
             and_(Client.active == 1, Contract.active == 1, Employee.active == 1)).all()
@@ -77,19 +78,19 @@ def reminders_set(payroll_run_date):
     return reminders_set
 
 
-def reminders(reminder_period_start, payroll_run_date, t_set, period='week'):
+def reminders(reminder_period_start, payroll_run_date, t_set, args):
     #
     reminders = []
-    for c, cl, em in contracts_per_period(period=period):
-        if period == 'week':
+    for c, cl, em in contracts_per_period(period=args.period):
+        if args.period == 'week':
             for ws, we in weeks_between_dates(reminder_period_start, payroll_run_date):
                 if reminder_hash(c, ws, we) not in t_set:
                     reminders.append((c, ws, we))
-        elif period == 'biweek':
+        elif args.period == 'biweek':
             for ws, we in biweeks_between_dates(date_to_datetime(c.startdate), payroll_run_date):
                 if reminder_hash(c, ws, we) not in t_set:
                     reminders.append((c, ws, we))
-        elif period == 'semimonth':
+        elif args.period == 'semimonth':
             for ws, we in semimonths_between_dates(date_to_datetime(c.startdate), payroll_run_date):
                 if reminder_hash(c, ws, we) not in t_set:
                     reminders.append((c, ws, we))
@@ -101,10 +102,10 @@ def reminders(reminder_period_start, payroll_run_date, t_set, period='week'):
     return reminders
 
 
-def timecards_set():
+def timecards_set(args):
 
     timecards_set = set()
-    for t in timecards():
+    for t in timecards(args):
 
         timecards_set.add(timecard_hash(t[0]))
     return timecards_set

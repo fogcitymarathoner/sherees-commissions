@@ -15,14 +15,14 @@ periods = {
 }
 
  
-def contracts_per_period(period='week'):
+def contracts_per_period(args):
     """
     returns active contracts of period type - weekly, semimonthly, monthly
     and biweekly
     """
-    if period not in periods:
+    if args.period not in periods:
         print('wrong period type')
-
+    session = session_maker(args)
     with session.no_autoflush:
         return session.query(Contract, Client, Employee).join(Client) \
             .join(Employee).filter(and_(Contract.active == 1, Client.active == 1,
