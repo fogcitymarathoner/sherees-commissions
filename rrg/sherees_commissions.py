@@ -71,12 +71,12 @@ def comm_latex_header(title='needs title'):
 
 
 def sherees_commissions_report(session, args):
-    if format not in ['plain', 'latex']:
+    if args.format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
     balance = 0
     report = str()
-    if format == 'plain':
+    if args.format == 'plain':
         for cm in comm_months(end=dt.now()):
             report += monthly_statement_ym_header % (args.month, args.year)
             total, res = year_month_statement(session, args)
@@ -92,7 +92,7 @@ def sherees_commissions_report(session, args):
             res_dict_transposed['description'].append('New Balance: %s' % balance)
             res_dict_transposed['amount'].append('Period Total %s' % total)
             report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
-    elif format == 'latex':
+    elif args.format == 'latex':
         report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
             report += '\n\section{%s/%s}\n' % (cm['year'], cm['month'])
@@ -393,11 +393,11 @@ def remaining_payroll():
     return sherees_paychecks_due, do_not_delete_items, total_due
 
 
-def payroll_due_report(format='plain'):
+def payroll_due_report(args):
     """
     """
 
-    if format not in ['plain', 'latex']:
+    if args.format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
 
