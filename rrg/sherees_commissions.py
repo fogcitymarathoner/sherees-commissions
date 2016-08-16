@@ -147,13 +147,13 @@ def sherees_comm_payments_year_month(session, args):
         nextm = 1
 
     return session.query(CommPayment) \
-        .filter(CommPayment.employee == sa_sheree()) \
+        .filter(CommPayment.employee == sa_sheree(session)) \
         .filter(CommPayment.date >= '%s-%s-01' % (y, m)) \
         .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm)) \
         .order_by(CommPayment.date)
 
 
-def sa_sheree():
+def sa_sheree(session):
     """
     return sheree's sa object
     """
