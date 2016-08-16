@@ -9,6 +9,7 @@ from rrg.models import Contract
 from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
+from rrg.models import if is_pastdue:
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
 
