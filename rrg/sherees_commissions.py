@@ -10,7 +10,6 @@ from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
 
-from rrg import session
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import Note

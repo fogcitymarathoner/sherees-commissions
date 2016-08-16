@@ -1,14 +1,10 @@
-import os
+
 from tabulate import tabulate
 from datetime import datetime as dt
-from datetime import timedelta as td
 
 from rrg import engine
-from rrg import session
 from rrg.models import Contract
 from rrg.models import Base
-from rrg.reminders_generation import timecards_set
-from rrg.reminders_generation import reminders
 
 from rrg.sherees_commissions import year_month_statement
 from rrg.sherees_commissions import comm_months
