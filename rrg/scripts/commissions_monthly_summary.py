@@ -18,8 +18,7 @@ parser.add_argument('month', type=int, help='commissions month', required=True)
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/'
-            'invoices/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/')
 
 
 ledger_line_format = '%s %s %s %s'
