@@ -23,7 +23,7 @@ monthly_statement_ym_header = '\n\n%s/%s - #####################################
 
 
 def sherees_notes_report(session, args):
-    if format not in ['plain', 'latex']:
+    if args.format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
     notes = session.query(Note).order_by(Note.id)
