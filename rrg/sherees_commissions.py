@@ -215,7 +215,7 @@ def directory_date_dictionary(data_dir):
     return {f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT) for f in dirFileList}
 
 
-def db_date_dictionary_comm_item(data_dir):
+def db_date_dictionary_comm_item(session, args):
     """
     returns database dictionary counter part to dicectory_date_dictionary for sync determination
     :param data_dir:
@@ -227,7 +227,7 @@ def db_date_dictionary_comm_item(data_dir):
     citems = session.query(Citem).order_by(Citem.id)
 
     for comm_item in citems:
-        f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
+        f, rel_dir = full_comm_item_xml_path(args.datadir, comm_item)
         rel_dir_set.add(rel_dir)
         citem_dict[f] = comm_item.last_sync_time
 
@@ -297,20 +297,20 @@ def verify_comm_dirs_ready(data_dir, rel_dir_set):
         mkdirs(dest)
 
 
-def cache_comm_items(data_dir):
-    disk_dict = directory_date_dictionary(data_dir)
+def cache_comm_items(session, args):
+    disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(data_dir)
+    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, args)
 
     #
     # Make sure destination directories exist
     #
-    verify_comm_dirs_ready(data_dir, rel_dir_set)
+    verify_comm_dirs_ready(args.datadir, rel_dir_set)
 
     to_sync = []
     for comm_item in citems:
-        file = full_comm_item_xml_path(data_dir, comm_item)
+        file = full_comm_item_xml_path(args.datadir, comm_item)
         # add to sync list if comm item not on disk
         if file[0] not in disk_dict:
             to_sync.append(comm_item)
@@ -325,7 +325,7 @@ def cache_comm_items(data_dir):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_comm_item(data_dir, comm_item)
+        sync_comm_item(args.datadir, comm_item)
 
 
 def comm_item_xml_to_dict(citem):

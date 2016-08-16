@@ -1,5 +1,6 @@
 import argparse
 from rrg import cache_clients_ar
+from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Cache Clients AR')
 
@@ -23,6 +24,7 @@ def cache_client_accounts_receivable():
     :return:
     """
     args = parser.parse_args()
+    session = session_maker(args)
 
     print('Caching Clients AR')
-    cache_clients_ar(args)
+    cache_clients_ar(session, args)
