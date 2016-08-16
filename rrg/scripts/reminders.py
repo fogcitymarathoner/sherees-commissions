@@ -22,7 +22,9 @@ def reminders():
     args = parser.parse_args()
 
     t_set = timecards_set(args)
-    w_reminders = period_reminders(dt.now() - td(days=90), dt.now(), t_set, args)
+
+    session = session_maker(args)
+    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(), t_set, args)
     tbl = []
     for r in w_reminders:
         tbl.append(
