@@ -20,5 +20,4 @@ def comm():
 
     args = parser.parse_args()
 
-    print(sherees_commissions_report(
-        data_dir=args.datadir, format=args.format))
+    print(sherees_commissions_report(data_dir=args.datadir, format=args.format))

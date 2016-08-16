@@ -109,7 +109,7 @@ setup(
             'cache_client_accounts_receivable',
             'rrg-cache-comm-items=scripts.cache_comm_items:cache_comm_items',
 
-            'rrg-comm-monthly=rrg.scripts.commissions:'
+            'rrg-comm=rrg.scripts.commissions:'
             'comm',
 
             'rrg-comm-monthlies=rrg.scripts.commissions_monthly_summaries:'
