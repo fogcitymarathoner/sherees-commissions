@@ -104,9 +104,10 @@ setup(
             'rrg-cli=rrg:main',
             'rrg-create-test-db=rrg.utils:create_db',
             'rrg-ar=rrg.scripts.ar_reports:ar_report',
-            'rrg-cache-clients-ar:scripts.cache_clients_ar:'
+
+            'rrg-cache-clients-ar=scripts.cache_clients_ar:'
             'cache_client_accounts_receivable',
-            'rrg-cache-comm-items:scripts.cache_comm_items:cache_comm_items',
+            'rrg-cache-comm-items=scripts.cache_comm_items:cache_comm_items',
 
             'rrg-comm-monthly=rrg.scripts.commissions:'
             'comm',
@@ -116,7 +117,7 @@ setup(
             'rrg-comm-monthly=rrg.scripts.commissions_monthly_summary:'
             'monthly_detail',
 
-            'rrg-get-last-db-backup:get_last_backup:get_last_db_backup',
+            'rrg-get-last-db-backup=get_last_backup:get_last_db_backup',
 
             'rrg-notes=rrg.scripts.notes_report:'
             'notes',
