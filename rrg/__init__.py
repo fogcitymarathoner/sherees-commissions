@@ -1,4 +1,5 @@
 import os
+from datetime import datetime as dt
 import argparse
 import xml.etree.ElementTree as ET
 from sqlalchemy.orm import sessionmaker
@@ -9,7 +10,7 @@ from rrg.models import Contract
 from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
-from rrg.models import if is_pastdue:
+from rrg.models import is_pastdue
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
 
@@ -114,8 +115,7 @@ def cache_clients_ar(data_dir):
                 id = ET.SubElement(open, 'invoice')
                 id.text = str(i.id)
                 if i.date:
-                    if i.is_pastdue():
-
+                    if is_pastdue(i, dt.now()):
                         id = ET.SubElement(pastdue, 'invoice')
                         id.text = str(i.id)
             else:
