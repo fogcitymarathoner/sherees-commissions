@@ -117,13 +117,13 @@ def sherees_commissions_report(data_dir, format='plain'):
 
 def sherees_commissions_transactions_year_month(session, args):
     return sherees_comm_payments_year_month(session, args), \
-           sorted(sherees_comm_items_year_month(args),
+           sorted(sherees_comm_items_year_month(session, args),
                   key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
 
 
-def sherees_comm_items_year_month(args):
+def sherees_comm_items_year_month(session, args):
     xml_comm_items = []
-    dir = sherees_comm_path_year_month(args)
+    dir = sherees_comm_path_year_month(session, args)
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
 
         for fname in fileList:
@@ -187,8 +187,8 @@ def comm_months(start=start, end=end):
     return year_months
 
 
-def sherees_comm_path_year_month(args):
-    sheree = sa_sheree()
+def sherees_comm_path_year_month(session,args):
+    sheree = sa_sheree(session)
     return os.path.join(args.datadir, str(sheree.id), str(args.year), str(args.month))
 
 
