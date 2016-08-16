@@ -115,15 +115,15 @@ def sherees_commissions_report(data_dir, format='plain'):
     return report
 
 
-def sherees_commissions_transactions_year_month(data_dir, year, month):
-    return sherees_comm_payments_year_month(year, month), \
-           sorted(sherees_comm_items_year_month(data_dir, year, month),
+def sherees_commissions_transactions_year_month(session, args):
+    return sherees_comm_payments_year_month(session, args), \
+           sorted(sherees_comm_items_year_month(args),
                   key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
 
 
-def sherees_comm_items_year_month(data_dir, y, m):
+def sherees_comm_items_year_month(args):
     xml_comm_items = []
-    dir = sherees_comm_path_year_month(data_dir, y, str(m).zfill(2))
+    dir = sherees_comm_path_year_month(args))
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
 
         for fname in fileList:
@@ -136,9 +136,9 @@ def sherees_comm_items_year_month(data_dir, y, m):
     return xml_comm_items
 
 
-def sherees_comm_payments_year_month(y, m):
-    m = int(m)
-    y = int(y)
+def sherees_comm_payments_year_month(session, args):
+    m = int(args.month)
+    y = int(args.year)
     if m < 12:
         nexty = y
         nextm = m + 1
@@ -187,9 +187,9 @@ def comm_months(start=start, end=end):
     return year_months
 
 
-def sherees_comm_path_year_month(data_dir, year, month):
+def sherees_comm_path_year_month(args):
     sheree = sa_sheree()
-    return os.path.join(data_dir, str(sheree.id), str(year), str(month))
+    return os.path.join(args.datadir, str(sheree.id), str(args.year), str(args.month))
 
 
 def full_comm_item_xml_path(data_dir, comm_item):
@@ -347,12 +347,12 @@ def comm_item_xml_to_sa(citem):
                  employee_id=ci_dict['employee_id'], voided=ci_dict['voided'])
 
 
-def year_month_statement(data_dir, y, m):
+def year_month_statement(session, args):
     sum = 0
     res = []
 
     payments, commissions = \
-        sherees_commissions_transactions_year_month(data_dir, y, m)
+        sherees_commissions_transactions_year_month(session, args)
     for payment in payments:
         res.append({
             'id': payment.check_number, 'date': payment.date, 'description': payment.description,
