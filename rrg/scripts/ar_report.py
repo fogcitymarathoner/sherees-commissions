@@ -23,7 +23,7 @@ def ar_report():
     """
     args = parser.parse_args()
 
-    print('Generating %s Report' % type)
+    print('Generating %s Report' % args.type)
     infile = os.path.join(args.datadir, 'ar.xml')
 
     if os.path.isfile(infile):
