@@ -76,11 +76,12 @@ def sherees_commissions_report(data_dir, format='plain'):
         print('Wrong format')
         quit()
     balance = 0
+    report = str()
     if format == 'plain':
         for cm in comm_months(end=dt.now()):
             report += monthly_statement_ym_header % (cm['month'], cm['year'])
-            sum, res = year_month_statement(data_dir, cm['year'], cm['month'])
-            balance += sum
+            total, res = year_month_statement(data_dir, cm['year'], cm['month'])
+            balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),
                 'date': map(lambda x: x['date'], res),
@@ -93,12 +94,11 @@ def sherees_commissions_report(data_dir, format='plain'):
             res_dict_transposed['amount'].append('Period Total %s' % sum)
             report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
     elif format == 'latex':
-        report = ''
         report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
             report += '\n\section{%s/%s}\n' % (cm['year'], cm['month'])
-            sum, res = year_month_statement(data_dir, cm['year'], cm['month'])
-            balance += sum
+            total, res = year_month_statement(data_dir, cm['year'], cm['month'])
+            balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),
                 'date': map(lambda x: x['date'], res),
