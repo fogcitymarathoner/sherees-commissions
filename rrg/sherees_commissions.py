@@ -32,9 +32,11 @@ def sherees_notes_report(session, args):
     res_dict_transposed = {
         'id': [np.check_number for np in notes_payments] + ['' for n in notes],
         'date': [np.date for np in notes_payments] + [n.date for n in notes],
-        'description': [np.notes for np in notes_payments] + [''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for
-                                                              n in notes],
-        'amount': [-np.amount for np in notes_payments] + [n.amount for n in notes]
+        'description': [np.notes for np in notes_payments] + [
+            ''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for
+            n in notes],
+        'amount': [-np.amount for np in notes_payments] + [n.amount for n in
+                                                           notes]
     }
 
     amounts = [-np.amount for np in notes_payments] + [n.amount for n in notes]
@@ -52,7 +54,8 @@ def sherees_notes_report(session, args):
     elif args.format == 'latex':
         report = ''
         report += comm_latex_header(title='Sherees Notes Report')
-        report += tabulate(res_dict_transposed, headers='keys', tablefmt='latex')
+        report += tabulate(res_dict_transposed, headers='keys',
+                           tablefmt='latex')
         report += '\n\end{document}\n'
         return report.replace('tabular', 'longtable')
 
@@ -91,9 +94,11 @@ def sherees_commissions_report(session, args):
             }
             res_dict_transposed['id'].append('')
             res_dict_transposed['date'].append('')
-            res_dict_transposed['description'].append('New Balance: %s' % balance)
+            res_dict_transposed['description'].append(
+                'New Balance: %s' % balance)
             res_dict_transposed['amount'].append('Period Total %s' % total)
-            report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
+            report += tabulate(res_dict_transposed, headers='keys',
+                               tablefmt='psql')
     elif args.format == 'latex':
         report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
@@ -110,9 +115,12 @@ def sherees_commissions_report(session, args):
             }
             res_dict_transposed['id'].append('')
             res_dict_transposed['date'].append('')
-            res_dict_transposed['description'].append('New Balance: %s' % balance)
+            res_dict_transposed['description'].append(
+                'New Balance: %s' % balance)
             res_dict_transposed['amount'].append(total)
-            report += tabulate(res_dict_transposed, headers='keys', tablefmt='latex').replace('tabular', 'longtable')
+            report += tabulate(res_dict_transposed, headers='keys',
+                               tablefmt='latex').replace('tabular',
+                                                         'longtable')
 
         report += '\n\end{document}\n'
 
@@ -122,7 +130,8 @@ def sherees_commissions_report(session, args):
 def sherees_commissions_transactions_year_month(session, args):
     return sherees_comm_payments_year_month(session, args), \
            sorted(sherees_comm_items_year_month(session, args),
-                  key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
+                  key=lambda ci: dt.strptime(ci.findall('date')[0].text,
+                                             TIMESTAMP_FORMAT))
 
 
 def sherees_comm_items_year_month(session, args):
@@ -161,7 +170,8 @@ def sa_sheree(session):
     """
     return sheree's sa object
     """
-    return session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
+    return \
+    session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
 
 
 start = dt(year=2009, month=6, day=1)
@@ -191,14 +201,18 @@ def comm_months(start=start, end=end):
     return year_months
 
 
-def sherees_comm_path_year_month(session,args):
+def sherees_comm_path_year_month(session, args):
     sheree = sa_sheree(session)
-    return os.path.join(args.datadir, str(sheree.id), str(args.year), str(args.month).zfill(2))
+    return os.path.join(args.datadir, str(sheree.id), str(args.year),
+                        str(args.month).zfill(2))
 
 
 def full_comm_item_xml_path(data_dir, comm_item):
-    rel_dir = os.path.join(str(comm_item.employee_id), str(comm_item.date.year), str(comm_item.date.month).zfill(2))
-    return os.path.join(data_dir, rel_dir, '%s.xml' % str(comm_item.id).zfill(5)), rel_dir
+    rel_dir = os.path.join(str(comm_item.employee_id),
+                           str(comm_item.date.year),
+                           str(comm_item.date.month).zfill(2))
+    return os.path.join(data_dir, rel_dir,
+                        '%s.xml' % str(comm_item.id).zfill(5)), rel_dir
 
 
 def directory_date_dictionary(data_dir):
@@ -212,7 +226,9 @@ def directory_date_dictionary(data_dir):
         for f in fileList:
             dirFileList.append(os.path.join(dirName, f))
 
-    return {f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT) for f in dirFileList}
+    return {
+    f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT) for
+    f in dirFileList}
 
 
 def db_date_dictionary_comm_item(session, args):
@@ -270,9 +286,11 @@ def sync_comm_item(session, data_dir, comm_item):
 
     # Fix bad modified_date
     if comm_item.modified_date is None:
-        session.query(Citem).filter_by(id=comm_item.id).update({"modified_date": dt.now()})
+        session.query(Citem).filter_by(id=comm_item.id).update(
+            {"modified_date": dt.now()})
 
-    session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
+    session.query(Citem).filter_by(id=comm_item.id).update(
+        {"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -301,7 +319,8 @@ def cache_comm_items(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, args)
+    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session,
+                                                                  args)
 
     #
     # Make sure destination directories exist
@@ -347,7 +366,8 @@ def comm_item_xml_to_dict(citem):
 
 def comm_item_xml_to_sa(citem):
     ci_dict = comm_item_xml_to_dict(citem)
-    return Citem(id=ci_dict['id'], date=ci_dict['date'], description=ci_dict['description'], amount=ci_dict['amount'],
+    return Citem(id=ci_dict['id'], date=ci_dict['date'],
+                 description=ci_dict['description'], amount=ci_dict['amount'],
                  employee_id=ci_dict['employee_id'], voided=ci_dict['voided'])
 
 
@@ -359,7 +379,8 @@ def year_month_statement(session, args):
         sherees_commissions_transactions_year_month(session, args)
     for payment in payments:
         res.append({
-            'id': payment.check_number, 'date': payment.date, 'description': payment.description,
+            'id': payment.check_number, 'date': payment.date,
+            'description': payment.description,
             'amount': -payment.amount, 'employee_id': payment.employee_id})
         sum -= payment.amount
     for citem in commissions:
@@ -379,12 +400,15 @@ def year_month_statement(session, args):
 
 def remaining_payroll(session):
     """
-    gather sherees remaining payroll with invoice and invoice items lists to use to exclude from deletion
+    gather sherees remaining payroll with invoice and invoice items lists to
+    use to exclude from deletion
     """
 
-    scontract = session.query(Contract).filter(Contract.employee == sa_sheree())[2]
-    sherees_paychecks_due = session.query(Invoice).filter(Invoice.contract == scontract, Invoice.voided == 0,
-                                                          Invoice.prcleared == 0, Invoice.posted == 1)
+    scontract = \
+    session.query(Contract).filter(Contract.employee == sa_sheree(session))[2]
+    sherees_paychecks_due = session.query(Invoice).filter(
+        Invoice.contract == scontract, Invoice.voided == 0,
+        Invoice.prcleared == 0, Invoice.posted == 1)
     do_not_delete_items = []
     total_due = 0
     for pc in sherees_paychecks_due:
