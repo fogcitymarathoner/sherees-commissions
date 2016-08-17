@@ -149,17 +149,38 @@ class Client(Base):
         return "<Client(id='%s', name='%s')>" % (self.id, self.name)
 
 
+class ContractItem(Base):
+    __tablename__ = 'contracts_items'
+
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean)
+
+    contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
+    contract = relationship("Contract", backref="clients_contracts")
+
+    amt = Column(Float)
+    cost = Column(Float)
+    description = Column(TEXT)
+
+    notes = Column(TEXT)
+    modified_date = Column(Date)
+    created_date = Column(Date)
+    modified_user = Column(Integer)
+    created_user = Column(Integer)
+    last_sync_time = Column(Date)
+
+    def __repr__(self):
+        return "<ContractItem(id='%s', description='%s')>" % (self.id, self.description)
+
+
 class Contract(Base):
     __tablename__ = 'clients_contracts'
 
     id = Column(Integer, primary_key=True)
 
     client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
-
     client = relationship("Client")
-
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
-
     employee = relationship("Employee")
 
     period_id = Column(Integer)

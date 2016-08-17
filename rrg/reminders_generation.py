@@ -110,3 +110,15 @@ def timecards_set(session, args):
 
         timecards_set.add(timecard_hash(t[0]))
     return timecards_set
+
+
+
+#function create_invoice_for_period($clientsContract, $periodstart, $periodend)
+
+
+
+def create_invoice_for_period(session, contract, period_start, period_end):
+    new_inv = Invoice(contract_id=contract.id, period_start=period_start, period_end=period_end)
+
+    for iitem in session.query(C)
+
