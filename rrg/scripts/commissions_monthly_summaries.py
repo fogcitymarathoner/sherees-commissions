@@ -35,6 +35,7 @@ parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_P
 parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
+
 def monthlies_summary():
 
     args = parser.parse_args()

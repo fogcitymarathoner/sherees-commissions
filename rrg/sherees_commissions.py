@@ -142,7 +142,8 @@ def sherees_comm_items_year_month(session, args):
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
             if re.search(
-                    'transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/[0-9]{5}\.xml$',
+                    'transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/'
+                    '[0-9]{5}\.xml$',
                     filename):
                 xml_comm_items.append(Citem.from_xml(filename))
 
