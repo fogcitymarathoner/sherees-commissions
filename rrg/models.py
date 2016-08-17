@@ -165,8 +165,8 @@ class ContractItem(Base):
     notes = Column(TEXT)
     modified_date = Column(Date)
     created_date = Column(Date)
-    modified_user = Column(Integer)
-    created_user = Column(Integer)
+    modified_user_id = Column(Integer)
+    created_user_id = Column(Integer)
     last_sync_time = Column(Date)
 
     def __repr__(self):
