@@ -43,6 +43,8 @@ def monthlies_summary():
     balance = 0
     for cm in comm_months(end=dt.now()):
         print(monthy_statement_ym_header % (cm['month'], cm['year']))
+        args.year = cm['year']
+        args.month = cm['month']
         total, res = year_month_statement(session, args)
         balance += total
 
