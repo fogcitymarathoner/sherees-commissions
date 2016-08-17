@@ -122,6 +122,7 @@ setup(
             'rrg-notes=rrg.scripts.notes_report:'
             'notes',
             'rrg-reminders=rrg.scripts.reminders:reminders',
+            'rrg-sherees-payroll=rrg.scripts.sherees_payroll:sherees_payroll'
         ],
     },
     setup_requires=['pytest-runner', ],

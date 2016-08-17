@@ -260,7 +260,7 @@ def get_list_of_comm_items_to_sync(data_dir):
     return sync_list
 
 
-def sync_comm_item(data_dir, comm_item):
+def sync_comm_item(session, data_dir, comm_item):
     """
     writes xml file for commissions item
     """
@@ -276,7 +276,7 @@ def sync_comm_item(data_dir, comm_item):
     print('%s written' % f)
 
 
-def delete_orphen_comm_items(comm_items):
+def delete_orphen_comm_items(session, comm_items):
     """
     deletes list of orphened comm_items identified by get_comm_items_without_parents
     """
@@ -325,7 +325,7 @@ def cache_comm_items(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_comm_item(args.datadir, comm_item)
+        sync_comm_item(session, args.datadir, comm_item)
 
 
 def comm_item_xml_to_dict(citem):
@@ -377,7 +377,7 @@ def year_month_statement(session, args):
     return sum, res
 
 
-def remaining_payroll():
+def remaining_payroll(session):
     """
     gather sherees remaining payroll with invoice and invoice items lists to use to exclude from deletion
     """
@@ -397,7 +397,7 @@ def remaining_payroll():
     return sherees_paychecks_due, do_not_delete_items, total_due
 
 
-def payroll_due_report(args):
+def payroll_due_report(session, args):
     """
     """
 
@@ -405,7 +405,7 @@ def payroll_due_report(args):
         print('Wrong format')
         quit()
 
-    sherees_paychecks_due, iitems, total = remaining_payroll()
+    sherees_paychecks_due, iitems, total = remaining_payroll(session)
     res = dict(id=[], date=[], description=[], amount=[])
     res['id'] = [i.id for i in sherees_paychecks_due]
     res['date'] = [i.date for i in sherees_paychecks_due]
@@ -422,9 +422,9 @@ def payroll_due_report(args):
     res['description'].append('Total Due')
     res['amount'].append(total)
 
-    if format == 'plain':
+    if args.format == 'plain':
         return tabulate(res, headers='keys', tablefmt='plain')
-    elif format == 'latex':
+    elif args.format == 'latex':
 
         report = ''
         report += comm_latex_header(title='Sherees Paychecks Due Report')
