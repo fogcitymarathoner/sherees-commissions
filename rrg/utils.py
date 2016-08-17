@@ -1,5 +1,4 @@
-
-from rrg import engine
+from sqlalchemy import create_engine
 from rrg.models import Contract
 from rrg.models import Base
 
@@ -16,6 +15,14 @@ def clear_out_bad_contracts():
     session.commit()
 
 
+class Args(object):
+    mysql_host = 'localhost'
+    mysql_port = 3306
+    db_user = 'root'
+    db_pass = 'my_very_secret_password'
+    db = 'rrg_test'
+
+
 def create_db():
     """
     this routine has a bug, DATABASE isn't fully integrated right, the line
@@ -23,4 +30,12 @@ def create_db():
     'rrg_test' or whatever
     :return:
     """
+    args = Args()
+
+    engine = create_engine(
+        'mysql+mysqldb://%s:%s@%s:%s/%s' % (
+            args.db_user, args.db_pass, args.mysql_host,
+            args.mysql_port, args.db))
+
+    Base.metadata.create_dropall(engine)
     Base.metadata.create_all(engine)
