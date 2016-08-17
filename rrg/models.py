@@ -149,6 +149,22 @@ class Client(Base):
         return "<Client(id='%s', name='%s')>" % (self.id, self.name)
 
 
+class ContractItemCommItem(Base):
+    __tablename__ = 'contracts_items_commissions_items'
+
+    id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer, ForeignKey('employees.id'))
+    employee = relationship("Employee")
+
+    contract_item_id = Column(Integer, ForeignKey('contracts_items.id'), nullable=False)
+    contract_item = relationship("ContractItem")
+    percent = Column(Float)
+    modified_date = Column(Date)
+    created_date = Column(Date)
+    modified_user_id = Column(Integer)
+    created_user_id = Column(Integer)
+
+
 class ContractItem(Base):
     __tablename__ = 'contracts_items'
 
@@ -157,6 +173,8 @@ class ContractItem(Base):
 
     contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
     contract = relationship("Contract")
+
+    contract_comm_items = relationship("ContractItemCommItem", back_populates="contract_item")
 
     amt = Column(Float)
     cost = Column(Float)

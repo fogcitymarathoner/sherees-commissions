@@ -8,6 +8,8 @@ from rrg.models import Invoice
 from rrg.models import Contract
 from rrg.models import Client
 from rrg.models import Employee
+from rrg.models import Iitem
+from rrg.models import Citem
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
 from rrg.reminders import semimonths_between_dates
@@ -112,14 +114,14 @@ def timecards_set(session, args):
     return timecards_set
 
 
-
-#function create_invoice_for_period($clientsContract, $periodstart, $periodend)
-
-
-
 def create_invoice_for_period(session, contract, period_start, period_end):
     new_inv = Invoice(contract_id=contract.id, period_start=period_start, period_end=period_end)
-
-    for iitem in session.query(C):
-        pass
-
+    session.add(new_inv)
+    for citem in contract.contract_items:
+        new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description, cost=citem.cost, amount=citem.amt)
+        session.add(new_iitem)
+        for comm_item in citem.comm_items:
+            new_sales_comm_item = Citem(
+                invoices_item_id=new_iitem.id, employee_id=comm_item.employee_id,
+                percent=comm_item.percent, description=new_iitem.description)
+            session.add(new_sales_comm_item)
