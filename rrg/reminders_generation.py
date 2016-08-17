@@ -114,6 +114,27 @@ def timecards_set(session, args):
     return timecards_set
 
 
+def rebuild_empty_invoice_commissions(session, inv):
+    """
+    this should be used to build the sql.  from invoice items from invoices for period with no comm items
+    This should be used once and thrown away, because of a bug, invoice items do not have parent ids.
+    this will cause redundancies, if run multiple times
+    :fixme
+    :param session:
+    :param inv:
+    :return:
+    """
+
+    for citem in inv.contract.contract_items:
+        new_iitem = Iitem(invoice_id=inv.id, description=citem.description, cost=citem.cost, amount=citem.amt)
+        session.add(new_iitem)
+        for comm_item in citem.comm_items:
+            new_sales_comm_item = Citem(
+                invoices_item_id=new_iitem.id, employee_id=comm_item.employee_id,
+                percent=comm_item.percent, description=new_iitem.description)
+            session.add(new_sales_comm_item)
+
+
 def create_invoice_for_period(session, contract, period_start, period_end):
     new_inv = Invoice(contract_id=contract.id, period_start=period_start, period_end=period_end)
     session.add(new_inv)
