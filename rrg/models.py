@@ -156,7 +156,7 @@ class ContractItem(Base):
     active = Column(Boolean)
 
     contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
-    contract = relationship("Contract", backref="clients_contracts")
+    contract = relationship("Contract")
 
     amt = Column(Float)
     cost = Column(Float)
