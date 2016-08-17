@@ -183,6 +183,7 @@ class Contract(Base):
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
     employee = relationship("Employee")
 
+    contract_items = relationship("ContractItem", back_populates="contract")
     period_id = Column(Integer)
     active = Column(Boolean)
     notes = Column(TEXT)
