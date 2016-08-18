@@ -36,6 +36,7 @@ def session_maker(args):
     session = sessionmaker(bind=engine)
     return session()
 
+
 periods = {
     'week': 1,
     'semimonth': 2,
@@ -87,6 +88,11 @@ class NotePayment(Base):
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
+    def __repr__(self):
+        return "<NotePayment(id='%s', employee='%s %s', check_number='%s', date='%s', amount='%s', notes='%s')>" % (
+            self.id, self.employee.firstname, self.employee.lastname, self.check_number, self.date, self.amount,
+            self.notes)
+
 
 class Note(Base):
     __tablename__ = 'notes'
@@ -124,6 +130,12 @@ class CommPayment(Base):
     check_number = Column(String(10))
     cleared = Column(Boolean)
     voided = Column(Boolean)
+
+    def __repr__(self):
+        return "<CommissionsPayment(id='%s', employee='%s %s', check_number='%s', date='%s', amount='%s'," \
+               " description='%s')>" % (
+            self.id, self.employee.firstname, self.employee.lastname, self.check_number, self.date, self.amount,
+            self.description)
 
 
 class Client(Base):
@@ -310,6 +322,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     firstname = Column(String(60))
+
     lastname = Column(String(60))
 
 
