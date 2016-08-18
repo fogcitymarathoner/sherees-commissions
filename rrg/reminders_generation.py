@@ -142,7 +142,9 @@ def rebuild_empty_invoice_commissions(session, inv):
     for iitem in inv.invoice_items:
         logger.debug(iitem)
         ci = Citem(
-            invoices_item_id=iitem.id, employee_id=1025,
+            invoices_item_id=iitem.id, employee_id=1025, commissions_report_id=0,
+            created_date=dt.now(), modified_date=dt.now(),
+            created_user_id=2, modified_user_id=2,
             percent=61.5, date=inv.date, description=iitem.description,
             amount=.615 * (
             iitem.quantity * (iitem.amount - iitem.cost) - iitem.quantity * (
@@ -151,7 +153,9 @@ def rebuild_empty_invoice_commissions(session, inv):
         session.add(ci)
 
         ci = Citem(
-            invoices_item_id=iitem.id, employee_id=1479,
+            invoices_item_id=iitem.id, employee_id=1479, commissions_report_id=0,
+            created_date=dt.now(), modified_date=dt.now(),
+            created_user_id=2, modified_user_id=2,
             percent=38.5, date=inv.date, description=iitem.description,
             amount=.385 * (
             iitem.quantity * (iitem.amount - iitem.cost) - iitem.quantity * (
