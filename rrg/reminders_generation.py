@@ -145,8 +145,8 @@ def rebuild_empty_invoice_commissions(session, inv):
             invoices_item_id=iitem.id, employee_id=1025,
             percent=61.5, date=inv.date, description=iitem.description,
             amount=.615 * (
-            iitem.quantity * (iitem.amount - iitem.cost) - iitem.quantity * (
-            iitem.amount - iitem.cost) * .1))
+            iitem.quantity * (iitem.amount - iitem.cost) -
+            iitem.quantity * (iitem.amount - iitem.cost) * .1))
 
         session.add(ci)
 

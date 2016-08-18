@@ -85,9 +85,8 @@ def open_invoices_client(client, all_invs):
     return open_invoices
 
 
-def cache_clients_ar(args):
+def cache_clients_ar(session, args):
 
-    session = session_maker(args)
     outfile = os.path.join(args.datadir, 'ar.xml')
     all_invs = session.query(Invoice).order_by(Invoice.date)
 
