@@ -1,4 +1,4 @@
-from rrg.reports import invoices_year_month
+from rrg.reports.invoices import invoices_year_month
 
 from rrg.models import session_maker
 
