@@ -33,7 +33,9 @@ def invoices_monthly():
     res_dict_transposed = {
         'id': [i.id for i in invs],
         'date': [i.date for i in invs],
-        'description': [i.contract.title for i in invs],
+        'description': [
+            '%s %s-%s' % (i.contract.title, i.period_start, i.period_end) for i
+            in invs],
         'amount': [i.amount for i in invs]
     }
     print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))
