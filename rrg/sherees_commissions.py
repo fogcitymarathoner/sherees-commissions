@@ -12,23 +12,47 @@ from s3_mysql_backup import YMD_FORMAT
 
 from rrg.models import Employee
 from rrg.models import Citem
-from rrg.models import Note
-from rrg.models import NotePayment
 from rrg.models import CommPayment
 from rrg.models import Contract
 from rrg.models import Invoice
 from rrg.models import Iitem
+from rrg.queries import sheree_notes_payments
+from rrg.queries import sherees_notes
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
+
+
+def sheree_total_monies_owe(session, args):
+    notes = sherees_notes(session)
+
+    notes_payments = sheree_notes_payments(session)
+
+    amounts = [-np.amount for np in notes_payments] + [n.amount for n in notes]
+
+    total_notes = 0
+    for a in amounts:
+        total_notes += a
+
+    total_commissions = 0
+    for cm in comm_months(end=dt.now()):
+        args.month = cm['month']
+        args.year = cm['year']
+        total, res = year_month_statement(session, args)
+        total_commissions += total
+
+    sherees_paychecks_due, iitems, total_payroll = remaining_payroll(session)
+
+    return total_notes, total_commissions, total_payroll, \
+           (total_commissions + total_payroll - total_notes)
 
 
 def sherees_notes_report(session, args):
     if args.format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
-    notes = session.query(Note).order_by(Note.id)
+    notes = sherees_notes(session)
 
-    notes_payments = session.query(NotePayment).order_by(NotePayment.id)
+    notes_payments = sheree_notes_payments(session)
     res_dict_transposed = {
         'id': [np.check_number for np in notes_payments] + ['' for n in notes],
         'date': [np.date for np in notes_payments] + [n.date for n in notes],
@@ -53,14 +77,14 @@ def sherees_notes_report(session, args):
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
     elif args.format == 'latex':
         report = ''
-        report += comm_latex_header(title='Sherees Notes Report')
+        # report += comm_latex_header(title='Sherees Notes Report')
         report += tabulate(res_dict_transposed, headers='keys',
                            tablefmt='latex')
         report += '\n\end{document}\n'
         return report.replace('tabular', 'longtable')
 
 
-def comm_latex_header(title='needs title'):
+def comm_latex_document_header(title='needs title'):
     report = ''
     report += '\documentclass[11pt, a4paper]{report}\n'
 
@@ -70,6 +94,8 @@ def comm_latex_header(title='needs title'):
     report += '\\begin{document}\n'
     report += '\\title{%s - %s}\n' % (dt.strftime(dt.now(), '%m/%d/%Y'), title)
     report += '\\maketitle\n'
+    report += '\\tableofcontents\n'
+    report += '\\newpage\n'
     return report
 
 
@@ -100,7 +126,7 @@ def sherees_commissions_report(session, args):
             report += tabulate(res_dict_transposed, headers='keys',
                                tablefmt='psql')
     elif args.format == 'latex':
-        report += comm_latex_header(title='Sherees Commissions Report')
+        # report += comm_latex_header(title='Sherees Commissions Report')
         for cm in comm_months(end=dt.now()):
             report += '\n\section{%s/%s}\n' % (cm['year'], cm['month'])
             args.month = cm['month']
@@ -122,7 +148,7 @@ def sherees_commissions_report(session, args):
                                tablefmt='latex').replace('tabular',
                                                          'longtable')
 
-        report += '\n\end{document}\n'
+            # report += '\n\end{document}\n'
 
     return report
 
@@ -135,6 +161,15 @@ def sherees_commissions_transactions_year_month(session, args):
 
 
 def sherees_comm_items_year_month(session, args):
+    """
+    reads comm items from xml forest
+    Args:
+        session:
+        args:
+
+    Returns:
+
+    """
     xml_comm_items = []
     dir = sherees_comm_path_year_month(session, args)
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
@@ -164,6 +199,7 @@ def sherees_comm_payments_year_month(session, args):
         .filter(CommPayment.employee == sa_sheree(session)) \
         .filter(CommPayment.date >= '%s-%s-01' % (y, m)) \
         .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm)) \
+        .filter(CommPayment.voided == False) \
         .order_by(CommPayment.date)
 
 
@@ -172,7 +208,8 @@ def sa_sheree(session):
     return sheree's sa object
     """
     return \
-    session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
+        session.query(Employee).filter_by(firstname='sheree', salesforce=True)[
+            0]
 
 
 start = dt(year=2009, month=6, day=1)
@@ -203,6 +240,15 @@ def comm_months(start=start, end=end):
 
 
 def sherees_comm_path_year_month(session, args):
+    """
+    path to comms directory per year per month
+    Args:
+        session:
+        args:
+
+    Returns:
+
+    """
     sheree = sa_sheree(session)
     return os.path.join(args.datadir, str(sheree.id), str(args.year),
                         str(args.month).zfill(2))
@@ -228,8 +274,9 @@ def directory_date_dictionary(data_dir):
             dirFileList.append(os.path.join(dirName, f))
 
     return {
-    f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT) for
-    f in dirFileList}
+        f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT)
+        for
+        f in dirFileList}
 
 
 def db_date_dictionary_comm_item(session, args):
@@ -406,7 +453,8 @@ def remaining_payroll(session):
     """
 
     scontract = \
-    session.query(Contract).filter(Contract.employee == sa_sheree(session))[2]
+        session.query(Contract).filter(
+            Contract.employee == sa_sheree(session))[2]
     sherees_paychecks_due = session.query(Invoice).filter(
         Invoice.contract == scontract, Invoice.voided == 0,
         Invoice.prcleared == 0, Invoice.posted == 1)
@@ -452,7 +500,7 @@ def payroll_due_report(session, args):
     elif args.format == 'latex':
 
         report = ''
-        report += comm_latex_header(title='Sherees Paychecks Due Report')
+        # report += comm_latex_header(title='Sherees Paychecks Due Report')
         report += tabulate(res, headers='keys', tablefmt='latex')
-        report += '\n\end{document}\n'
+        # report += '\n\end{document}\n'
         return report

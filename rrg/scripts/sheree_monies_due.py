@@ -3,7 +3,7 @@ import argparse
 from rrg.sherees_commissions import sherees_notes_report
 from rrg.sherees_commissions import sherees_commissions_report
 from rrg.sherees_commissions import comm_latex_document_header
-from rrg.sherees_commissions import payroll_due_report
+from rrg.sherees_commissions import sheree_total_monies_owe
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Sherees Commissions Report')
@@ -25,18 +25,12 @@ parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_P
 parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
+def monies_due():
 
-def comm():
+
 
     args = parser.parse_args()
 
     session = session_maker(args)
-    if args.format == 'latex':
-        report = comm_latex_document_header("Sheree's Commissions")
-        report += sherees_commissions_report(session, args)
-        report += sherees_notes_report(session, args)
-        report += payroll_due_report(session, args)
-        report += '\n\end{document}\n'
-        print(report)
-    else:
-        print(sherees_commissions_report(session, args))
+
+    print(sheree_total_monies_owe(session, args))

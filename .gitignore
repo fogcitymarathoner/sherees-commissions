@@ -8,3 +8,4 @@ dist
 rrg/tmp
 *.log
 .coverage
+.DS_Store
