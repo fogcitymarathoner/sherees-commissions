@@ -32,7 +32,7 @@ def contracts_per_period(session, args):
 
 
 def sheree_notes_payments(session):
-    session.query(NotePayment).filter(
+    return session.query(NotePayment).filter(
         and_(
             NotePayment.voided == False, NotePayment.employee_id == 1025)) \
         .order_by(NotePayment.id)

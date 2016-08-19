@@ -26,7 +26,8 @@ def sheree_total_monies_owe(session, args):
     notes = sherees_notes(session)
 
     notes_payments = sheree_notes_payments(session)
-
+    print('notes payments %s' % notes_payments)
+    print('notes %s' % notes)
     amounts = [-np.amount for np in notes_payments] + [n.amount for n in notes]
 
     total_notes = 0
