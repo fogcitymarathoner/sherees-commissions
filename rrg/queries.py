@@ -35,9 +35,9 @@ def sheree_notes_payments(session):
     return session.query(NotePayment).filter(
         and_(
             NotePayment.voided == False, NotePayment.employee_id == 1025)) \
-        .order_by(NotePayment.id)
+        .order_by(NotePayment.date)
 
 
 def sherees_notes(session):
     return session.query(Note).filter(
-        and_(Note.employee_id == 1025, Note.voided == False)).order_by(Note.id)
+        and_(Note.employee_id == 1025, Note.voided == False)).order_by(Note.date)
