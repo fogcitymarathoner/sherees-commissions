@@ -2,7 +2,6 @@ from datetime import datetime as dt
 import hashlib
 import logging
 from sqlalchemy import and_
-
 from s3_mysql_backup import YMD_FORMAT
 
 from rrg.models import Invoice
@@ -51,6 +50,7 @@ def timecard_hash(timecard):
 def timecards(session, args):
     """
     returns set of timecard hashs of contract.id+startdate+enddate
+    timecard not used
     :return:
     """
     with session.no_autoflush:
@@ -94,7 +94,8 @@ def reminders_set(session, args):
 
 
 def reminders(session, reminder_period_start, payroll_run_date, t_set, args):
-    #
+    # generate list of reminders in a period for a period type [week, biweek, semimonth, month]
+
     reminders = []
     for c, cl, em in contracts_per_period(session, args):
         if args.period == 'week':
@@ -119,6 +120,16 @@ def reminders(session, reminder_period_start, payroll_run_date, t_set, args):
                     reminders.append((c, ws, we))
 
     return reminders
+
+
+def forget_reminder(session, reminder_period_start, payroll_run_date, t_set, args):
+    # create voided invoice for args.number'th reminder from reminders
+
+    reminders_tbs = reminders(session, reminder_period_start, payroll_run_date, t_set, args)
+
+    contract, start, end = reminders_tbs[args.number - 1]
+    new_inv = create_invoice_for_period(session, contract, start, end)
+    new_inv.voided = True
 
 
 def timecards_set(session, args):
@@ -166,7 +177,7 @@ def rebuild_empty_invoice_commissions(session, inv):
 
 def create_invoice_for_period(session, contract, period_start, period_end):
     new_inv = Invoice(contract_id=contract.id, period_start=period_start,
-                      period_end=period_end)
+                      period_end=period_end, date=dt.now(), terms=contract.terms)
     session.add(new_inv)
     for citem in contract.contract_items:
         new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description,
@@ -178,3 +189,4 @@ def create_invoice_for_period(session, contract, period_start, period_end):
                 employee_id=comm_item.employee_id,
                 percent=comm_item.percent, description=new_iitem.description)
             session.add(new_sales_comm_item)
+    return new_inv

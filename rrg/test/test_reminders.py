@@ -23,6 +23,7 @@ from rrg.reminders_generation import reminders_set
 from rrg.reminders_generation import reminders
 from rrg.reminders_generation import timecards_set
 from rrg.reminders_generation import timecards
+from rrg.reminders_generation import forget_reminder
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
@@ -267,14 +268,19 @@ class Test:
         contracts_m = contracts_per_period(self.session, self.args)
         assert 1 == len(contracts_m)
 
-        logger.debug('timecards')
-        tbl = []
+    def test_reminders(self, capsys):
+        """
+        test model interactions
+        """
+        logger.debug('testing reminders')
+
         self.args.payroll_run_date = self.payroll_run_date
         r_set = reminders_set(self.session, self.args)
+        tbl = []
         tcards = timecards(self.session, self.args)
         t_set = timecards_set(self.session, self.args)
+        logger.debug('timecards')
         for t in tcards:
-            logger.debug(t)
             tbl.append([t[0].id, t[0].period_start, t[0].period_end, t[1].active, t[1].title, t[2].active, t[3].active,
                         1 if timecard_hash(t[0]) in r_set else 0,
                         timecard_hash(t[0])])
@@ -282,18 +288,20 @@ class Test:
                               headers=['id', 'start', 'end', 'contract-active', 'contract-title', 'employee-active',
                                        'client-active', 'already-has-reminder', 'timecard-hash']))
         # weekly
+        logger.debug('weekly')
         assert dt(year=2016, month=7, day=11) == date_to_datetime(tcards[0][0].period_start)
         assert dt(year=2016, month=7, day=17) == date_to_datetime(tcards[0][0].period_end)
         assert True is tcards[0][1].active
         assert True is tcards[0][2].active
         assert True is tcards[0][3].active
-        # biweekly
+        # second weekly
+        logger.debug('biweekly')
         assert dt(year=2016, month=7, day=11) == date_to_datetime(tcards[1][0].period_start)
         assert dt(year=2016, month=7, day=24) == date_to_datetime(tcards[1][0].period_end)
         assert True is tcards[1][1].active
         assert True is tcards[1][2].active
         assert True is tcards[1][3].active
-        # semimonthly
+        # biweekly
         assert dt(year=2016, month=7, day=16) == date_to_datetime(tcards[2][0].period_start)
         assert dt(year=2016, month=7, day=31) == date_to_datetime(tcards[2][0].period_end)
         assert True is tcards[2][1].active
@@ -301,9 +309,13 @@ class Test:
         assert True is tcards[2][3].active
         # monthly
         assert dt(year=2016, month=8, day=1) == date_to_datetime(tcards[3][0].period_start)
+        # monthly
         assert dt(year=2016, month=8, day=31) == date_to_datetime(tcards[3][0].period_end)
+        # invoice
         assert True is tcards[3][1].active
+        # contract
         assert True is tcards[3][2].active
+        # employee
         assert True is tcards[3][3].active
 
         logger.debug('biweekly')
@@ -396,3 +408,63 @@ class Test:
 
         for r in reminders_to_be_sent:
             logger.debug(r)
+
+    def test_reminder_forgetting(self, capsys):
+        """
+        test forgetting a model
+        """
+        logger.debug('testing reminder forgetting, week')
+        ####
+
+        self.args.payroll_run_date = self.payroll_run_date
+        self.args.period = 'week'
+        r_set = reminders_set(self.session, self.args)
+        tbl = []
+        tcards = timecards(self.session, self.args)
+        t_set = timecards_set(self.session, self.args)
+        logger.debug('All timecards ever submitted')
+        for t in tcards:
+            tbl.append([t[0].id, t[0].period_start, t[0].period_end, t[1].active, t[1].title, t[2].active, t[3].active,
+                        1 if timecard_hash(t[0]) in r_set else 0,
+                        timecard_hash(t[0])])
+        logger.debug(tabulate(tbl,
+                              headers=['id', 'start', 'end', 'contract-active', 'contract-title', 'employee-active',
+                                       'client-active', 'already-has-reminder', 'timecard-hash']))
+
+        # Reminder outstanding presented to user for selection
+        self.args.period = 'week'
+        week_reminders_to_be_sent = reminders(self.session, self.payroll_run_date - td(days=30), self.payroll_run_date,
+                                         t_set, self.args)
+        contract_of_forgotten_reminder = week_reminders_to_be_sent[0][0]
+        logger.debug('Pending Week Reminders BEFORE forgetting first reminder')
+        tbl = []
+        for r in week_reminders_to_be_sent:
+            # conract, start, end = t
+            tbl.append([r[0].id, r[0].title, '%s %s' % (r[0].employee.firstname, r[0].employee.lastname), r[1], r[2]])
+        logger.debug(tabulate(tbl, headers=['id', 'title', 'employee', 'start', 'end']))
+        assert 5 == len(week_reminders_to_be_sent)
+        self.args.number = 1
+        logger.debug('Forgetting first reminder')
+        forget_reminder(self.session, self.payroll_run_date - td(days=30), dt.now(), t_set, self.args)
+
+        t_set = timecards_set(self.session, self.args)
+        self.args.period = 'week'
+        week_reminders_to_be_sent = reminders(self.session, self.payroll_run_date - td(days=30), self.payroll_run_date,
+                                         t_set, self.args)
+        logger.debug('Pending Week Reminders AFTER forgetting first reminder')
+        tbl = []
+        for r in week_reminders_to_be_sent:
+            tbl.append([r[0].id, r[0].title, '%s %s' % (r[0].employee.firstname, r[0].employee.lastname), r[1], r[2]])
+        logger.debug(tabulate(tbl, headers=['id', 'title', 'employee', 'start', 'end']))
+        assert 4 == len(week_reminders_to_be_sent)
+        # former second reminder is current first reminder, first reminder forgotten
+        assert dt(2016, 7, 18) == week_reminders_to_be_sent[0][1]
+        assert dt(2016, 7, 24) == week_reminders_to_be_sent[0][2]
+        invs = self.session.query(Invoice).all()
+        last_inv = invs[len(invs)-1:len(invs)][0]
+        logger.debug(last_inv)
+        logger.debug(last_inv.period_start)
+        assert contract_of_forgotten_reminder == last_inv.contract
+        assert date_to_datetime(last_inv.period_start) == dt(2016, 7, 4)
+        assert date_to_datetime(last_inv.period_end) == dt(2016, 7, 10)
+        assert last_inv.voided == True
