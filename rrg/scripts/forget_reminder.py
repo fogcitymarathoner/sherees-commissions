@@ -2,8 +2,8 @@
 import argparse
 from datetime import datetime as dt
 from datetime import timedelta as td
-from tabulate import tabulate
 
+from rrg.reminders_generation import reminders as period_reminders
 from rrg.reminders_generation import timecards_set
 from rrg.reminders_generation import forget_reminder
 from rrg.models import session_maker
@@ -27,5 +27,10 @@ def forget_numbered_reminder():
     session = session_maker(args)
 
     t_set = timecards_set(session, args)
-    forget_reminder(session, dt.now() - td(days=90), dt.now(), t_set, args)
-    session.commit()
+    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(), t_set, args)
+    if args.number in xrange(1, len(w_reminders) + 1):
+        forget_reminder(session, dt.now() - td(days=90), dt.now(), t_set, args)
+        session.commit()
+    else:
+        print('Reminder number is not in range')
+        quit()
