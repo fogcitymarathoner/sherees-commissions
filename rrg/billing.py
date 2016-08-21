@@ -69,19 +69,14 @@ def cache_invoices(session, args):
         file = full_invoice_xml_path(args.datadir, inv)
         # add to sync list if invoice not on disk
         if file[0] not in disk_dict:
-            print('not on disk - building')
             to_sync.append(inv)
         else:
             # check the rest of the business rules for syncing
             # no time stamps, timestamps out of sync
             if inv.last_sync_time is None or inv.modified_date is None:
-                print('no mod date - building')
-                print('mod date %s' % inv.modified_date)
-                print('sync %s' % inv.last_sync_time)
                 to_sync.append(inv)
                 continue
             if inv.modified_date > inv.last_sync_time:
-                print('disk copy is old - building')
                 to_sync.append(inv)
 
     # Write out xml
