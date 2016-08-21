@@ -76,6 +76,8 @@ def cache_invoices(session, args):
             # no time stamps, timestamps out of sync
             if inv.last_sync_time is None or inv.modified_date is None:
                 print('no mod date - building')
+                print('mod date %s' % inv.modified_date)
+                print('sync %s' % inv.last_sync_time)
                 to_sync.append(inv)
                 continue
             if inv.modified_date > inv.last_sync_time:
