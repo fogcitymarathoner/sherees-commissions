@@ -262,7 +262,7 @@ def full_comm_item_xml_path(data_dir, comm_item):
 
 def db_date_dictionary_comm_item(session, args):
     """
-    returns database dictionary counter part to dicectory_date_dictionary for sync determination
+    returns database dictionary counter part to directory_date_dictionary for sync determination
     :param data_dir:
     :return:
     """
