@@ -1,6 +1,9 @@
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime as dt
+
+from s3_mysql_backup import mkdirs
+
 from rrg.models import Invoice
 from rrg.utils import directory_date_dictionary
 
@@ -41,6 +44,15 @@ def db_date_dictionary_invoice(session, args):
     return inv_dict, invoices, rel_dir_set
 
 
+def verify_invs_dir_ready(data_dir, rel_dir_set):
+    """
+    run through the list of commissions directories created by db_data_dictionary_comm_item()
+    """
+    for d in rel_dir_set:
+        dest = os.path.join(data_dir, d)
+        mkdirs(dest)
+
+
 def cache_invoices(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
@@ -50,7 +62,7 @@ def cache_invoices(session, args):
     #
     # Make sure destination directories exist
     #
-    verify_comm_dirs_ready(args.datadir, rel_dir_set)
+    verify_invs_dir_ready(args.datadir, rel_dir_set)
 
     to_sync = []
     for inv in invoices:
