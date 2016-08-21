@@ -31,3 +31,4 @@ def cache_invoices():
 
     print('Caching Invoices')
     cache_invoices_routine(session, args)
+    session.commit()
