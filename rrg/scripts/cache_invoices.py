@@ -1,6 +1,6 @@
 
 import argparse
-from rrg.billing import cache_invoices
+from rrg.billing import cache_invoices as cache_invoices_routine
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Cache Invoices')
@@ -30,4 +30,4 @@ def cache_invoices():
     session = session_maker(args)
 
     print('Caching Invoices')
-    cache_invoices(session, args)
+    cache_invoices_routine(session, args)
