@@ -31,11 +31,13 @@ def create_db():
     :return:
     """
     args = Args()
+    if args.mysql_host == 'localhost':
+        engine = create_engine(
+            'mysql+mysqldb://%s:%s@%s:%s/%s' % (
+                args.db_user, args.db_pass, args.mysql_host,
+                args.mysql_port, args.db))
 
-    engine = create_engine(
-        'mysql+mysqldb://%s:%s@%s:%s/%s' % (
-            args.db_user, args.db_pass, args.mysql_host,
-            args.mysql_port, args.db))
-
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+        Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
+    else:
+        print('This routine only builds test databases on localhost')

@@ -16,7 +16,6 @@ from sqlalchemy import Float
 from sqlalchemy.orm import relationship
 from sqlalchemy import TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
-
 import xml.etree.ElementTree as ET
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
@@ -83,8 +82,8 @@ class NotePayment(Base):
     amount = Column(Float)
     notes = Column(String(100))
     voided = Column(Boolean)
-    created_date = Column(Date)
-    modified_date = Column(Date)
+    created_date = Column(Date, default=dt.now)
+    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
@@ -112,8 +111,8 @@ class Note(Base):
     opening = Column(Boolean)
     voided = Column(Boolean)
     cleared = Column(Boolean)
-    created_date = Column(Date)
-    modified_date = Column(Date)
+    created_date = Column(Date, default=dt.now)
+    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
@@ -152,8 +151,8 @@ class Client(Base):
     terms = Column(Integer, nullable=False)
     hq = Column(Boolean)
     modified_date = Column(Date)
-    created_date = Column(Date)
-    modified_user = Column(Integer)
+    created_date = Column(Date, default=dt.now)
+    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
     created_user = Column(Integer)
     last_sync_time = Column(Date)
 
@@ -165,15 +164,15 @@ class ContractItemCommItem(Base):
     __tablename__ = 'contracts_items_commissions_items'
 
     id = Column(Integer, primary_key=True)
-    employee_id = Column(Integer, ForeignKey('employees.id'))
+    employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
     employee = relationship("Employee")
 
     contract_item_id = Column(Integer, ForeignKey('contracts_items.id'), nullable=False)
     contract_item = relationship("ContractItem")
     percent = Column(Float)
     modified_date = Column(Date)
-    created_date = Column(Date)
-    modified_user_id = Column(Integer)
+    created_date = Column(Date, default=dt.now)
+    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
     created_user_id = Column(Integer)
 
 
@@ -193,8 +192,8 @@ class ContractItem(Base):
     description = Column(TEXT)
 
     notes = Column(TEXT)
-    modified_date = Column(Date)
-    created_date = Column(Date)
+    created_date = Column(Date, default=dt.now)
+    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
     last_sync_time = Column(Date)
@@ -262,8 +261,8 @@ class Invoice(Base):
     view_count = Column(Integer)
     mock = Column(Boolean)
     timecard_document = Column(TEXT)
-    created_date = Column(Date)
-    modified_date = Column(Date)
+    created_date = Column(Date, default=dt.now)
+    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -276,6 +275,33 @@ class Invoice(Base):
 
     def duedate(self):
         return date_to_datetime(self.date) + td(days=self.terms)
+
+    def to_xml(self):
+        doc = ET.Element('invoice')
+
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'contract_id').text = str(self.contract_id)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'po').text = str(self.po)
+        ET.SubElement(doc, 'employerexpenserate').text = str(self.employerexpenserate)
+        ET.SubElement(doc, 'terms').text = str(self.terms)
+        ET.SubElement(doc, 'timecard').text = str(self.timecard)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'period_start').text = dt.strftime(self.period_start, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'period_end').text = dt.strftime(self.period_end, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'posted').text = str(self.posted)
+        ET.SubElement(doc, 'cleared').text = str(self.cleared)
+        ET.SubElement(doc, 'voided').text = str(self.voided)
+        ET.SubElement(doc, 'prcleared').text = str(self.prcleared)
+        ET.SubElement(doc, 'message').text = str(self.message)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
+        ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        return doc
 
 
 def is_pastdue(inv, date=None):
@@ -361,7 +387,7 @@ class Citem(Base):
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
     description = Column(String(50))
-    date = Column(Date, index=True)
+    date = Column(Date, index=True, default=dt.now)
     percent = Column(Float)
     amount = Column(Float)
     rel_inv_amt = Column(Float)
@@ -371,10 +397,10 @@ class Citem(Base):
     rel_item_cost = Column(Float)
     cleared = Column(Float)
     voided = Column(Float)
-    created_date = Column(Date)
-    modified_date = Column(Date)
-    created_user_id = Column(Integer)
-    modified_user_id = Column(Integer)
+    created_date = Column(Date, default=dt.now)
+    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_user_id = Column(Integer, default=2)
+    modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
@@ -384,67 +410,35 @@ class Citem(Base):
     def to_xml(self):
         doc = ET.Element('invoices-items-commissions-item')
 
-        id = ET.SubElement(doc, 'id')
-        id.text = str(self.id)
+        ET.SubElement(doc, 'id').text = str(self.id)
+        # fixme: put back after next data migration
+        # ET.SubElement(doc, 'invoice_id').text = str(self.invoices_item.invoice_id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'invoices_item_id').text = str(self.invoices_item_id)
+        ET.SubElement(doc, 'commissions_report_id').text = str(self.commissions_report_id)
+        ET.SubElement(
+            doc, 'commissions_reports_tag_id').text = str(self.commissions_reports_tag_id)
+        # ET.SubElement(doc, 'description').text = '%s-%s %s' % (
+        #     dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
+        #     dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),
+        #     self.description)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'percent').text = str(self.percent)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'rel_inv_amt').text = str(self.rel_inv_amt)
+        ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(self.rel_inv_line_item_amt)
+        ET.SubElement(doc, 'rel_item_amt').text = str(self.rel_item_amt)
+        ET.SubElement(doc, 'rel_item_quantity').text = str(self.rel_item_quantity)
+        ET.SubElement(doc, 'rel_item_cost').text = str(self.rel_item_cost)
+        ET.SubElement(doc, 'rel_item_amt').text = str(self.rel_item_amt)
+        ET.SubElement(doc, 'cleared').text = str(self.cleared)
+        ET.SubElement(doc, 'voided').text = str(self.voided)
+        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
 
-        invoice_id = ET.SubElement(doc, 'invoice_id')
-        invoice_id.text = str(self.invoices_item.invoice_id)
-
-        employee_id = ET.SubElement(doc, 'employee_id')
-        employee_id.text = str(self.employee_id)
-
-        invoices_item_id = ET.SubElement(doc, 'invoices_item_id')
-        invoices_item_id.text = str(self.invoices_item_id)
-
-        commissions_report_id = ET.SubElement(doc, 'commissions_report_id')
-        commissions_report_id.text = str(self.commissions_report_id)
-
-        commissions_reports_tag_id = ET.SubElement(
-            doc, 'commissions_reports_tag_id')
-        commissions_reports_tag_id.text = str(self.commissions_reports_tag_id)
-
-        description = ET.SubElement(doc, 'description')
-        description.text = '%s-%s %s' % (
-            dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
-            dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),
-            self.description)
-
-        date = ET.SubElement(doc, 'date')
-        date.text = dt.strftime(self.date, TIMESTAMP_FORMAT)
-
-        percent = ET.SubElement(doc, 'percent')
-        percent.text = str(self.percent)
-
-        amount = ET.SubElement(doc, 'amount')
-        amount.text = str(self.amount)
-
-        rel_inv_amt = ET.SubElement(doc, 'rel_inv_amt')
-        rel_inv_amt.text = str(self.rel_inv_amt)
-
-        rel_inv_line_item_amt = ET.SubElement(doc, 'rel_inv_line_item_amt')
-        rel_inv_line_item_amt.text = str(self.rel_inv_line_item_amt)
-
-        rel_item_amt = ET.SubElement(doc, 'rel_item_amt')
-        rel_item_amt.text = str(self.rel_item_amt)
-
-        rel_item_quantity = ET.SubElement(doc, 'rel_item_quantity')
-        rel_item_quantity.text = str(self.rel_item_quantity)
-
-        rel_item_cost = ET.SubElement(doc, 'rel_item_cost')
-        rel_item_cost.text = str(self.rel_item_cost)
-
-        rel_item_cost = ET.SubElement(doc, 'rel_item_amt')
-        rel_item_cost.text = str(self.rel_item_amt)
-
-        cleared = ET.SubElement(doc, 'cleared')
-        cleared.text = str(self.cleared)
-
-        voided = ET.SubElement(doc, 'voided')
-        voided.text = str(self.voided)
-
-        date_generated = ET.SubElement(doc, 'date_generated')
-        date_generated.text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
-
+        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
         return doc
 
     @staticmethod
