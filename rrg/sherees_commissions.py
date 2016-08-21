@@ -81,11 +81,11 @@ def sherees_notes_report(session, args):
         combined.append([n.id, n.date, n.notes, n.amount, ''])
     combined_sorted = sorted(combined, key=itemgetter(1))
     res_dict_transposed = {
-        'id': [i[0] for i in combined_sorted,
-        'date': [i[1]] for i in combined_sorted,
-        'description': [i[2] for i in combined_sorted,
-        'amount': [i[3] for i in combined_sorted,
-        'balance': [i[3] for i in combined_sorted
+        'id': [i[0] for i in combined_sorted],
+        'date': [i[1] for i in combined_sorted],
+        'description': [i[2] for i in combined_sorted],
+        'amount': [i[3] for i in combined_sorted],
+        'balance': [i[3] for i in combined_sorted]
     }
 
     total = 0
