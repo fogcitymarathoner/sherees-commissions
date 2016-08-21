@@ -42,9 +42,3 @@ def sherees_notes(session):
     return session.query(Note).filter(
         and_(Note.employee_id == 1025, Note.voided == False)).order_by(Note.date)
 
-
-def sherees_notes_notespayments(session):
-    q1 = session.query(Employee).outerjoin(Note).outerjoin(NotePayment).filter(
-        and_(Employee.id == 1025, Note.voided == False, NotePayment == False)).order_by(Note.date, NotePayment.date)
-
-    return q1

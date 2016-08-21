@@ -3,7 +3,7 @@ import re
 from datetime import datetime as dt
 from xml.etree import ElementTree
 from tabulate import tabulate
-
+from operator import itemgette
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
@@ -73,14 +73,19 @@ def sherees_notes_report(session, args):
     notes = sherees_notes(session)
 
     notes_payments = sheree_notes_payments(session)
+    combined = []
+    for np in notes_payments:
+        combined.append([np.id, np.date, np.description, np.amount, np.check_number])
+    for n in notes:
+
+        combined.append([n.id, n.date, n.notes, n.amount, ''])
+    combined_sorted = sorted(combined, key=itemgetter(1))
     res_dict_transposed = {
-        'id': [np.check_number for np in notes_payments] + ['' for n in notes],
-        'date': [np.date for np in notes_payments] + [n.date for n in notes],
-        'description': [np.notes for np in notes_payments] + [
-            ''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for
-            n in notes],
-        'amount': [-np.amount for np in notes_payments] + [n.amount for n in notes],
-        'balance': [-np.amount for np in notes_payments] + [n.amount for n in notes]
+        'id': [i[0] for i in combined_sorted,
+        'date': [i[1]] for i in combined_sorted,
+        'description': [i[2] for i in combined_sorted,
+        'amount': [i[3] for i in combined_sorted,
+        'balance': [i[3] for i in combined_sorted
     }
 
     total = 0
