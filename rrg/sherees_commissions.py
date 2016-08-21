@@ -85,7 +85,7 @@ def sherees_notes_report(session, args):
 
     total = 0
     for line in res_dict_transposed:
-        total += line['amount']
+        total += float(line['amount'])
         res_dict_transposed['balance'] = total
     if args.format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
