@@ -81,12 +81,15 @@ def sherees_notes_report(session, args):
             n in notes],
         'amount': [-np.amount for np in notes_payments] + [n.amount for n in
                                                            notes]
+        'balance': [-np.amount for np in notes_payments] + [n.amount for n in
+                                                           notes]
     }
 
     total = 0
-    for line in res_dict_transposed:
-        total += float(line['amount'])
-        res_dict_transposed['balance'] = total
+    for i in xrange(0, len(res_dict_transposed['balance']) + 1):
+        total += float(res_dict_transposed['balance'][i])
+        res_dict_transposed['balance'][i] = total
+        
     if args.format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
     elif args.format == 'latex':
