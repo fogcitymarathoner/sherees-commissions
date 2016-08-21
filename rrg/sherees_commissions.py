@@ -75,10 +75,17 @@ def sherees_notes_report(session, args):
     notes_payments = sheree_notes_payments(session)
     combined = []
     for np in notes_payments:
-        combined.append([np.id, np.date, ''.join([i if ord(i) < 128 else ' ' for i in np.notes]), np.amount, np.check_number])
+        if np.notes:
+            notes = ''.join([i if ord(i) < 128 else ' ' for i in np.notes])
+        else:
+            notes = ''
+        combined.append([np.id, np.date, notes, np.amount, np.check_number])
     for n in notes:
-
-        combined.append([n.id, n.date, ''.join([i if ord(i) < 128 else ' ' for i in n.notes]), n.amount, ''])
+        if n.notes:
+            notes = ''.join([i if ord(i) < 128 else ' ' for i in n.notes])
+        else:
+            notes = ''
+        combined.append([n.id, n.date, notes, n.amount, ''])
     combined_sorted = sorted(combined, key=itemgetter(1))
     res_dict_transposed = {
         'id': [i[0] for i in combined_sorted],
