@@ -39,9 +39,25 @@ def sheree_total_monies_owe(session, args):
         total_commissions += total
 
     sherees_paychecks_due, iitems, total_payroll = remaining_payroll(session)
+    out = ''
+    if args.format == 'latex':
+        report += '\n\section{Summary of Monies Due}\n'
+        out += '\\begin{itemize}'
+        out += '\\item Hourly Pay %.2f' % total_payroll
+        out += '\\item Commissions %.2f' % total_commissions
+        out += '\\item Notes %.2f' % total_notes
+        out += '\\item Total %.2f' % (total_commissions + total_payroll + total_notes)
+        out += '\\end{itemize}'
+    else:
+        dout = {
+            'Hourly': 'Hourly Pay %.2f' % total_payroll,
+            'Commissions': 'Commissions %.2f' % total_commissions,
+            'Notes': 'Notes %.2f' % total_notes,
+            'Total': 'Total %.2f' % (total_commissions + total_payroll + total_notes)
+        }
+        out = tabulate(dout, headers='keys')
 
-    return total_notes, total_commissions, total_payroll, \
-           (total_commissions + total_payroll + total_notes)
+    return out
 
 
 def sherees_notes_report(session, args):
@@ -75,7 +91,7 @@ def sherees_notes_report(session, args):
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
     elif args.format == 'latex':
         report = ''
-        #
+        report += '\n\section{Notes}\n'
         report += tabulate(res_dict_transposed, headers='keys',tablefmt='latex')
         return report.replace('tabular', 'longtable')
 
@@ -119,12 +135,11 @@ def sherees_commissions_report(session, args):
             res_dict_transposed['description'].append(
                 'New Balance: %s' % balance)
             res_dict_transposed['amount'].append('Period Total %s' % total)
-            report += tabulate(res_dict_transposed, headers='keys',
-                               tablefmt='psql')
+            report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
     elif args.format == 'latex':
-        # report += comm_latex_header(title='Sherees Commissions Report')
+        report += '\n\section{Commissions}\n'
         for cm in comm_months(end=dt.now()):
-            report += '\n\section{%s/%s}\n' % (cm['year'], cm['month'])
+            report += '\n\subsection{%s/%s}\n' % (cm['year'], cm['month'])
             args.month = cm['month']
             args.year = cm['year']
             total, res = year_month_statement(session, args)
@@ -141,8 +156,7 @@ def sherees_commissions_report(session, args):
                 'New Balance: %s' % balance)
             res_dict_transposed['amount'].append(total)
             report += tabulate(res_dict_transposed, headers='keys',
-                               tablefmt='latex').replace('tabular',
-                                                         'longtable')
+                               tablefmt='latex').replace('tabular', 'longtable')
 
             # report += '\n\end{document}\n'
 
@@ -448,10 +462,6 @@ def payroll_due_report(session, args):
     """
     """
 
-    if args.format not in ['plain', 'latex']:
-        print('Wrong format')
-        quit()
-
     sherees_paychecks_due, iitems, total = remaining_payroll(session)
     res = dict(id=[], date=[], description=[], amount=[])
     res['id'] = [i.id for i in sherees_paychecks_due]
@@ -472,9 +482,7 @@ def payroll_due_report(session, args):
     if args.format == 'plain':
         return tabulate(res, headers='keys', tablefmt='plain')
     elif args.format == 'latex':
-
         report = ''
-        # report += comm_latex_header(title='Sherees Paychecks Due Report')
+        report += '\n\section{Hourly}\n'
         report += tabulate(res, headers='keys', tablefmt='latex')
-        # report += '\n\end{document}\n'
         return report

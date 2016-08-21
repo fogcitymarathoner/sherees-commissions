@@ -1,10 +1,13 @@
 import argparse
 
-from rrg.sherees_commissions import sherees_commissions_report
 from rrg.sherees_commissions import comm_latex_document_header
+from rrg.sherees_commissions import sheree_total_monies_owe
+from rrg.sherees_commissions import payroll_due_report
+from rrg.sherees_commissions import sherees_notes_report
+from rrg.sherees_commissions import sherees_commissions_report
 from rrg.models import session_maker
 
-parser = argparse.ArgumentParser(description='RRG Sherees Commissions Report')
+parser = argparse.ArgumentParser(description='RRG Money Due to Sheree Long Report')
 
 parser.add_argument(
     '--format', required=True, choices=['plain', 'latex'],
@@ -24,15 +27,21 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 
-def comm():
+def monies_due():
 
     args = parser.parse_args()
 
     session = session_maker(args)
-    if args.format == 'latex':
-        report = comm_latex_document_header("Sheree's Commissions")
+
+    print(sheree_total_monies_owe(session, args))
+
+    if args.format == 'plain':
+        print(sheree_total_monies_owe(session, args))
+    elif args.format == 'latex':
+        report = comm_latex_document_header("Sheree's Monies Due Report")
+        report += sheree_total_monies_owe(session, args)
+        report += payroll_due_report(session, args)
+        report += sherees_notes_report(session, args)
         report += sherees_commissions_report(session, args)
         report += '\n\end{document}\n'
         print(report)
-    else:
-        print(sherees_commissions_report(session, args))
