@@ -86,7 +86,7 @@ def sherees_notes_report(session, args):
     }
 
     total = 0
-    for i in xrange(0, len(res_dict_transposed['balance']) + 1):
+    for i in xrange(0, len(res_dict_transposed['balance']) - 1):
         total += float(res_dict_transposed['balance'][i])
         res_dict_transposed['balance'][i] = total
 
