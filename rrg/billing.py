@@ -1,5 +1,5 @@
 import os
-import ElementTree as ET
+import xml.etree.ElementTree as ET
 from datetime import datetime as dt
 from rrg.models import Invoice
 from rrg.utils import directory_date_dictionary
