@@ -92,7 +92,7 @@ def sherees_notes_report(session, args):
             notestx = ''.join([i if ord(i) < 128 else ' ' for i in np.notes])
         else:
             notestx = ''
-        new_rec = [np.id, np.date, notestx, np.amount, np.check_number]
+        new_rec = [np.id, np.date, notestx, -np.amount, np.check_number]
         logger.debug('adding notepayment %s' % new_rec)
         combined.append(new_rec)
     for n in notes:
