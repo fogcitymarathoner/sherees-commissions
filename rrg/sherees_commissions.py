@@ -79,10 +79,8 @@ def sherees_notes_report(session, args):
         'description': [np.notes for np in notes_payments] + [
             ''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for
             n in notes],
-        'amount': [-np.amount for np in notes_payments] + [n.amount for n in
-                                                           notes],
-        'balance': [-np.amount for np in notes_payments] + [n.amount for n in
-                                                           notes]
+        'amount': [-np.amount for np in notes_payments] + [n.amount for n in notes],
+        'balance': [-np.amount for np in notes_payments] + [n.amount for n in notes]
     }
 
     total = 0

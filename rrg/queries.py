@@ -41,3 +41,13 @@ def sheree_notes_payments(session):
 def sherees_notes(session):
     return session.query(Note).filter(
         and_(Note.employee_id == 1025, Note.voided == False)).order_by(Note.date)
+
+
+def sherees_notes_notespayments(session):
+    q1 = session.query(NotePayment).filter(
+        and_(
+            NotePayment.voided == False, NotePayment.employee_id == 1025))
+    q2 = session.query(Note).filter(
+        and_(Note.employee_id == 1025, Note.voided == False))
+
+    return q1.union(q2).order_by('date')
