@@ -81,5 +81,5 @@ def cache_invoices(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_comm_item(session, args.datadir, comm_item)
+        sync_invoice(session, args.datadir, comm_item)
 
