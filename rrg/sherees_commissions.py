@@ -81,9 +81,11 @@ def sherees_notes_report(session, args):
     notes = sherees_notes(session)
 
     logger.debug('notes')
-    logger.debug(notes)
+    for n in notes:
+        logger.debug(n)
     logger.debug('notespayments')
-    logger.debug(notes_payments)
+    for np in notes_payments:
+        logger.debug(np)
     combined = []
     for np in notes_payments:
         if np.notes:
