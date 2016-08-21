@@ -1,6 +1,11 @@
+import os
+import time
+from datetime import datetime as dt
 from sqlalchemy import create_engine
 from rrg.models import Contract
 from rrg.models import Base
+
+from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 
 
 def clear_out_bad_contracts():
@@ -41,3 +46,21 @@ def create_db():
         Base.metadata.create_all(engine)
     else:
         print('This routine only builds test databases on localhost')
+
+
+def directory_date_dictionary(data_dir):
+    """
+    returns dictionary of a directory in [{name: creation_date}] format
+    :param data_dir:
+    :return:
+    """
+    dirFileList = []
+    for dirName, subdirList, fileList in os.walk(data_dir, topdown=True):
+        for f in fileList:
+            dirFileList.append(os.path.join(dirName, f))
+
+    return {
+        f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT)
+        for
+        f in dirFileList}
+

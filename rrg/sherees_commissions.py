@@ -1,12 +1,10 @@
 import os
 import re
-import time
 from datetime import datetime as dt
 from xml.etree import ElementTree
 from tabulate import tabulate
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
-from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
 
@@ -19,6 +17,7 @@ from rrg.models import Iitem
 from rrg.queries import sheree_notes_payments
 from rrg.queries import sherees_notes
 
+from rrg.utils import directory_date_dictionary
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
 
@@ -261,23 +260,6 @@ def full_comm_item_xml_path(data_dir, comm_item):
                         '%s.xml' % str(comm_item.id).zfill(5)), rel_dir
 
 
-def directory_date_dictionary(data_dir):
-    """
-    returns dictionary of a directory in [{name: creation_date}] format
-    :param data_dir:
-    :return:
-    """
-    dirFileList = []
-    for dirName, subdirList, fileList in os.walk(data_dir, topdown=True):
-        for f in fileList:
-            dirFileList.append(os.path.join(dirName, f))
-
-    return {
-        f: dt.strptime(time.ctime(os.path.getmtime(f)), DIR_CREATE_TIME_FORMAT)
-        for
-        f in dirFileList}
-
-
 def db_date_dictionary_comm_item(session, args):
     """
     returns database dictionary counter part to dicectory_date_dictionary for sync determination
@@ -330,11 +312,6 @@ def sync_comm_item(session, data_dir, comm_item):
     f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
     with open(f, 'w') as fh:
         fh.write(ElementTree.tostring(comm_item.to_xml()))
-
-    # Fix bad modified_date
-    if comm_item.modified_date is None:
-        session.query(Citem).filter_by(id=comm_item.id).update(
-            {"modified_date": dt.now()})
 
     session.query(Citem).filter_by(id=comm_item.id).update(
         {"last_sync_time": dt.now()})
