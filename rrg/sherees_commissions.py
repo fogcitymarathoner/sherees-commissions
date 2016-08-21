@@ -92,7 +92,8 @@ def sherees_notes_report(session, args):
         'date': [i[1] for i in combined_sorted],
         'description': [i[2] for i in combined_sorted],
         'amount': [i[3] for i in combined_sorted],
-        'balance': [i[3] for i in combined_sorted]
+        'balance': [i[3] for i in combined_sorted],
+        'check_number': [i[4] for i in combined_sorted]
     }
 
     total = 0
