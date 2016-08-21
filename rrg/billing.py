@@ -4,8 +4,9 @@ from datetime import datetime as dt
 from rrg.models import Invoice
 from rrg.utils import directory_date_dictionary
 
+
 def full_invoice_xml_path(data_dir, invoice):
-    return os.path.join(data_dir, '%s.xml' % str(invoice.id).zfill(4))
+    return os.path.join(data_dir, '%s.xml' % str(invoice.id).zfill(4)), data_dir
 
 
 def sync_invoice(session, data_dir, invoice):
