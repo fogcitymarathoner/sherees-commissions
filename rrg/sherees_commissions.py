@@ -3,7 +3,7 @@ import re
 from datetime import datetime as dt
 from xml.etree import ElementTree
 from tabulate import tabulate
-from operator import itemgette
+from operator import itemgetter
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
