@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from xml.etree import ElementTree
 from tabulate import tabulate
 from operator import itemgetter
+import logging
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
@@ -18,6 +19,11 @@ from rrg.queries import sheree_notes_payments
 from rrg.queries import sherees_notes
 
 from rrg.utils import directory_date_dictionary
+
+
+logging.basicConfig(filename='testing.log', level=logging.DEBUG)
+logger = logging.getLogger('test')
+
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
 
@@ -70,9 +76,14 @@ def sherees_notes_report(session, args):
     if args.format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
-    notes = sherees_notes(session)
 
     notes_payments = sheree_notes_payments(session)
+    notes = sherees_notes(session)
+
+    logger.debug('notes')
+    logger.debug(notes)
+    logger.debug('notespayments')
+    logger.debug(notespayments)
     combined = []
     for np in notes_payments:
         if np.notes:
@@ -87,6 +98,10 @@ def sherees_notes_report(session, args):
             notes = ''
         combined.append([n.id, n.date, notes, n.amount, ''])
     combined_sorted = sorted(combined, key=itemgetter(1))
+    logger.debug('combined')
+    logger.debug(combinec)
+    logger.debug('combined sorted')
+    logger.debug(combinec_sorted)
     res_dict_transposed = {
         'id': [i[0] for i in combined_sorted],
         'date': [i[1] for i in combined_sorted],
@@ -97,7 +112,7 @@ def sherees_notes_report(session, args):
     }
 
     total = 0
-    for i in xrange(0, len(res_dict_transposed['balance']) - 1):
+    for i in xrange(0, len(res_dict_transposed['balance'])):
         total += float(res_dict_transposed['balance'][i])
         res_dict_transposed['balance'][i] = total
 
