@@ -62,6 +62,8 @@ class Employee(Base):
     dob = Column(Date)
     salesforce = Column(Boolean)
     comm_items = relationship("Citem", back_populates="employee")
+    notes = relationship("Note", back_populates="employee")
+    notes_payments = relationship("NotePayment", back_populates="employee")
     contracts = relationship("Contract", back_populates="employee")
 
     voided = Column(Boolean)
