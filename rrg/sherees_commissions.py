@@ -80,7 +80,7 @@ def sherees_notes_report(session, args):
             ''.join([i if ord(i) < 128 else ' ' for i in n.notes]) for
             n in notes],
         'amount': [-np.amount for np in notes_payments] + [n.amount for n in
-                                                           notes]
+                                                           notes],
         'balance': [-np.amount for np in notes_payments] + [n.amount for n in
                                                            notes]
     }
@@ -89,7 +89,7 @@ def sherees_notes_report(session, args):
     for i in xrange(0, len(res_dict_transposed['balance']) + 1):
         total += float(res_dict_transposed['balance'][i])
         res_dict_transposed['balance'][i] = total
-        
+
     if args.format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
     elif args.format == 'latex':
