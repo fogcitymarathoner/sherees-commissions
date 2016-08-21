@@ -45,6 +45,12 @@ def sheree_total_monies_owe(session, args):
 
 
 def sherees_notes_report(session, args):
+    """
+    returns sherees notes report as a subsection
+    :param session:
+    :param args:
+    :return:
+    """
     if args.format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
@@ -61,24 +67,16 @@ def sherees_notes_report(session, args):
                                                            notes]
     }
 
-    amounts = [-np.amount for np in notes_payments] + [n.amount for n in notes]
     total = 0
-    for a in amounts:
-        total += a
-
-    res_dict_transposed['id'].append('')
-    res_dict_transposed['date'].append('')
-    res_dict_transposed['description'].append('Balance')
-    res_dict_transposed['amount'].append(total)
-
+    for line in res_dict_transposed:
+        total += line['amount']
+        res_dict_transposed['balance'] = total
     if args.format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
     elif args.format == 'latex':
         report = ''
-        # report += comm_latex_header(title='Sherees Notes Report')
-        report += tabulate(res_dict_transposed, headers='keys',
-                           tablefmt='latex')
-        report += '\n\end{document}\n'
+        #
+        report += tabulate(res_dict_transposed, headers='keys',tablefmt='latex')
         return report.replace('tabular', 'longtable')
 
 

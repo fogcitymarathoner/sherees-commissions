@@ -1,5 +1,6 @@
 import argparse
 from rrg.sherees_commissions import sherees_notes_report
+from rrg.sherees_commissions import comm_latex_document_header
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Sherees Notes Report')
@@ -17,12 +18,17 @@ parser.add_argument('--db-pass', required=True, help='database pw', default='dea
 
 
 def notes():
-
+    """
+    print notes report as a document
+    :return:
+    """
     args = parser.parse_args()
 
     session = session_maker(args)
     if args.format == 'plain':
         print(sherees_notes_report(session, args))
     elif args.format == 'latex':
-        print(sherees_notes_report(session, args))
-
+        report = comm_latex_document_header("Sheree's Notes Report")
+        report += sherees_notes_report(session, args)
+        report += '\n\end{document}\n'
+        print(report)
