@@ -99,9 +99,9 @@ def sherees_notes_report(session, args):
         combined.append([n.id, n.date, notes, n.amount, ''])
     combined_sorted = sorted(combined, key=itemgetter(1))
     logger.debug('combined')
-    logger.debug(combinec)
+    logger.debug(combined)
     logger.debug('combined sorted')
-    logger.debug(combinec_sorted)
+    logger.debug(combined_sorted)
     res_dict_transposed = {
         'id': [i[0] for i in combined_sorted],
         'date': [i[1] for i in combined_sorted],
