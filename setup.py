@@ -108,7 +108,7 @@ setup(
             'rrg-cache-clients-ar=rrg.scripts.cache_clients_ar:'
             'cache_client_accounts_receivable',
             'rrg-cache-comm-items=rrg.scripts.cache_comm_items:cache_comm_items',
-            'rrg-invoices=rrg.scripts.cache_invoices:cache_invoices',
+            'rrg-cache-invoices=rrg.scripts.cache_invoices:cache_invoices',
 
             'rrg-comm=rrg.scripts.commissions:'
             'comm',
