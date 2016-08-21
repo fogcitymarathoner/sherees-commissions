@@ -4,7 +4,6 @@ from datetime import datetime as dt
 from xml.etree import ElementTree
 from tabulate import tabulate
 from operator import itemgetter
-import logging
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
@@ -19,10 +18,6 @@ from rrg.queries import sheree_notes_payments
 from rrg.queries import sherees_notes
 
 from rrg.utils import directory_date_dictionary
-
-
-logging.basicConfig(filename='testing.log', level=logging.DEBUG)
-logger = logging.getLogger('test')
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
@@ -80,12 +75,6 @@ def sherees_notes_report(session, args):
     notes_payments = sheree_notes_payments(session)
     notes = sherees_notes(session)
 
-    logger.debug('notes')
-    for n in notes:
-        logger.debug(n)
-    logger.debug('notespayments')
-    for np in notes_payments:
-        logger.debug(np)
     combined = []
     for np in notes_payments:
         if np.notes:
@@ -93,7 +82,6 @@ def sherees_notes_report(session, args):
         else:
             notestx = ''
         new_rec = [np.id, np.date, notestx, -np.amount, np.check_number]
-        logger.debug('adding notepayment %s' % new_rec)
         combined.append(new_rec)
     for n in notes:
         if n.notes:
@@ -101,13 +89,9 @@ def sherees_notes_report(session, args):
         else:
             notestx = ''
         new_rec = [n.id, n.date, notestx, n.amount, '']
-        logger.debug('adding note %s' % new_rec)
         combined.append(new_rec)
     combined_sorted = sorted(combined, key=itemgetter(1))
-    logger.debug('combined')
-    logger.debug(combined)
-    logger.debug('combined sorted')
-    logger.debug(combined_sorted)
+
     res_dict_transposed = {
         'id': [i[0] for i in combined_sorted],
         'date': [dt.strftime(i[1], '%m/%d/%Y') for i in combined_sorted],
