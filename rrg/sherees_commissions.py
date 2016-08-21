@@ -75,7 +75,7 @@ def sherees_notes_report(session, args):
     notes_payments = sheree_notes_payments(session)
     combined = []
     for np in notes_payments:
-        combined.append([np.id, np.date, np.description, np.amount, np.check_number])
+        combined.append([np.id, np.date, np.notes, np.amount, np.check_number])
     for n in notes:
 
         combined.append([n.id, n.date, n.notes, n.amount, ''])
