@@ -92,7 +92,7 @@ def sherees_notes_report(session, args):
             notestx = ''.join([i if ord(i) < 128 else ' ' for i in np.notes])
         else:
             notestx = ''
-        new_rec = [np.id, np.date, notestx, -np.amount, np.check_number]
+        new_rec = [np.id, dt.strftime(np.date, '%m/%d/%Y'), notestx, -np.amount, np.check_number]
         logger.debug('adding notepayment %s' % new_rec)
         combined.append(new_rec)
     for n in notes:
@@ -100,7 +100,7 @@ def sherees_notes_report(session, args):
             notestx = ''.join([i if ord(i) < 128 else ' ' for i in n.notes])
         else:
             notestx = ''
-        new_rec = [n.id, n.date, notestx, n.amount, '']
+        new_rec = [n.id, dt.strftime(n.date, '%m/%d/%Y'), notestx, n.amount, '']
         logger.debug('adding note %s' % new_rec)
         combined.append(new_rec)
     combined_sorted = sorted(combined, key=itemgetter(1))
