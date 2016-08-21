@@ -112,7 +112,7 @@ def sherees_notes_report(session, args):
         'id': [i[0] for i in combined_sorted],
         'date': [i[1] for i in combined_sorted],
         'description': [i[2] for i in combined_sorted],
-        'amount': [i[3] for i in combined_sorted],
+        'amount': ["%.2f" % round(i[3], 2) for i in combined_sorted],
         'balance': [i[3] for i in combined_sorted],
         'check_number': [i[4] for i in combined_sorted]
     }
@@ -120,7 +120,7 @@ def sherees_notes_report(session, args):
     total = 0
     for i in xrange(0, len(res_dict_transposed['balance'])):
         total += float(res_dict_transposed['balance'][i])
-        res_dict_transposed['balance'][i] = total
+        res_dict_transposed['balance'][i] = "%.2f" % round(total, 2)
 
     if args.format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
