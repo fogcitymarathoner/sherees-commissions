@@ -34,14 +34,17 @@ def monies_due():
     session = session_maker(args)
 
     print(sheree_total_monies_owe(session, args))
-
+    report = ''
     if args.format == 'plain':
-        print(sheree_total_monies_owe(session, args))
+        report += sheree_total_monies_owe(session, args)
+        report += payroll_due_report(session, args)
+        report += sherees_notes_report(session, args)
+        report += sherees_commissions_report(session, args)
     elif args.format == 'latex':
-        report = comm_latex_document_header("Sheree's Monies Due Report")
+        report += comm_latex_document_header("Sheree's Monies Due Report")
         report += sheree_total_monies_owe(session, args)
         report += payroll_due_report(session, args)
         report += sherees_notes_report(session, args)
         report += sherees_commissions_report(session, args)
         report += '\n\end{document}\n'
-        print(report)
+    print(report)
