@@ -128,7 +128,7 @@ setup(
             'rrg.scripts.invoices_monthly:invoices_monthly',
 
             'rrg-sheree-total-due=rrg.scripts.sheree_monies_due:monies_due',
-            'rrg-sheree-total-due-full=rrg.scripts.sheree_monies_due_full_report:monies_due',
+            'rrg-sheree-total-due-full=rrg.scripts.sherees_monies_due_full_report:monies_due',
 
             'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder'
         ],
