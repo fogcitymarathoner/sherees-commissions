@@ -42,7 +42,7 @@ def sheree_total_monies_owe(session, args):
     sherees_paychecks_due, iitems, total_payroll = remaining_payroll(session)
     out = ''
     if args.format == 'latex':
-        report += '\n\section{Summary of Monies Due}\n'
+        out += '\n\section{Summary of Monies Due}\n'
         out += '\\begin{itemize}'
         out += '\\item Hourly Pay %.2f' % total_payroll
         out += '\\item Commissions %.2f' % total_commissions
