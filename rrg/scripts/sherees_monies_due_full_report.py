@@ -1,7 +1,7 @@
 import argparse
 
 from rrg.sherees_commissions import comm_latex_document_header
-from rrg.sherees_commissions import sheree_total_monies_owe
+from rrg.sherees_commissions import sheree_total_monies_owed
 from rrg.sherees_commissions import payroll_due_report
 from rrg.sherees_commissions import sherees_notes_report
 from rrg.sherees_commissions import sherees_commissions_report
@@ -33,16 +33,15 @@ def monies_due():
 
     session = session_maker(args)
 
-    print(sheree_total_monies_owe(session, args))
     report = ''
     if args.format == 'plain':
-        report += sheree_total_monies_owe(session, args)
+        report += sheree_total_monies_owed(session, args)
         report += payroll_due_report(session, args)
         report += sherees_notes_report(session, args)
         report += sherees_commissions_report(session, args)
     elif args.format == 'latex':
         report += comm_latex_document_header("Sheree's Monies Due Report")
-        report += sheree_total_monies_owe(session, args)
+        report += sheree_total_monies_owed(session, args)
         report += payroll_due_report(session, args)
         report += sherees_notes_report(session, args)
         report += sherees_commissions_report(session, args)

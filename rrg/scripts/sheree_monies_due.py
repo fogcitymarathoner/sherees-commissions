@@ -1,7 +1,7 @@
 import argparse
 
 from rrg.sherees_commissions import comm_latex_document_header
-from rrg.sherees_commissions import sheree_total_monies_owe
+from rrg.sherees_commissions import sheree_total_monies_owed
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Money Due to Sheree Summary Report')
@@ -30,12 +30,10 @@ def monies_due():
 
     session = session_maker(args)
 
-    print(sheree_total_monies_owe(session, args))
-
     if args.format == 'plain':
-        print(sheree_total_monies_owe(session, args))
+        print(sheree_total_monies_owed(session, args))
     elif args.format == 'latex':
         report = comm_latex_document_header("Sheree's Monies Due Report")
-        report += sheree_total_monies_owe(session, args)
+        report += sheree_total_monies_owed(session, args)
         report += '\n\end{document}\n'
         print(report)

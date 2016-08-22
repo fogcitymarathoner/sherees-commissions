@@ -22,7 +22,7 @@ from rrg.utils import directory_date_dictionary
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
 
-def sheree_total_monies_owe(session, args):
+def sheree_total_monies_owed(session, args):
     notes = sherees_notes(session)
 
     notes_payments = sheree_notes_payments(session)
@@ -51,10 +51,10 @@ def sheree_total_monies_owe(session, args):
         out += '\\end{itemize}'
     else:
         dout = {
-            'Hourly': 'Hourly Pay %.2f' % total_payroll,
-            'Commissions': 'Commissions %.2f' % total_commissions,
-            'Notes': 'Notes %.2f' % total_notes,
-            'Total': 'Total %.2f' % (total_commissions + total_payroll + total_notes)
+            'Hourly': ['Hourly Pay %.2f' % total_payroll],
+            'Commissions': ['Commissions %.2f' % total_commissions],
+            'Notes': ['Notes %.2f' % total_notes],
+            'Total': ['Total %.2f' % (total_commissions + total_payroll + total_notes)]
         }
         out = tabulate(dout, headers='keys')
 
