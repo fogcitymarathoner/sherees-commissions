@@ -2,6 +2,7 @@
 does not work on alpine because libmysqlclient-dev package is not available.
 """
 
+from datetime import date
 from datetime import datetime as dt
 from datetime import timedelta as td
 
@@ -19,7 +20,6 @@ from sqlalchemy.ext.declarative import declarative_base
 import xml.etree.ElementTree as ET
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
-from s3_mysql_backup import YMD_FORMAT
 
 from rrg.helpers import date_to_datetime
 
@@ -27,10 +27,13 @@ from sqlalchemy.orm import sessionmaker
 
 from sqlalchemy import create_engine
 
+def default_date():
+    return date.today()
 
 def session_maker(args):
     engine = create_engine(
-        'mysql+mysqldb://%s:%s@%s:%s/%s' % (args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db))
+        'mysql+mysqldb://%s:%s@%s:%s/%s' % (
+        args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db))
 
     session = sessionmaker(bind=engine)
     return session()
@@ -84,14 +87,15 @@ class NotePayment(Base):
     amount = Column(Float)
     notes = Column(String(100))
     voided = Column(Boolean)
-    created_date = Column(Date, default=dt.now)
-    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
     def __repr__(self):
         return "<NotePayment(id='%s', employee='%s %s', check_number='%s', date='%s', amount='%s', notes='%s')>" % (
-            self.id, self.employee.firstname, self.employee.lastname, self.check_number, self.date, self.amount,
+            self.id, self.employee.firstname, self.employee.lastname,
+            self.check_number, self.date, self.amount,
             self.notes)
 
 
@@ -113,8 +117,8 @@ class Note(Base):
     opening = Column(Boolean)
     voided = Column(Boolean)
     cleared = Column(Boolean)
-    created_date = Column(Date, default=dt.now)
-    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
@@ -135,8 +139,9 @@ class CommPayment(Base):
     def __repr__(self):
         return "<CommissionsPayment(id='%s', employee='%s %s', check_number='%s', date='%s', amount='%s'," \
                " description='%s')>" % (
-            self.id, self.employee.firstname, self.employee.lastname, self.check_number, self.date, self.amount,
-            self.description)
+                   self.id, self.employee.firstname, self.employee.lastname,
+                   self.check_number, self.date, self.amount,
+                   self.description)
 
 
 class Client(Base):
@@ -153,8 +158,8 @@ class Client(Base):
     terms = Column(Integer, nullable=False)
     hq = Column(Boolean)
     modified_date = Column(Date)
-    created_date = Column(Date, default=dt.now)
-    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user = Column(Integer)
     last_sync_time = Column(Date)
 
@@ -169,12 +174,13 @@ class ContractItemCommItem(Base):
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
     employee = relationship("Employee")
 
-    contract_item_id = Column(Integer, ForeignKey('contracts_items.id'), nullable=False)
+    contract_item_id = Column(Integer, ForeignKey('contracts_items.id'),
+                              nullable=False)
     contract_item = relationship("ContractItem")
     percent = Column(Float)
     modified_date = Column(Date)
-    created_date = Column(Date, default=dt.now)
-    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user_id = Column(Integer)
 
 
@@ -184,24 +190,27 @@ class ContractItem(Base):
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
 
-    contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
+    contract_id = Column(Integer, ForeignKey('clients_contracts.id'),
+                         nullable=False)
     contract = relationship("Contract")
 
-    contract_comm_items = relationship("ContractItemCommItem", back_populates="contract_item")
+    contract_comm_items = relationship("ContractItemCommItem",
+                                       back_populates="contract_item")
 
     amt = Column(Float)
     cost = Column(Float)
     description = Column(TEXT)
 
     notes = Column(TEXT)
-    created_date = Column(Date, default=dt.now)
-    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
     last_sync_time = Column(Date)
 
     def __repr__(self):
-        return "<ContractItem(id='%s', description='%s')>" % (self.id, self.description)
+        return "<ContractItem(id='%s', description='%s')>" % (
+        self.id, self.description)
 
 
 class Contract(Base):
@@ -225,7 +234,8 @@ class Contract(Base):
 
     def __repr__(self):
         return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
-            self.id, self.client.name, self.title, self.employee.firstname, self.employee.lastname)
+            self.id, self.client.name, self.title, self.employee.firstname,
+            self.employee.lastname)
 
 
 class Invoice(Base):
@@ -233,7 +243,8 @@ class Invoice(Base):
 
     id = Column(Integer, primary_key=True)
 
-    contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
+    contract_id = Column(Integer, ForeignKey('clients_contracts.id'),
+                         nullable=False)
 
     contract = relationship("Contract", backref="clients_contracts")
 
@@ -263,8 +274,8 @@ class Invoice(Base):
     view_count = Column(Integer)
     mock = Column(Boolean)
     timecard_document = Column(TEXT)
-    created_date = Column(Date, default=dt.now)
-    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -283,26 +294,35 @@ class Invoice(Base):
 
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'contract_id').text = str(self.contract_id)
-        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date,
+                                                      TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'po').text = str(self.po)
-        ET.SubElement(doc, 'employerexpenserate').text = str(self.employerexpenserate)
+        ET.SubElement(doc, 'employerexpenserate').text = str(
+            self.employerexpenserate)
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'timecard').text = str(self.timecard)
         ET.SubElement(doc, 'notes').text = str(self.notes)
-        ET.SubElement(doc, 'period_start').text = dt.strftime(self.period_start, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'period_end').text = dt.strftime(self.period_end, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'period_start').text = dt.strftime(
+            self.period_start, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'period_end').text = dt.strftime(self.period_end,
+                                                            TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'posted').text = str(self.posted)
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'prcleared').text = str(self.prcleared)
         ET.SubElement(doc, 'message').text = str(self.message)
         ET.SubElement(doc, 'amount').text = str(self.amount)
-        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(
+            self.created_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(
+            self.modified_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
-        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
-        ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(), TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_user_id').text = str(
+            self.modified_user_id)
+        ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(),
+                                                          TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(),
+                                                                TIMESTAMP_FORMAT)
         return doc
 
 
@@ -389,7 +409,7 @@ class Citem(Base):
     commissions_report_id = Column(Integer)
     commissions_reports_tag_id = Column(Integer)
     description = Column(String(50))
-    date = Column(Date, index=True, default=dt.now)
+    date = Column(Date, index=True, default=default_date)
     percent = Column(Float)
     amount = Column(Float)
     rel_inv_amt = Column(Float)
@@ -399,15 +419,16 @@ class Citem(Base):
     rel_item_cost = Column(Float)
     cleared = Column(Float)
     voided = Column(Float)
-    created_date = Column(Date, default=dt.now)
-    modified_date = Column(Date, default=dt.now, onupdate=dt.now)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user_id = Column(Integer, default=2)
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
         return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s'. mod_date='%s')>" % (
-            self.description, self.id, self.employee_id, self.amount, self.modified_date)
+            self.description, self.id, self.employee_id, self.amount,
+            self.modified_date)
 
     def to_xml(self):
         doc = ET.Element('invoices-items-commissions-item')
@@ -416,31 +437,41 @@ class Citem(Base):
         # fixme: put back after next data migration
         # ET.SubElement(doc, 'invoice_id').text = str(self.invoices_item.invoice_id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'invoices_item_id').text = str(self.invoices_item_id)
-        ET.SubElement(doc, 'commissions_report_id').text = str(self.commissions_report_id)
+        ET.SubElement(doc, 'invoices_item_id').text = str(
+            self.invoices_item_id)
+        ET.SubElement(doc, 'commissions_report_id').text = str(
+            self.commissions_report_id)
         ET.SubElement(
-            doc, 'commissions_reports_tag_id').text = str(self.commissions_reports_tag_id)
+            doc, 'commissions_reports_tag_id').text = str(
+            self.commissions_reports_tag_id)
         # ET.SubElement(doc, 'description').text = '%s-%s %s' % (
         #     dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
         #     dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),
         #     self.description)
-        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date,
+                                                      TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'percent').text = str(self.percent)
         ET.SubElement(doc, 'amount').text = str(self.amount)
         ET.SubElement(doc, 'rel_inv_amt').text = str(self.rel_inv_amt)
-        ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(self.rel_inv_line_item_amt)
+        ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(
+            self.rel_inv_line_item_amt)
         ET.SubElement(doc, 'rel_item_amt').text = str(self.rel_item_amt)
-        ET.SubElement(doc, 'rel_item_quantity').text = str(self.rel_item_quantity)
+        ET.SubElement(doc, 'rel_item_quantity').text = str(
+            self.rel_item_quantity)
         ET.SubElement(doc, 'rel_item_cost').text = str(self.rel_item_cost)
         ET.SubElement(doc, 'rel_item_amt').text = str(self.rel_item_amt)
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         ET.SubElement(doc, 'voided').text = str(self.voided)
-        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(),
+                                                                TIMESTAMP_FORMAT)
 
-        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(
+            self.created_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(
+            self.modified_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
-        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
+        ET.SubElement(doc, 'modified_user_id').text = str(
+            self.modified_user_id)
         return doc
 
     @staticmethod

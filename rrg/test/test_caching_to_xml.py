@@ -63,15 +63,15 @@ class Test:
 
             objects = []
 
-            employee_active = Employee(firstname='firstname', lastname='lastname', active=True)
-            employee_inactive = Employee(firstname='firstname', lastname='lastname', active=False)
-            employee_sales_person1 = Employee(firstname='sales', lastname='person', active=True)
-            employee_sales_person2 = Employee(firstname='sales', lastname='person', active=True)
+            employee_active = Employee(firstname='firstname', lastname='activelastname', active=True)
+            employee_inactive = Employee(firstname='firstname', lastname='inactivelastname', active=False)
+            employee_sales_person1 = Employee(firstname='sales', lastname='person1', active=True)
+            employee_sales_person2 = Employee(firstname='sales', lastname='person2', active=True)
 
             objects.append(employee_active)
             objects.append(employee_inactive)
             objects.append(employee_sales_person1)
-            objects.append(employee_sales_person1)
+            objects.append(employee_sales_person2)
 
             self.session.bulk_save_objects(objects)
 

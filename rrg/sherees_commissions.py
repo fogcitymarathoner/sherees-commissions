@@ -4,6 +4,8 @@ from datetime import datetime as dt
 from xml.etree import ElementTree
 from tabulate import tabulate
 from operator import itemgetter
+from sqlalchemy import and_
+
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
@@ -11,6 +13,7 @@ from s3_mysql_backup import YMD_FORMAT
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment
+from rrg.models import Client
 from rrg.models import Contract
 from rrg.models import Invoice
 from rrg.models import Iitem
@@ -47,14 +50,16 @@ def sheree_total_monies_owed(session, args):
         out += '\\item Hourly Pay %.2f' % total_payroll
         out += '\\item Commissions %.2f' % total_commissions
         out += '\\item Notes %.2f' % total_notes
-        out += '\\item Total %.2f' % (total_commissions + total_payroll + total_notes)
+        out += '\\item Total %.2f' % (
+        total_commissions + total_payroll + total_notes)
         out += '\\end{itemize}'
     else:
         dout = {
             'Hourly': ['Hourly Pay %.2f' % total_payroll],
             'Commissions': ['Commissions %.2f' % total_commissions],
             'Notes': ['Notes %.2f' % total_notes],
-            'Total': ['Total %.2f' % (total_commissions + total_payroll + total_notes)]
+            'Total': ['Total %.2f' % (
+            total_commissions + total_payroll + total_notes)]
         }
         out = tabulate(dout, headers='keys')
 
@@ -111,7 +116,8 @@ def sherees_notes_report(session, args):
     elif args.format == 'latex':
         report = ''
         report += '\n\section{Notes}\n'
-        report += tabulate(res_dict_transposed, headers='keys',tablefmt='latex')
+        report += tabulate(res_dict_transposed, headers='keys',
+                           tablefmt='latex')
         return report.replace('tabular', 'longtable')
 
 
@@ -154,7 +160,8 @@ def sherees_commissions_report(session, args):
             res_dict_transposed['description'].append(
                 'New Balance: %s' % balance)
             res_dict_transposed['amount'].append('Period Total %s' % total)
-            report += tabulate(res_dict_transposed, headers='keys', tablefmt='psql')
+            report += tabulate(res_dict_transposed, headers='keys',
+                               tablefmt='psql')
     elif args.format == 'latex':
         report += '\n\section{Commissions}\n'
         for cm in comm_months(end=dt.now()):
@@ -175,7 +182,8 @@ def sherees_commissions_report(session, args):
                 'New Balance: %s' % balance)
             res_dict_transposed['amount'].append(total)
             report += tabulate(res_dict_transposed, headers='keys',
-                               tablefmt='latex').replace('tabular', 'longtable')
+                               tablefmt='latex').replace('tabular',
+                                                         'longtable')
 
             # report += '\n\end{document}\n'
 
@@ -505,3 +513,20 @@ def payroll_due_report(session, args):
         report += '\n\section{Hourly}\n'
         report += tabulate(res, headers='keys', tablefmt='latex')
         return report
+
+
+def sherees_contracts_of_interest(session):
+    contract_clients = session.query(Contract, Client).join(Client).filter(
+        and_(Contract.active == 1, Contract.employee_id == 1025,
+             Client.active == 1))
+    return contract_clients
+
+def sherees_invoices_of_interest(session):
+    contract_clients = sherees_contracts_of_interest(session)
+    cids = []
+    for con, cl in contract_clients:
+        cids.append(con.id)
+    invs = session.query(Invoice).join(Contract).filter(
+        Invoice.contract_id.in_(cids))
+
+    return invs
