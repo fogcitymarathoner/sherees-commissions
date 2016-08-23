@@ -11,6 +11,7 @@ from rrg.models import ContractItemCommItem
 from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import Invoice
+from rrg.models import Iitem
 from rrg.models import periods
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
@@ -20,6 +21,8 @@ from rrg.reminders import current_semimonth
 from rrg.reminders_generation import create_invoice_for_period
 from rrg.sherees_commissions import sherees_contracts_of_interest
 from rrg.sherees_commissions import sherees_invoices_of_interest
+from rrg.sherees_commissions import iitem_xml_pretty_str
+from rrg.sherees_commissions import iitem_to_xml
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
@@ -220,15 +223,16 @@ class Test:
         assert sys._called_from_test
         assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
 
-    def test_sherees_contracts_of_interest(self):
+    def test_sherees_invoices_of_interest(self):
         """
         test xml output of invoice
         :return:
         """
         invoices = sherees_invoices_of_interest(self.session)
-        print(contract_clients)
+        print('test_sherees_invoices_of_interest invoices')
+        print(invoices)
         cids = []
-        for con, cl in contract_clients:
+        for con, cl in invoices:
             print(con)
             cids.append(con.id)
         invs = self.session.query(Invoice).join(Contract).filter(Invoice.contract_id.in_(cids))
@@ -239,7 +243,7 @@ class Test:
 
     def test_sherees_contracts_of_interest(self):
         """
-        test xml output of invoice
+        test xml output of contract
         :return:
         """
         contracts = sherees_contracts_of_interest(self.session)
@@ -248,3 +252,13 @@ class Test:
     def test_sherees_invoices_of_interest(self):
         invs = sherees_invoices_of_interest(self.session)
         assert 4 == invs.count()
+
+    def test_sherees_pretty_iitems(self):
+        iitems = self.session.query(Iitem).all()
+        logger.debug('pretty invoice items')
+        for i in iitems:
+            logger.debug(i)
+            logger.debug(i.invoice_id)
+            if i.invoice:
+                print(iitem_xml_pretty_str(i))
+        assert 4 == 1

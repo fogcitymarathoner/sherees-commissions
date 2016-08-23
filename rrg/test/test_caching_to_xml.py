@@ -12,6 +12,7 @@ from rrg.models import ContractItemCommItem
 from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import Invoice
+from rrg.models import Iitem
 from rrg.models import Citem
 from rrg.models import periods
 from rrg.reminders import weeks_between_dates
@@ -176,31 +177,42 @@ class Test:
             weeks = weeks_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
             second_week_start, second_week_end = weeks[1]
 
-            create_invoice_for_period(self.session, contracts[0], second_week_start.date(), second_week_end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[4], second_week_start.date(), second_week_end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[8], second_week_start.date(), second_week_end.date(), date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[0], second_week_start.date(), second_week_end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[4], second_week_start.date(), second_week_end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[8], second_week_start.date(), second_week_end.date(),
+                                      date=self.payroll_run_date.date())
 
             biweeks = biweeks_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             start, end = biweeks[1]
-            create_invoice_for_period(self.session, contracts[1], start.date(), end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[5], start.date(), end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[9], start.date(), end.date(), date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[1], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[5], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[9], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
 
             semimonths = semimonths_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             start, end = semimonths[1]
-            create_invoice_for_period(self.session, contracts[2], start.date(), end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[6], start.date(), end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[10], start.date(), end.date(), date=self.payroll_run_date.date())
-
+            create_invoice_for_period(self.session, contracts[2], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[6], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[10], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
 
             months = months_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             start, end = months[1]
-            create_invoice_for_period(self.session, contracts[3], start.date(), end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[7], start.date(), end.date(), date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[11], start.date(), end.date(), date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[3], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[7], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
+            create_invoice_for_period(self.session, contracts[11], start.date(), end.date(),
+                                      date=self.payroll_run_date.date())
 
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
 
@@ -250,3 +262,27 @@ class Test:
         logger.debug(ET.tostring(citem.to_xml()))
         # fixme: add assertions against contract/invoice particulars
         1 == len(ele.findall('invoices-items-commissions-item'))
+
+    def test_iitem_to_xml(self):
+        """
+        test xml output of invoice item
+        :return:
+        """
+        baseline_string = """<invoice-item><id>1126</id><invoice_id>None</invoice_id><description>Regular</description><amount>10.0</amount><quantity>None</quantity><cleared>None</cleared></invoice-item>"""
+        base_doc = ET.fromstring(baseline_string)
+        iitem = self.session.query(Iitem)[0]
+        logger.debug('iitem')
+        logger.debug(iitem)
+        ele = iitem.to_xml()
+        logger.debug('iitem-ele')
+        logger.debug(ET.tostring(iitem.to_xml()))
+        assert base_doc.findall('amount')[0].text == ele.findall('amount')[0].text
+        logger.debug('base_doc.findall("quantity")[0].text')
+        logger.debug(base_doc.findall('quantity')[0].text)
+        logger.debug('ele.findall("quantity")[0]')
+        logger.debug(ele.findall('quantity')[0])
+        logger.debug('count')
+        logger.debug(len(ele.findall('quantity')))
+        logger.debug('ele.findall("quantity")[0].text')
+        logger.debug(ele.findall('quantity')[0].text)
+        assert base_doc.findall('quantity')[0].text == ele.findall('quantity')[0].text

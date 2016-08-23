@@ -379,7 +379,7 @@ class Iitem(Base):
 
     id = Column(Integer, primary_key=True)
 
-    invoice_id = Column(Integer, ForeignKey('invoices.id'))
+    invoice_id = Column(Integer, ForeignKey('invoices.id'), nullable=False)
     invoice = relationship("Invoice", back_populates='invoice_items')
 
     description = Column(String(60))
@@ -389,6 +389,22 @@ class Iitem(Base):
     ordering = Column(Integer)
     cleared = Column(Boolean)
     comm_items = relationship("Citem", back_populates="invoices_item")
+
+    def __repr__(self):
+        return "<InvoiceItem(id='%s', description='%s', amount='%s', quantity='%s', invoice.id='%s')>" % (
+                   self.id, self.description, self.amount, self.quantity, self.invoice_id)
+
+    def to_xml(self):
+        doc = ET.Element('invoice-item')
+
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
+        ET.SubElement(doc, 'description').text = str(self.description)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'quantity').text = str(self.quantity)
+        ET.SubElement(doc, 'cleared').text = str(self.cleared)
+
+        return doc
 
 
 class Citem(Base):

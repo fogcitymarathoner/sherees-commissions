@@ -1,7 +1,9 @@
 import os
 import re
 from datetime import datetime as dt
-from xml.etree import ElementTree
+import logging
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 from tabulate import tabulate
 from operator import itemgetter
 from sqlalchemy import and_
@@ -21,6 +23,12 @@ from rrg.queries import sheree_notes_payments
 from rrg.queries import sherees_notes
 
 from rrg.utils import directory_date_dictionary
+
+
+logging.basicConfig(filename='testing.log', level=logging.DEBUG)
+logger = logging.getLogger('test')
+
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
@@ -350,7 +358,7 @@ def sync_comm_item(session, data_dir, comm_item):
     """
     f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
     with open(f, 'w') as fh:
-        fh.write(ElementTree.tostring(comm_item.to_xml()))
+        fh.write(ET.tostring(comm_item.to_xml()))
 
     session.query(Citem).filter_by(id=comm_item.id).update(
         {"last_sync_time": dt.now()})
@@ -521,6 +529,7 @@ def sherees_contracts_of_interest(session):
              Client.active == 1))
     return contract_clients
 
+
 def sherees_invoices_of_interest(session):
     contract_clients = sherees_contracts_of_interest(session)
     cids = []
@@ -530,3 +539,39 @@ def sherees_invoices_of_interest(session):
         Invoice.contract_id.in_(cids))
 
     return invs
+
+
+def iitem_to_xml(iitem):
+
+    doc = ET.Element('invoice-item')
+    logger.debug('iitem_to_xml iitem')
+    logger.debug(type(iitem))
+    logger.debug(iitem)
+    logger.debug(iitem.id)
+    ET.SubElement(doc, 'id').text = str(iitem.id)
+    ET.SubElement(doc, 'invoice_id').text = str(iitem.invoice_id)
+    desc_ele = ET.SubElement(doc, 'description')
+    desc_ele.text = str(iitem.description)
+    desc_ele.set('Invoice', iitem.invoice_id)
+    desc_ele.set('Description', iitem.description)
+    desc_ele.set('Start', iitem.invoice.period_start)
+    desc_ele.set('End', iitem.invoice.period_end)
+    ET.SubElement(doc, 'amount').text = str(iitem.amount)
+    ET.SubElement(doc, 'quantity').text = str(iitem.quantity)
+    ET.SubElement(doc, 'cleared').text = str(iitem.cleared)
+
+    return doc
+
+
+def prettify(elem):
+    """
+    Return a pretty-printed XML string for the Element.
+    """
+    rough_string = elem.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")
+
+
+def iitem_xml_pretty_str(iitem):
+
+    return prettify(iitem_to_xml(iitem))

@@ -178,17 +178,16 @@ def rebuild_empty_invoice_commissions(session, inv):
 def create_invoice_for_period(session, contract, period_start, period_end, date=None):
     if not date:
         date = dt.now()
-    new_inv = Invoice(contract_id=contract.id, period_start=period_start,
-                      period_end=period_end, date=date, terms=contract.terms)
+    new_inv = Invoice(contract_id=contract.id, period_start=period_start, period_end=period_end, date=date,
+                      terms=contract.terms)
     session.add(new_inv)
+
     for citem in contract.contract_items:
-        new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description,
-                          cost=citem.cost, amount=citem.amt)
+        new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description, cost=citem.cost, amount=citem.amt)
         session.add(new_iitem)
+        session.flush()
         for comm_item in citem.contract_comm_items:
-            new_sales_comm_item = Citem(
-                invoices_item_id=new_iitem.id,
-                employee_id=comm_item.employee_id,
-                percent=comm_item.percent, description=new_iitem.description)
+            new_sales_comm_item = Citem(invoices_item_id=new_iitem.id, employee_id=comm_item.employee_id,
+                                        percent=comm_item.percent, description=new_iitem.description)
             session.add(new_sales_comm_item)
     return new_inv
