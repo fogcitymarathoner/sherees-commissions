@@ -146,7 +146,7 @@ def current_biweek(date):
 
 def biweeks_between_dates(start, end):
     if start > end:
-        print('start date is greater than end date')
+        print('biweek start date is greater than end date')
         return None
     biweek = current_biweek(start)
 
@@ -161,7 +161,7 @@ def biweeks_between_dates(start, end):
 def weeks_between_dates(start, end):
 
     if start > end:
-        print('start date is greater than end date')
+        print('week start date %s is greater than end date %s' % (start, end))
         return None
     week = current_week(start)
 
@@ -176,7 +176,7 @@ def weeks_between_dates(start, end):
 def months_between_dates(start, end):
 
     if start > end:
-        print('start date is greater than end date')
+        print('month start date is greater than end date')
         return None
     month = current_month(start)
 
@@ -191,7 +191,7 @@ def months_between_dates(start, end):
 def semimonths_between_dates(start, end):
 
     if start > end:
-        print('start date is greater than end date')
+        print('semimonth start date is greater than end date')
         return None
     semimonth = current_semimonth(start)
 

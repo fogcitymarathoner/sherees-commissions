@@ -281,7 +281,8 @@ class Invoice(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<Invoice(id='%s', contract_id='%s', amount='%s', duedate='%s', period_start='%s', " \
+        return "<Invoice(id='%s', contract_id='%s', amount='%s', " \
+               "duedate='%s', period_start='%s', " \
                "period_end='%s', date='%s')>" % (
                    self.id, self.contract_id, self.amount, self.duedate(),
                    self.period_start, self.period_end, self.date)

@@ -546,16 +546,18 @@ def iitem_to_xml(iitem):
     doc = ET.Element('invoice-item')
     logger.debug('iitem_to_xml iitem')
     logger.debug(type(iitem))
+    logger.debug(type(iitem.invoice.period_start))
     logger.debug(iitem)
+    logger.debug(iitem.invoice)
     logger.debug(iitem.id)
     ET.SubElement(doc, 'id').text = str(iitem.id)
     ET.SubElement(doc, 'invoice_id').text = str(iitem.invoice_id)
     desc_ele = ET.SubElement(doc, 'description')
     desc_ele.text = str(iitem.description)
-    desc_ele.set('Invoice', iitem.invoice_id)
-    desc_ele.set('Description', iitem.description)
-    desc_ele.set('Start', iitem.invoice.period_start)
-    desc_ele.set('End', iitem.invoice.period_end)
+    desc_ele.set('Invoice', str(iitem.invoice_id))
+    desc_ele.set('Amount', str(iitem.amount))
+    desc_ele.set('Start', str(iitem.invoice.period_start))
+    desc_ele.set('End', str(iitem.invoice.period_end))
     ET.SubElement(doc, 'amount').text = str(iitem.amount)
     ET.SubElement(doc, 'quantity').text = str(iitem.quantity)
     ET.SubElement(doc, 'cleared').text = str(iitem.cleared)
@@ -563,15 +565,17 @@ def iitem_to_xml(iitem):
     return doc
 
 
-def prettify(elem):
+def prettify(elemstr):
     """
     Return a pretty-printed XML string for the Element.
     """
-    rough_string = elem.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
+    reparsed = minidom.parseString(elemstr)
     return reparsed.toprettyxml(indent="  ")
 
 
 def iitem_xml_pretty_str(iitem):
-
-    return prettify(iitem_to_xml(iitem))
+    xele = iitem_to_xml(iitem)
+    logger.debug('xele')
+    logger.debug(xele)
+    logger.debug(ET.tostring(xele))
+    return prettify(ET.tostring(xele))
