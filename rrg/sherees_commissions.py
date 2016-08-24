@@ -592,7 +592,7 @@ def invoice_to_xml(inv):
 def cache_invoices(session, args):
 
     for inv in sherees_invoices_of_interest(session):
-        f, rel_dir = full_invoice_xml_path(args.data_dir, inv)
+        f, rel_dir = full_invoice_xml_path(args.datadir, inv)
         with open(f, 'w') as fh:
             fh.write(ET.tostring(invoice_to_xml(inv)))
 
@@ -603,7 +603,7 @@ def cache_invoices_items(session, args):
 
     for inv in sherees_invoices_of_interest(session):
         for iitem in inv.invoice_items:
-            f, rel_dir = full_invoice_item_xml_path(args.data_dir, iitem)
+            f, rel_dir = full_invoice_item_xml_path(args.datadir, iitem)
             with open(f, 'w') as fh:
                 fh.write(ET.tostring(iitem_to_xml(iitem)))
 

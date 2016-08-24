@@ -377,7 +377,6 @@ class User(Base):
 
 class Iitem(Base):
     """
-    alter table invoices_items add column last_sync_time datetime;
 
     """
     __tablename__ = 'invoices_items'
