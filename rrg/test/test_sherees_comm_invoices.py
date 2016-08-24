@@ -3,6 +3,7 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 import logging
 from freezegun import freeze_time
+import xml.etree.ElementTree as ET
 
 from rrg import MYSQL_PORT_3306_TCP_ADDR
 from rrg.models import Contract
@@ -20,6 +21,7 @@ from rrg.reminders import current_semimonth
 from rrg.reminders_generation import create_invoice_for_period
 from rrg.sherees_commissions import sherees_contracts_of_interest
 from rrg.sherees_commissions import sherees_invoices_of_interest
+from rrg.sherees_commissions import invoice_to_xml
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
@@ -326,3 +328,12 @@ class Test1:
     def test_sherees_invoices_of_interest(self):
         invs = sherees_invoices_of_interest(self.session)
         assert 4 == invs.count()
+
+    def test_sherees_invoices_of_interest_xml(self):
+        invs = sherees_invoices_of_interest(self.session)
+        for i in invs:
+            ixml = invoice_to_xml(i)
+            ixml_str = ET.tostring(ixml)
+            logger.debug(ixml_str)
+            root = ET.fromstring(ixml_str)
+            assert 1 == len(root.findall('invoice-items'))

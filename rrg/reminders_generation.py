@@ -181,6 +181,7 @@ def create_invoice_for_period(session, contract, period_start, period_end, date=
     new_inv = Invoice(contract_id=contract.id, period_start=period_start, period_end=period_end, date=date,
                       terms=contract.terms)
     session.add(new_inv)
+    session.flush()
 
     for citem in contract.contract_items:
         new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description, cost=citem.cost, amount=citem.amt)

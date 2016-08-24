@@ -376,6 +376,10 @@ class User(Base):
 
 
 class Iitem(Base):
+    """
+    alter table invoices_items add column last_sync_time datetime;
+
+    """
     __tablename__ = 'invoices_items'
 
     id = Column(Integer, primary_key=True)
@@ -390,6 +394,7 @@ class Iitem(Base):
     ordering = Column(Integer)
     cleared = Column(Boolean)
     comm_items = relationship("Citem", back_populates="invoices_item")
+    last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
         return "<InvoiceItem(id='%s', description='%s', amount='%s', quantity='%s', invoice.id='%s')>" % (

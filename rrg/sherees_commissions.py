@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import datetime as dt
-import logging
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from tabulate import tabulate
@@ -12,6 +11,8 @@ from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
 
+from rrg.billing import full_invoice_xml_path
+from rrg.billing import full_invoice_item_xml_path
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment
@@ -24,11 +25,6 @@ from rrg.queries import sherees_notes
 
 from rrg.utils import directory_date_dictionary
 
-
-logging.basicConfig(filename='testing.log', level=logging.DEBUG)
-logger = logging.getLogger('test')
-
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
@@ -544,20 +540,17 @@ def sherees_invoices_of_interest(session):
 def iitem_to_xml(iitem):
 
     doc = ET.Element('invoice-item')
-    logger.debug('iitem_to_xml iitem')
-    logger.debug(type(iitem))
-    logger.debug(type(iitem.invoice.period_start))
-    logger.debug(iitem)
-    logger.debug(iitem.invoice)
-    logger.debug(iitem.id)
+
     ET.SubElement(doc, 'id').text = str(iitem.id)
     ET.SubElement(doc, 'invoice_id').text = str(iitem.invoice_id)
     desc_ele = ET.SubElement(doc, 'description')
-    desc_ele.text = str(iitem.description)
+    desc_ele.text = iitem.description
     desc_ele.set('Invoice', str(iitem.invoice_id))
     desc_ele.set('Amount', str(iitem.amount))
-    desc_ele.set('Start', str(iitem.invoice.period_start))
-    desc_ele.set('End', str(iitem.invoice.period_end))
+    desc_ele.set('comm', '%s: %s-%s %s %s - %s' % (str(iitem.id), str(iitem.invoice.period_start),
+                                               str(iitem.invoice.period_end),
+                                               iitem.invoice.contract.employee.firstname,
+                                               iitem.invoice.contract.employee.lastname, iitem.description))
     ET.SubElement(doc, 'amount').text = str(iitem.amount)
     ET.SubElement(doc, 'quantity').text = str(iitem.quantity)
     ET.SubElement(doc, 'cleared').text = str(iitem.cleared)
@@ -575,7 +568,41 @@ def prettify(elemstr):
 
 def iitem_xml_pretty_str(iitem):
     xele = iitem_to_xml(iitem)
-    logger.debug('xele')
-    logger.debug(xele)
-    logger.debug(ET.tostring(xele))
     return prettify(ET.tostring(xele))
+
+
+def invoice_to_xml(inv):
+    doc = ET.Element('invoice')
+
+    ET.SubElement(doc, 'id').text = str(inv.id)
+    ET.SubElement(doc, 'date').text = dt.strftime(inv.date, TIMESTAMP_FORMAT)
+    ET.SubElement(doc, 'notes').text = str(inv.notes)
+    ET.SubElement(doc, 'period_start').text = dt.strftime(inv.period_start, TIMESTAMP_FORMAT)
+    ET.SubElement(doc, 'period_end').text = dt.strftime(inv.period_end, TIMESTAMP_FORMAT)
+    ET.SubElement(doc, 'employee').text = '%s %s' % (inv.contract.employee.firstname, inv.contract.employee.lastname)
+    items = ET.SubElement(doc, 'invoice-items')
+    for ii in inv.invoice_items:
+        ET.SubElement(items, 'invoice-item').text = str(ii.id)
+    ET.SubElement(doc, 'voided').text = str(inv.voided)
+    return doc
+
+
+def cache_invoices(session, args):
+
+    for inv in sherees_contracts_of_interest(session):
+        f, rel_dir = full_invoice_xml_path(args.data_dir, inv)
+        with open(f, 'w') as fh:
+            fh.write(ET.tostring(invoice_to_xml(inv)))
+
+        print('%s written' % f)
+
+
+def cache_invoices_items(session, args):
+
+    for inv in sherees_contracts_of_interest(session):
+        for iitem in inv.invoice_items:
+            f, rel_dir = full_invoice_item_xml_path(args.data_dir, iitem)
+            with open(f, 'w') as fh:
+                fh.write(ET.tostring(iitem_to_xml(iitem)))
+
+            print('%s written' % f)

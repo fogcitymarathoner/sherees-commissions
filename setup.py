@@ -109,6 +109,7 @@ setup(
             'cache_client_accounts_receivable',
             'rrg-cache-comm-items=rrg.scripts.cache_comm_items:cache_comm_items',
             'rrg-cache-invoices=rrg.scripts.cache_invoices:cache_invoices',
+            'rrg-cache-invoices-items=rrg.scripts.cache_invoices_items:cache_invoices_items',
 
             'rrg-comm=rrg.scripts.commissions:'
             'comm',
@@ -129,6 +130,7 @@ setup(
 
             'rrg-sheree-total-due=rrg.scripts.sheree_monies_due:monies_due',
             'rrg-sheree-total-due-full=rrg.scripts.sherees_monies_due_full_report:monies_due',
+            'rrg-cache-sherees-invoices=rrg.scripts.cache_sherees_invoices:cache_invoices',
 
             'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder'
         ],

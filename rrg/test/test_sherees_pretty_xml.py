@@ -7,7 +7,6 @@ from rrg.models import ContractItemCommItem
 from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import Iitem
-from rrg.models import Invoice
 from rrg.models import periods
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
@@ -18,6 +17,8 @@ from rrg.reminders_generation import create_invoice_for_period
 from rrg.sherees_commissions import iitem_xml_pretty_str
 from rrg.sherees_commissions import iitem_to_xml
 from rrg.models import session_maker
+
+import xml.etree.ElementTree as ET
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -298,10 +299,7 @@ class Test2:
         self.session.flush()
 
     def test_sherees_pretty_iitems(self):
-        invs = self.session.query(Invoice).all()
-        for i in invs:
-            print(i)
-            print(type(i.period_start))
+
         iitems = self.session.query(Iitem).all()
         logger.debug('pretty invoice items')
         for i in iitems:
@@ -310,5 +308,8 @@ class Test2:
             if i.invoice:
                 logger.debug(i.invoice.period_start)
                 logger.debug(iitem_to_xml(i))
-                print(iitem_xml_pretty_str(i))
-        assert 4 == 1
+                ixml = iitem_xml_pretty_str(i)
+                root = ET.fromstring(ixml)
+                assert 1 == len(root.findall('description'))
+                logger.debug(ixml)
+
