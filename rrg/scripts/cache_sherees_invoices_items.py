@@ -12,7 +12,7 @@ parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with invoices',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
-            'invoices/')
+            'invoices/invoices_items/')
 
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
@@ -21,7 +21,7 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 
-def cache_invoices():
+def cache_invoices_items():
     """
     replaces cake cache commissions items
     """
