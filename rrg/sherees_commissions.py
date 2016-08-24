@@ -521,8 +521,7 @@ def payroll_due_report(session, args):
 
 def sherees_contracts_of_interest(session):
     contract_clients = session.query(Contract, Client).join(Client).filter(
-        and_(Contract.active == 1, Contract.employee_id == 1025,
-             Client.active == 1))
+        and_(Contract.employee_id == 1025))
     return contract_clients
 
 
@@ -531,9 +530,12 @@ def sherees_invoices_of_interest(session):
     cids = []
     for con, cl in contract_clients:
         cids.append(con.id)
-    invs = session.query(Invoice).join(Contract).filter(
-        Invoice.contract_id.in_(cids))
-
+    invs = []
+    if len(cids):
+        invs = session.query(Invoice).join(Contract).filter(
+            Invoice.contract_id.in_(cids))
+    else:
+        print('There are no invoices of sherees interest')
     return invs
 
 
