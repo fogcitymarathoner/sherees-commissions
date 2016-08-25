@@ -54,8 +54,7 @@ class Test2:
         with self.session.no_autoflush:
             objects = []
             client_active = Client(name='weekly', active=True, terms=30)
-            client_inactive = Client(name='weekly-inactive', active=False,
-                                     terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
             objects.append(client_active)
             objects.append(client_inactive)
 

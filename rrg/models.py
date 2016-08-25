@@ -171,15 +171,18 @@ class Client(Base):
 
 
 class ContractItemCommItem(Base):
+    """
+
+    """
     __tablename__ = 'contracts_items_commissions_items'
 
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
     employee = relationship("Employee")
 
-    contract_item_id = Column(Integer, ForeignKey('contracts_items.id'),
-                              nullable=False)
+    contract_item_id = Column(Integer, ForeignKey('contracts_items.id'), nullable=False)
     contract_item = relationship("ContractItem")
+
     percent = Column(Float)
     modified_date = Column(Date)
     created_date = Column(Date, default=default_date)
