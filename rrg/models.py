@@ -206,8 +206,7 @@ class ContractItem(Base):
                          nullable=False)
     contract = relationship("Contract")
 
-    contract_comm_items = relationship("ContractItemCommItem",
-                                       back_populates="contract_item")
+    contract_comm_items = relationship("ContractItemCommItem", back_populates="contract_item")
 
     amt = Column(Float)
     cost = Column(Float)
@@ -221,8 +220,7 @@ class ContractItem(Base):
     last_sync_time = Column(Date)
 
     def __repr__(self):
-        return "<ContractItem(id='%s', description='%s')>" % (
-            self.id, self.description)
+        return "<ContractItem(id='%s', description='%s')>" % ( self.id, self.description)
 
 
 class Contract(Base):

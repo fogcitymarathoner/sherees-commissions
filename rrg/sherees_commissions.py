@@ -609,6 +609,6 @@ def cache_invoices_items(session, args):
         for iitem in inv.invoice_items:
             f, rel_dir = full_invoice_item_xml_path(args.datadir, iitem)
             with open(f, 'w') as fh:
-                fh.write(ET.tostring(iitem_to_xml(iitem)))
+                fh.write(iitem_xml_pretty_str(iitem))
 
             print('%s written' % f)
