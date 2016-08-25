@@ -187,11 +187,11 @@ class Test1:
             objects = []
             for i in xrange(0, 12):
                 objects.append(
-                    ContractItem(contract_id=contracts[i].id,
+                    ContractItem(contract_id=contracts[1].id,
                                  description='Regular', amt=10, active=True,
                                  cost=5))
                 objects.append(
-                    ContractItem(contract_id=contracts[i].id,
+                    ContractItem(contract_id=contracts[2].id,
                                  description='Double Time', amt=20,
                                  active=True, cost=10))
 
@@ -206,7 +206,7 @@ class Test1:
             objects = []
             for i in xrange(0, 24):
                 objects.append(
-                    ContractItemCommItem(employee_id=employees[2].id,
+                    ContractItemCommItem(employee_id=employees[0].id,
                                          contract_item_id=contract_items[i].id,
                                          percent=38.5))
 
@@ -217,6 +217,11 @@ class Test1:
 
                 self.session.bulk_save_objects(objects)
 
+            contract_items_citems = self.session.query(ContractItemCommItem).\
+                all()
+            logger.debug('contract items commissions items')
+            for ccitem in contract_items_citems:
+                logger.debug(ccitem)
             # invoices
             weeks = weeks_between_dates(dt(year=2016, month=7, day=4),
                                         self.payroll_run_date)
@@ -323,11 +328,18 @@ class Test1:
         :return:
         """
         contracts = sherees_contracts_of_interest(self.session)
-        assert 4 == contracts.count()
+        logger.debug('Sherees Contracts')
+        for c in contracts:
+            logger.debug(c)
+        assert 2 == len(contracts)
 
     def test_sherees_invoices_of_interest(self):
         invs = sherees_invoices_of_interest(self.session)
-        assert 4 == invs.count()
+        logger.debug('Sherees Invs')
+        for c in invs:
+            logger.debug(c)
+        assert 2 == invs.count()
+        assert 1 == 2
 
     def test_sherees_invoices_of_interest_xml(self):
         invs = sherees_invoices_of_interest(self.session)

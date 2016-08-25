@@ -54,7 +54,8 @@ class Test:
         with self.session.no_autoflush:
             objects = []
             client_active = Client(name='weekly', active=True, terms=30)
-            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False,
+                                     terms=30)
             objects.append(client_active)
             objects.append(client_inactive)
 
@@ -64,10 +65,15 @@ class Test:
 
             objects = []
 
-            employee_active = Employee(firstname='firstname', lastname='activelastname', active=True)
-            employee_inactive = Employee(firstname='firstname', lastname='inactivelastname', active=False)
-            employee_sales_person1 = Employee(firstname='sales', lastname='person1', active=True)
-            employee_sales_person2 = Employee(firstname='sales', lastname='person2', active=True)
+            employee_active = Employee(firstname='firstname',
+                                       lastname='activelastname', active=True)
+            employee_inactive = Employee(firstname='firstname',
+                                         lastname='inactivelastname',
+                                         active=False)
+            employee_sales_person1 = Employee(firstname='sales',
+                                              lastname='person1', active=True)
+            employee_sales_person2 = Employee(firstname='sales',
+                                              lastname='person2', active=True)
 
             objects.append(employee_active)
             objects.append(employee_inactive)
@@ -84,58 +90,90 @@ class Test:
             objects = []
 
             # Active Contract
-            objects.append(Contract(employee_id=employees[0].id, title='weekly-active-client-active-employee',
-                                    client_id=clients[0].id, terms=clients[0].terms, active=True,
-                                    period_id=periods['week'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[0].id,
+                                    title='weekly-active-client-active-employee',
+                                    client_id=clients[0].id,
+                                    terms=clients[0].terms, active=True,
+                                    period_id=periods['week'],
+                                    startdate=self.common_contract_start))
 
-            objects.append(Contract(employee_id=employees[0].id, title='biweekly-active-client-active-employee',
-                                    client_id=clients[0].id, terms=clients[0].terms, active=True,
-                                    period_id=periods['biweek'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[0].id,
+                                    title='biweekly-active-client-active-employee',
+                                    client_id=clients[0].id,
+                                    terms=clients[0].terms, active=True,
+                                    period_id=periods['biweek'],
+                                    startdate=self.common_contract_start))
 
-            objects.append(Contract(employee_id=employees[0].id, title='semimonthly-active-client-active-employee',
-                                    client_id=clients[0].id, terms=clients[0].terms, active=True,
-                                    period_id=periods['semimonth'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[0].id,
+                                    title='semimonthly-active-client-active-employee',
+                                    client_id=clients[0].id,
+                                    terms=clients[0].terms, active=True,
+                                    period_id=periods['semimonth'],
+                                    startdate=self.common_contract_start))
 
-            objects.append(Contract(employee_id=employees[0].id, title='monthly-active-client-active-employee',
-                                    client_id=clients[0].id, terms=clients[0].terms, active=True,
-                                    period_id=periods['month'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[0].id,
+                                    title='monthly-active-client-active-employee',
+                                    client_id=clients[0].id,
+                                    terms=clients[0].terms, active=True,
+                                    period_id=periods['month'],
+                                    startdate=self.common_contract_start))
 
             # Active Contracts Inactive Employees
-            objects.append(Contract(employee_id=employees[1].id, title='weekly-inactive-client-inactive-employee',
-                                    client_id=clients[1].id, terms=clients[1].terms, active=True,
-                                    period_id=periods['week'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[1].id,
+                                    title='weekly-inactive-client-inactive-employee',
+                                    client_id=clients[1].id,
+                                    terms=clients[1].terms, active=True,
+                                    period_id=periods['week'],
+                                    startdate=self.common_contract_start))
 
-            objects.append(Contract(employee_id=employees[1].id, title='biweekly-inactive-client-inactive-employee',
-                                    client_id=clients[1].id, terms=clients[1].terms, active=True,
-                                    period_id=periods['biweek'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[1].id,
+                                    title='biweekly-inactive-client-inactive-employee',
+                                    client_id=clients[1].id,
+                                    terms=clients[1].terms, active=True,
+                                    period_id=periods['biweek'],
+                                    startdate=self.common_contract_start))
 
-            objects.append(Contract(employee_id=employees[1].id, title='semimonthly-inactive-client-inactive-employee',
-                                    client_id=clients[1].id, terms=clients[1].terms, active=True,
-                                    period_id=periods['semimonth'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[1].id,
+                                    title='semimonthly-inactive-client-inactive-employee',
+                                    client_id=clients[1].id,
+                                    terms=clients[1].terms, active=True,
+                                    period_id=periods['semimonth'],
+                                    startdate=self.common_contract_start))
 
-            objects.append(Contract(employee_id=employees[1].id, title='monthly-inactive-client-inactive-employee',
-                                    client_id=clients[1].id, terms=clients[1].terms, active=True,
-                                    period_id=periods['month'], startdate=self.common_contract_start))
+            objects.append(Contract(employee_id=employees[1].id,
+                                    title='monthly-inactive-client-inactive-employee',
+                                    client_id=clients[1].id,
+                                    terms=clients[1].terms, active=True,
+                                    period_id=periods['month'],
+                                    startdate=self.common_contract_start))
 
             objects.append(
-                Contract(employee_id=employees[1].id, client_id=clients[1].id, terms=clients[1].terms, active=False,
+                Contract(employee_id=employees[1].id, client_id=clients[1].id,
+                         terms=clients[1].terms, active=False,
                          period_id=periods['week'], title='weekly-inactive',
                          startdate=self.common_contract_start))
 
             objects.append(
-                Contract(employee_id=employees[1].id, title='biweekly-inactive', client_id=clients[1].id,
+                Contract(employee_id=employees[1].id,
+                         title='biweekly-inactive', client_id=clients[1].id,
                          terms=clients[1].terms, active=False,
-                         period_id=periods['biweek'], startdate=self.common_contract_start))
+                         period_id=periods['biweek'],
+                         startdate=self.common_contract_start))
 
-            objects.append(Contract(employee_id=employees[1].id, title='semimonthly-inactive', client_id=clients[1].id,
+            objects.append(Contract(employee_id=employees[1].id,
+                                    title='semimonthly-inactive',
+                                    client_id=clients[1].id,
                                     terms=clients[1].terms,
                                     active=False,
-                                    period_id=periods['semimonth'], startdate=self.common_contract_start))
+                                    period_id=periods['semimonth'],
+                                    startdate=self.common_contract_start))
 
             objects.append(
-                Contract(employee_id=employees[1].id, title='monthly-inactive', client_id=clients[1].id,
+                Contract(employee_id=employees[1].id, title='monthly-inactive',
+                         client_id=clients[1].id,
                          terms=clients[1].terms, active=False,
-                         period_id=periods['month'], startdate=self.common_contract_start))
+                         period_id=periods['month'],
+                         startdate=self.common_contract_start))
 
             self.session.bulk_save_objects(objects)
 
@@ -149,9 +187,13 @@ class Test:
             objects = []
             for i in xrange(0, 12):
                 objects.append(
-                    ContractItem(contract_id=contracts[i].id, description='Regular', amt=10, active=True, cost=5))
+                    ContractItem(contract_id=contracts[i].id,
+                                 description='Regular', amt=10, active=True,
+                                 cost=5))
                 objects.append(
-                    ContractItem(contract_id=contracts[i].id, description='Double Time', amt=20, active=True, cost=10))
+                    ContractItem(contract_id=contracts[i].id,
+                                 description='Double Time', amt=20,
+                                 active=True, cost=10))
 
             self.session.bulk_save_objects(objects)
             contract_items = self.session.query(ContractItem).all()
@@ -164,61 +206,84 @@ class Test:
             objects = []
             for i in xrange(0, 24):
                 objects.append(
-                    ContractItemCommItem(employee_id=employees[2].id, contract_item_id=contract_items[i].id,
+                    ContractItemCommItem(employee_id=employees[2].id,
+                                         contract_item_id=contract_items[i].id,
                                          percent=38.5))
 
                 objects.append(
-                    ContractItemCommItem(employee_id=employees[3].id, contract_item_id=contract_items[i].id,
+                    ContractItemCommItem(employee_id=employees[3].id,
+                                         contract_item_id=contract_items[i].id,
                                          percent=61.5))
 
                 self.session.bulk_save_objects(objects)
 
             # invoices
-            weeks = weeks_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
+            weeks = weeks_between_dates(dt(year=2016, month=7, day=4),
+                                        self.payroll_run_date)
             second_week_start, second_week_end = weeks[1]
 
-            create_invoice_for_period(self.session, contracts[0], second_week_start.date(), second_week_end.date(),
+            create_invoice_for_period(self.session, contracts[0],
+                                      second_week_start.date(),
+                                      second_week_end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[4], second_week_start.date(), second_week_end.date(),
+            create_invoice_for_period(self.session, contracts[4],
+                                      second_week_start.date(),
+                                      second_week_end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[8], second_week_start.date(), second_week_end.date(),
+            create_invoice_for_period(self.session, contracts[8],
+                                      second_week_start.date(),
+                                      second_week_end.date(),
                                       date=self.payroll_run_date.date())
 
-            biweeks = biweeks_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
+            biweeks = biweeks_between_dates(dt(year=2016, month=7, day=4),
+                                            self.payroll_run_date)
 
             start, end = biweeks[1]
-            create_invoice_for_period(self.session, contracts[1], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[1], start.date(),
+                                      end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[5], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[5], start.date(),
+                                      end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[9], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[9], start.date(),
+                                      end.date(),
                                       date=self.payroll_run_date.date())
 
-            semimonths = semimonths_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
+            semimonths = semimonths_between_dates(
+                dt(year=2016, month=7, day=4), self.payroll_run_date)
 
             start, end = semimonths[1]
-            create_invoice_for_period(self.session, contracts[2], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[2], start.date(),
+                                      end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[6], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[6], start.date(),
+                                      end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[10], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[10],
+                                      start.date(), end.date(),
                                       date=self.payroll_run_date.date())
 
-            months = months_between_dates(dt(year=2016, month=7, day=4), self.payroll_run_date)
+            months = months_between_dates(dt(year=2016, month=7, day=4),
+                                          self.payroll_run_date)
 
             start, end = months[1]
-            create_invoice_for_period(self.session, contracts[3], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[3], start.date(),
+                                      end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[7], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[7], start.date(),
+                                      end.date(),
                                       date=self.payroll_run_date.date())
-            create_invoice_for_period(self.session, contracts[11], start.date(), end.date(),
+            create_invoice_for_period(self.session, contracts[11],
+                                      start.date(), end.date(),
                                       date=self.payroll_run_date.date())
 
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
 
-            current_semimonth(dt(year=self.payroll_run_date.year, month=self.payroll_run_date.month, day=16))
+            current_semimonth(dt(year=self.payroll_run_date.year,
+                                 month=self.payroll_run_date.month, day=16))
 
-            assert not weeks_between_dates(self.payroll_run_date + td(days=1), self.payroll_run_date)
+            assert not weeks_between_dates(self.payroll_run_date + td(days=1),
+                                           self.payroll_run_date)
 
     def teardown_class(self):
         logger.debug('Teardown reminders')
@@ -243,8 +308,10 @@ class Test:
         inv = self.session.query(Invoice)[0]
 
         ele = inv.to_xml()
-        assert base_doc.findall('period_start')[0].text == ele.findall('period_start')[0].text
-        assert base_doc.findall('period_end')[0].text == ele.findall('period_end')[0].text
+        assert base_doc.findall('period_start')[0].text == \
+               ele.findall('period_start')[0].text
+        assert base_doc.findall('period_end')[0].text == \
+               ele.findall('period_end')[0].text
 
     def test_citem_to_xml(self):
         """
@@ -276,7 +343,8 @@ class Test:
         ele = iitem.to_xml()
         logger.debug('iitem-ele')
         logger.debug(ET.tostring(iitem.to_xml()))
-        assert base_doc.findall('amount')[0].text == ele.findall('amount')[0].text
+        assert base_doc.findall('amount')[0].text == ele.findall('amount')[
+            0].text
         logger.debug('base_doc.findall("quantity")[0].text')
         logger.debug(base_doc.findall('quantity')[0].text)
         logger.debug('ele.findall("quantity")[0]')
@@ -285,4 +353,5 @@ class Test:
         logger.debug(len(ele.findall('quantity')))
         logger.debug('ele.findall("quantity")[0].text')
         logger.debug(ele.findall('quantity')[0].text)
-        assert base_doc.findall('quantity')[0].text == ele.findall('quantity')[0].text
+        assert base_doc.findall('quantity')[0].text == ele.findall('quantity')[
+            0].text

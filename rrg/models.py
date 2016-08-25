@@ -27,13 +27,16 @@ from sqlalchemy.orm import sessionmaker
 
 from sqlalchemy import create_engine
 
+
 def default_date():
     return date.today()
+
 
 def session_maker(args):
     engine = create_engine(
         'mysql+mysqldb://%s:%s@%s:%s/%s' % (
-        args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db))
+            args.db_user, args.db_pass, args.mysql_host, args.mysql_port,
+            args.db))
 
     session = sessionmaker(bind=engine)
     return session()
@@ -183,6 +186,12 @@ class ContractItemCommItem(Base):
     modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user_id = Column(Integer)
 
+    def __repr__(self):
+        return "<ContractItemCommItem(id='%s', contract_title='%s', " \
+               "salesperson='%s')>" % (
+                   self.id, self.contract_item.contract.title,
+                   '%s %s' % (self.employee.firstname, self.employee.lastname))
+
 
 class ContractItem(Base):
     __tablename__ = 'contracts_items'
@@ -210,7 +219,7 @@ class ContractItem(Base):
 
     def __repr__(self):
         return "<ContractItem(id='%s', description='%s')>" % (
-        self.id, self.description)
+            self.id, self.description)
 
 
 class Contract(Base):
@@ -281,10 +290,13 @@ class Invoice(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<Invoice(id='%s', contract_id='%s', amount='%s', " \
+        return "<Invoice(id='%s', contract='%s', amount='%s', worker='%s'" \
                "duedate='%s', period_start='%s', " \
                "period_end='%s', date='%s')>" % (
-                   self.id, self.contract_id, self.amount, self.duedate(),
+                   self.id, self.contract.title, self.amount, '%s %s' % (
+                       self.contract.employee.firstname,
+                       self.contract.employee.lastname),
+                   self.duedate(),
                    self.period_start, self.period_end, self.date)
 
     def duedate(self):
@@ -305,8 +317,9 @@ class Invoice(Base):
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'period_start').text = dt.strftime(
             self.period_start, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'period_end').text = dt.strftime(self.period_end,
-                                                            TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'period_end').text = dt.strftime(
+            self.period_end,
+            TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'posted').text = str(self.posted)
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         ET.SubElement(doc, 'voided').text = str(self.voided)
@@ -317,7 +330,8 @@ class Invoice(Base):
             self.created_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'modified_date').text = dt.strftime(
             self.modified_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'created_user_id').text = str(
+            self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(
             self.modified_user_id)
         ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(),
@@ -339,7 +353,6 @@ def is_pastdue(inv, date=None):
         return True
     else:
         return False
-
 
 # XML
 
@@ -365,7 +378,6 @@ class State(Base):
     name = Column(String(14))
     state_no = Column(String(9))
 
-
 class User(Base):
     __tablename__ = 'users'
 
@@ -373,7 +385,6 @@ class User(Base):
     firstname = Column(String(60))
 
     lastname = Column(String(60))
-
 
 class Iitem(Base):
     """
@@ -397,7 +408,8 @@ class Iitem(Base):
 
     def __repr__(self):
         return "<InvoiceItem(id='%s', description='%s', amount='%s', quantity='%s', invoice.id='%s')>" % (
-                   self.id, self.description, self.amount, self.quantity, self.invoice_id)
+            self.id, self.description, self.amount, self.quantity,
+            self.invoice_id)
 
     def to_xml(self):
         doc = ET.Element('invoice-item')
@@ -410,7 +422,6 @@ class Iitem(Base):
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
 
         return doc
-
 
 class Citem(Base):
     """
@@ -441,7 +452,8 @@ class Citem(Base):
     cleared = Column(Float)
     voided = Column(Float)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(Date, default=default_date,
+                           onupdate=default_date)
     created_user_id = Column(Integer, default=2)
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
@@ -490,7 +502,8 @@ class Citem(Base):
             self.created_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'modified_date').text = dt.strftime(
             self.modified_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'created_user_id').text = str(
+            self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(
             self.modified_user_id)
         return doc

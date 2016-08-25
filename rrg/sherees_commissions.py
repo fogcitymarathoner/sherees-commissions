@@ -5,7 +5,6 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from tabulate import tabulate
 from operator import itemgetter
-from sqlalchemy import and_
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
@@ -16,7 +15,7 @@ from rrg.billing import full_invoice_item_xml_path
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment
-from rrg.models import Client
+from rrg.models import ContractItemCommItem
 from rrg.models import Contract
 from rrg.models import Invoice
 from rrg.models import Iitem
@@ -520,19 +519,24 @@ def payroll_due_report(session, args):
 
 
 def sherees_contracts_of_interest(session):
-    contract_clients = session.query(Contract, Client).join(Client).filter(
-        and_(Contract.employee_id == 1025))
-    return contract_clients
+    contract_citems = session.query(ContractItemCommItem).\
+        filter(ContractItemCommItem.employee_id == 1025)
+    contracts = []
+    for ci in contract_citems:
+        if ci.contract_item.contract not in contracts:
+            contracts.append(ci.contract_item.contract)
+    return contracts
 
 
 def sherees_invoices_of_interest(session):
-    contract_clients = sherees_contracts_of_interest(session)
+    contracts = sherees_contracts_of_interest(session)
     cids = []
-    for con, cl in contract_clients:
-        cids.append(con.id)
+    if contracts:
+        for con in contracts:
+            cids.append(con.id)
     invs = []
     if len(cids):
-        invs = session.query(Invoice).join(Contract).filter(
+        invs = session.query(Invoice).filter(
             Invoice.contract_id.in_(cids))
     else:
         print('There are no invoices of sherees interest')
