@@ -24,7 +24,6 @@ from rrg.queries import sherees_notes
 
 from rrg.utils import directory_date_dictionary
 
-
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
 
@@ -54,7 +53,7 @@ def sheree_total_monies_owed(session, args):
         out += '\\item Commissions %.2f' % total_commissions
         out += '\\item Notes %.2f' % total_notes
         out += '\\item Total %.2f' % (
-        total_commissions + total_payroll + total_notes)
+            total_commissions + total_payroll + total_notes)
         out += '\\end{itemize}'
     else:
         dout = {
@@ -62,7 +61,7 @@ def sheree_total_monies_owed(session, args):
             'Commissions': ['Commissions %.2f' % total_commissions],
             'Notes': ['Notes %.2f' % total_notes],
             'Total': ['Total %.2f' % (
-            total_commissions + total_payroll + total_notes)]
+                total_commissions + total_payroll + total_notes)]
         }
         out = tabulate(dout, headers='keys')
 
@@ -519,7 +518,7 @@ def payroll_due_report(session, args):
 
 
 def sherees_contracts_of_interest(session):
-    contract_citems = session.query(ContractItemCommItem).\
+    contract_citems = session.query(ContractItemCommItem). \
         filter(ContractItemCommItem.employee_id == 1025)
     contracts = []
     for ci in contract_citems:
@@ -537,14 +536,13 @@ def sherees_invoices_of_interest(session):
     invs = []
     if len(cids):
         invs = session.query(Invoice).filter(
-            Invoice.contract_id.in_(cids))
+            Invoice.contract_id.in_(cids)).order_by(Invoice.date)
     else:
         print('There are no invoices of sherees interest')
     return invs
 
 
 def iitem_to_xml(iitem):
-
     doc = ET.Element('invoice-item')
 
     ET.SubElement(doc, 'id').text = str(iitem.id)
@@ -553,10 +551,12 @@ def iitem_to_xml(iitem):
     desc_ele.text = iitem.description
     desc_ele.set('Invoice', str(iitem.invoice_id))
     desc_ele.set('Amount', str(iitem.amount))
-    desc_ele.set('comm', '%s: %s-%s %s %s - %s' % (str(iitem.id), str(iitem.invoice.period_start),
-                                               str(iitem.invoice.period_end),
-                                               iitem.invoice.contract.employee.firstname,
-                                               iitem.invoice.contract.employee.lastname, iitem.description))
+    desc_ele.set(
+        'comm', '%s: %s-%s %s %s - %s' % (
+            str(iitem.id), str(iitem.invoice.period_start),
+            str(iitem.invoice.period_end),
+            iitem.invoice.contract.employee.firstname,
+            iitem.invoice.contract.employee.lastname, iitem.description))
     ET.SubElement(doc, 'amount').text = str(iitem.amount)
     ET.SubElement(doc, 'quantity').text = str(iitem.quantity)
     ET.SubElement(doc, 'cleared').text = str(iitem.cleared)
@@ -583,9 +583,12 @@ def invoice_to_xml(inv):
     ET.SubElement(doc, 'id').text = str(inv.id)
     ET.SubElement(doc, 'date').text = dt.strftime(inv.date, TIMESTAMP_FORMAT)
     ET.SubElement(doc, 'notes').text = str(inv.notes)
-    ET.SubElement(doc, 'period_start').text = dt.strftime(inv.period_start, TIMESTAMP_FORMAT)
-    ET.SubElement(doc, 'period_end').text = dt.strftime(inv.period_end, TIMESTAMP_FORMAT)
-    ET.SubElement(doc, 'employee').text = '%s %s' % (inv.contract.employee.firstname, inv.contract.employee.lastname)
+    ET.SubElement(doc, 'period_start').text = dt.strftime(inv.period_start,
+                                                          TIMESTAMP_FORMAT)
+    ET.SubElement(doc, 'period_end').text = dt.strftime(inv.period_end,
+                                                        TIMESTAMP_FORMAT)
+    ET.SubElement(doc, 'employee').text = '%s %s' % (
+    inv.contract.employee.firstname, inv.contract.employee.lastname)
     items = ET.SubElement(doc, 'invoice-items')
     for ii in inv.invoice_items:
         ET.SubElement(items, 'invoice-item').text = str(ii.id)
@@ -594,7 +597,6 @@ def invoice_to_xml(inv):
 
 
 def cache_invoices(session, args):
-
     for inv in sherees_invoices_of_interest(session):
         f, rel_dir = full_invoice_xml_path(args.datadir, inv)
         with open(f, 'w') as fh:
@@ -604,7 +606,6 @@ def cache_invoices(session, args):
 
 
 def cache_invoices_items(session, args):
-
     for inv in sherees_invoices_of_interest(session):
         for iitem in inv.invoice_items:
             f, rel_dir = full_invoice_item_xml_path(args.datadir, iitem)
@@ -612,3 +613,29 @@ def cache_invoices_items(session, args):
                 fh.write(iitem_xml_pretty_str(iitem))
 
             print('%s written' % f)
+
+
+def invoices_items(session):
+    iitems = []
+    for inv in sherees_invoices_of_interest(session):
+        for iitem in inv.invoice_items:
+            if iitem.description.lower() == 'overtime':
+                iitems.append({
+                    'id': iitem.id,
+                    'date': iitem.invoice.date,
+                    'description': '%s-%s %s %s - %s' % (
+                        str(iitem.invoice.period_start),
+                        str(iitem.invoice.period_end),
+                        iitem.invoice.contract.employee.firstname,
+                        iitem.invoice.contract.employee.lastname,
+                        iitem.description)
+                })
+
+    to_tabulate = {
+        'id': [i.id for i in iitems],
+        'date': [i.date for i in iitems],
+        'description': [i.date for i in iitems],
+
+    }
+
+    print(tabulate(to_tabulate, headers='keys'))

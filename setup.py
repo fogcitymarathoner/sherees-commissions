@@ -132,6 +132,7 @@ setup(
             'rrg-sheree-total-due-full=rrg.scripts.sherees_monies_due_full_report:monies_due',
             'rrg-cache-sherees-invoices=rrg.scripts.cache_sherees_invoices:cache_invoices',
             'rrg-cache-sherees-invoices-items=rrg.scripts.cache_sherees_invoices_items:cache_invoices_items',
+            'rrg-sherees-invoices-items=rrg.scripts.sherees_invoices_items:invoices_items',
 
             'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder'
         ],
