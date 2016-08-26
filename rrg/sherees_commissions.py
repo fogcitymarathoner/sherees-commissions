@@ -632,9 +632,9 @@ def invoices_items(session):
                 })
 
     to_tabulate = {
-        'id': [i.id for i in iitems],
-        'date': [i.date for i in iitems],
-        'description': [i.date for i in iitems],
+        'id': [i['id'] for i in iitems],
+        'date': [i['date'] for i in iitems],
+        'description': [i['description'] for i in iitems],
 
     }
 
