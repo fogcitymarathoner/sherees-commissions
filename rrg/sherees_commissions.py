@@ -658,8 +658,8 @@ def iitem_exclude(session, args):
     iitems = invoices_items(session)
     citems = cached_comm_items(session, args)
 
-    ex = []
+    ex = {}
     for i in iitems:
         if i not in citems:
-            ex.append(i)
+            ex[hash(i.description)] = None
     return ex
