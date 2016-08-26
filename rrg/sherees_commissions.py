@@ -588,7 +588,7 @@ def invoice_to_xml(inv):
     ET.SubElement(doc, 'period_end').text = dt.strftime(inv.period_end,
                                                         TIMESTAMP_FORMAT)
     ET.SubElement(doc, 'employee').text = '%s %s' % (
-    inv.contract.employee.firstname, inv.contract.employee.lastname)
+        inv.contract.employee.firstname, inv.contract.employee.lastname)
     items = ET.SubElement(doc, 'invoice-items')
     for ii in inv.invoice_items:
         ET.SubElement(items, 'invoice-item').text = str(ii.id)
@@ -639,3 +639,4 @@ def invoices_items(session):
     }
 
     print(tabulate(to_tabulate, headers='keys'))
+
