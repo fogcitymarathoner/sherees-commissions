@@ -8,11 +8,7 @@ parser = argparse.ArgumentParser(description='RRG Cache Sherees Commissions Invo
 
 parser.add_argument('project', help='project name',
                     choices=['rrg', 'biz'])
-parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir with invoices',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/commissions_items/'
-            'invoices/invoices_items/')
+
 
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
