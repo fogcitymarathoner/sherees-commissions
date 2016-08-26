@@ -384,8 +384,8 @@ def cache_comm_items(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session,
-                                                                  args)
+    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(
+        session, args)
 
     #
     # Make sure destination directories exist
@@ -394,18 +394,19 @@ def cache_comm_items(session, args):
 
     to_sync = []
     for comm_item in citems:
-        file = full_comm_item_xml_path(args.datadir, comm_item)
-        # add to sync list if comm item not on disk
-        if file[0] not in disk_dict:
-            to_sync.append(comm_item)
-        else:
-            # check the rest of the business rules for syncing
-            # no time stamps, timestamps out of sync
-            if comm_item.last_sync_time is None or comm_item.modified_date is None:
+        if comm_item.amount > 0:
+            file = full_comm_item_xml_path(args.datadir, comm_item)
+            # add to sync list if comm item not on disk
+            if file[0] not in disk_dict:
                 to_sync.append(comm_item)
-                continue
-            if comm_item.modified_date > comm_item.last_sync_time:
-                to_sync.append(comm_item)
+            else:
+                # check the rest of the business rules for syncing
+                # no time stamps, timestamps out of sync
+                if comm_item.last_sync_time is None or comm_item.modified_date is None:
+                    to_sync.append(comm_item)
+                    continue
+                if comm_item.modified_date > comm_item.last_sync_time:
+                    to_sync.append(comm_item)
 
     # Write out xml
     for comm_item in to_sync:

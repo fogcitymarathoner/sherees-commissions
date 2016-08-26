@@ -35,12 +35,16 @@ def monies_due():
 
     report = ''
     if args.format == 'plain':
+        report += 'Summary\n'
         report += sheree_total_monies_owed(session, args)
         report += '\n'
+        report += 'Hourly\n'
         report += payroll_due_report(session, args)
         report += '\n'
+        report += 'Notea Report\n'
         report += sherees_notes_report(session, args)
         report += '\n'
+        report += 'Commissions Report\n'
         report += sherees_commissions_report(session, args)
     elif args.format == 'latex':
         report += comm_latex_document_header("Sheree's Monies Due Report")
