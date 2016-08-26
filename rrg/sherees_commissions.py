@@ -652,8 +652,11 @@ def cached_comm_items(session, args):
         args.year = cm['year']
         total, res = year_month_statement(session, args)
         for ci in res:
-            if ci.description not in citems and ci.description.lower == 'overtime':
-                citems.append(ci.description)
+            try:
+                if ci.description not in citems and ci.description.lower == 'overtime':
+                    citems.append(ci.description)
+            except AttributeError:
+                pass
     return citems
 
 
