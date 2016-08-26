@@ -619,17 +619,19 @@ def invoices_items(session):
     iitems = []
     for inv in sherees_invoices_of_interest(session):
         for iitem in inv.invoice_items:
-            if iitem.description.lower() == 'overtime':
-                iitems.append({
-                    'id': iitem.id,
-                    'date': iitem.invoice.date,
-                    'description': '%s-%s %s %s - %s' % (
-                        str(iitem.invoice.period_start),
-                        str(iitem.invoice.period_end),
-                        iitem.invoice.contract.employee.firstname,
-                        iitem.invoice.contract.employee.lastname,
-                        iitem.description)
-                })
+            if iitem.invoice.voided is False:
+                if iitem.quantity > 0:
+                    if iitem.description.lower() == 'overtime':
+                        iitems.append({
+                            'id': iitem.id,
+                            'date': iitem.invoice.date,
+                            'description': '%s-%s %s %s - %s' % (
+                                str(iitem.invoice.period_start),
+                                str(iitem.invoice.period_end),
+                                iitem.invoice.contract.employee.firstname,
+                                iitem.invoice.contract.employee.lastname,
+                                iitem.description)
+                        })
 
     to_tabulate = {
         'id': [i['id'] for i in iitems],
