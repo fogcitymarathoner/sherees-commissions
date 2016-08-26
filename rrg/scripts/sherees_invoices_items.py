@@ -1,6 +1,6 @@
 
 import argparse
-from rrg.sherees_commissions import invoices_items
+from rrg.sherees_commissions import invoices_items as sinvoice_items
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Cache Sherees Commissions Invoices Items')
@@ -26,4 +26,4 @@ def invoices_items():
     session = session_maker(args)
 
     print('Sherees Invoices Items')
-    invoices_items(session)
+    sinvoices_items(session)
