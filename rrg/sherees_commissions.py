@@ -661,5 +661,5 @@ def iitem_exclude(session, args):
     ex = {}
     for i in iitems:
         if i not in citems:
-            ex[hash(i.description)] = None
+            ex[hash(i['description'])] = None
     return ex
