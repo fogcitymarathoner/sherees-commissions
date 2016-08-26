@@ -674,4 +674,5 @@ def inv_report(session, args):
             if hash(ii.description) not in iex and ii.quantity > 0:
                 total += ii.quantity * ii.amount
                 print(ii)
-        print('%s %s %s %s' % (i.id, i.date, total, i.worker))
+        print('%s %s %s %s %s' % (i.id, i.date, total,
+                                  i.contract.employee.firstname, i.contract.employee.lastname))
