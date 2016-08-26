@@ -669,7 +669,9 @@ def inv_report(session, args):
     iex = iitem_exclude(session, args)
     invs = sherees_invoices_of_interest(session)
     for i in invs:
+        total = 0
         for ii in i.invoice_items:
-            if hash(ii.description) not in iex:
+            if hash(ii.description) not in iex and ii.quantity > 0:
+                total += ii.quantity * ii.amount
                 print(ii)
-        print(i)
+        print('%s %s %s %s' % (i.id, i.date, total, i.worker))
