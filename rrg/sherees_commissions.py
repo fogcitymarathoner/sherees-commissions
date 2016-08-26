@@ -633,14 +633,7 @@ def invoices_items(session):
                                 iitem.description)
                         })
 
-    to_tabulate = {
-        'id': [i['id'] for i in iitems],
-        'date': [i['date'] for i in iitems],
-        'description': [i['description'] for i in iitems],
-
-    }
-
-    print(tabulate(to_tabulate, headers='keys'))
+    return iitems
 
 
 def cached_comm_items(session, args):
@@ -652,6 +645,7 @@ def cached_comm_items(session, args):
         args.year = cm['year']
         total, res = year_month_statement(session, args)
         for ci in res:
+            print(res)
             try:
                 if ci.description not in citems and ci.description.lower == 'overtime':
                     citems.append(ci.description)
