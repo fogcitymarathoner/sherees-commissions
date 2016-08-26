@@ -642,3 +642,28 @@ def invoices_items(session):
 
     print(tabulate(to_tabulate, headers='keys'))
 
+
+def cached_comm_items(session, args):
+
+    citems = []
+    for cm in comm_months(end=dt.now()):
+
+        args.month = cm['month']
+        args.year = cm['year']
+        total, res = year_month_statement(session, args)
+        for ci in res:
+            if ci.description not in citems and ci.description.lower == 'overtime':
+                citems.append(ci.description)
+    return citems
+
+
+def iitem_exclude(session, args):
+
+    iitems = invoices_items(session)
+    citems = cached_comm_items(session, args)
+
+    ex = []
+    for i in iitems:
+        if i not in citems:
+            ex.append(i)
+    return ex
