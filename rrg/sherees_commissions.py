@@ -294,14 +294,6 @@ def sherees_comm_path_year_month(session, args):
                         str(args.month).zfill(2))
 
 
-def full_comm_item_xml_path(data_dir, comm_item):
-    rel_dir = os.path.join(str(comm_item.employee_id),
-                           str(comm_item.date.year),
-                           str(comm_item.date.month).zfill(2))
-    return os.path.join(data_dir, rel_dir,
-                        '%s.xml' % str(comm_item.id).zfill(5)), rel_dir
-
-
 def db_date_dictionary_comm_item(session, args):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
@@ -314,7 +306,7 @@ def db_date_dictionary_comm_item(session, args):
     citems = session.query(Citem).order_by(Citem.id)
 
     for comm_item in citems:
-        f, rel_dir = full_comm_item_xml_path(args.datadir, comm_item)
+        f, rel_dir = full_dated_obj_xml_path(args.datadir, comm_item)
         rel_dir_set.add(rel_dir)
         citem_dict[f] = comm_item.last_sync_time
 
@@ -351,7 +343,7 @@ def sync_comm_item(session, data_dir, comm_item):
     """
     writes xml file for commissions item
     """
-    f, rel_dir = full_comm_item_xml_path(data_dir, comm_item)
+    f, rel_dir = full_dated_obj_xml_path(data_dir, comm_item)
     with open(f, 'w') as fh:
         fh.write(ET.tostring(comm_item.to_xml()))
 
@@ -396,7 +388,7 @@ def cache_comm_items(session, args):
     to_sync = []
     for comm_item in citems:
         if comm_item.amount > 0:
-            file = full_comm_item_xml_path(args.datadir, comm_item)
+            file = full_dated_obj_xml_path(args.datadir, comm_item)
             # add to sync list if comm item not on disk
             if file[0] not in disk_dict:
                 to_sync.append(comm_item)
@@ -412,6 +404,24 @@ def cache_comm_items(session, args):
     # Write out xml
     for comm_item in to_sync:
         sync_comm_item(session, args.datadir, comm_item)
+
+
+def cache_comm_payments(session, args):
+
+    for cm in comm_months(end=dt.now()):
+        args.month = cm['month']
+        args.year = cm['year']
+        payments, commissions = \
+            sherees_commissions_transactions_year_month(session, args)
+
+        for pay in payments:
+            if pay.amount > 0:
+                filename = full_dated_obj_xml_path(args.datadir, pay)
+                if not os.path.isdir(filename):
+                    os.path.makedirs(filename)
+                with open(filename, 'w') as fh:
+                    fh.write(pay.to_xml().tostring())
+                print('%s written')
 
 
 def comm_item_xml_to_dict(citem):
@@ -618,6 +628,19 @@ def cache_invoices_items(session, args):
                 fh.write(iitem_xml_pretty_str(iitem))
 
             print('%s written' % f)
+
+    iex = iitem_exclude(session, args)
+
+    doc = ET.Element('excluded-invoice-itmes')
+    for ix in iex:
+
+        ET.SubElement(doc, 'id').text = str(ix.id)
+
+    ex_inv_filename = os.path.join(args.datadir, 'excludes.xml')
+    with open(ex_inv_filename, 'w') as fh:
+        fh.write(ET.dump(doc))
+
+    print('%s written' % ex_inv_filename)
 
 
 def invoices_items(session):

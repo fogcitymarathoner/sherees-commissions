@@ -139,6 +139,7 @@ class CommPayment(Base):
     check_number = Column(String(10))
     cleared = Column(Boolean)
     voided = Column(Boolean)
+    # fixme: add last_sync_time
 
     def __repr__(self):
         return "<CommissionsPayment(id='%s', employee='%s %s', check_number='%s', date='%s', amount='%s'," \
@@ -146,6 +147,17 @@ class CommPayment(Base):
                    self.id, self.employee.firstname, self.employee.lastname,
                    self.check_number, self.date, self.amount,
                    self.description)
+
+    def to_xml(self):
+        doc = ET.Element('commissions-payment')
+
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'check_number').text = str(self.check_number)
+        ET.SubElement(doc, 'description').text = str(self.description)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+
+        return doc
 
 
 class Client(Base):
@@ -424,6 +436,7 @@ class Iitem(Base):
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
 
         return doc
+
 
 class Citem(Base):
     """
