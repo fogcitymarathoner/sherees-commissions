@@ -31,6 +31,7 @@ def cache_comm_payments():
     session = session_maker(args)
     if args.project == 'rrg':
         print('Caching Commission Payments')
+        args.cache = False
         cache_commissions_payments(session, args)
     else:
         print('Project not "rrg" skipping Caching Commission Items')

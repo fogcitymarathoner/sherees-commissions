@@ -213,10 +213,12 @@ def sherees_comm_items_year_month(session, args):
     """
     xml_comm_items = []
     dir = sherees_comm_path_year_month(session, args)
+    print dir
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
 
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
+            print filename
             if re.search(
                     'transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/'
                     '[0-9]{5}\.xml$',
@@ -245,7 +247,8 @@ def sherees_comm_payments_year_month(session, args):
             .order_by(CommPayment.date)
     else:
         cps = []
-        dirname = os.path.join(args.datadir, 'invoice_items', 'commissions_payments', str(y), str(m).zfill(2))
+        dirname = os.path.join(args.datadir, 'commissions_payments', str(y), str(m).zfill(2))
+        print args.datadir
         print dirname
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             print fileList
@@ -257,9 +260,7 @@ def sa_sheree(session):
     """
     return sheree's sa object
     """
-    return \
-        session.query(Employee).filter_by(firstname='sheree', salesforce=True)[
-            0]
+    return  session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
 
 
 start = dt(year=2009, month=6, day=1)
@@ -300,7 +301,7 @@ def sherees_comm_path_year_month(session, args):
 
     """
     sheree = sa_sheree(session)
-    return os.path.join(args.datadir, str(sheree.id), str(args.year),
+    return os.path.join(args.datadir, 'commissions_items', str(sheree.id), str(args.year),
                         str(args.month).zfill(2))
 
 
