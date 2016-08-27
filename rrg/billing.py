@@ -35,7 +35,7 @@ def sync_invoice_item(session, data_dir, inv_item):
     """
     writes xml file for invoices
     """
-    f, rel_dir = full_non_dated_xml_path(data_dir, inv_item)
+    f = full_non_dated_xml_path(data_dir, inv_item)
     with open(f, 'w') as fh:
         fh.write(ET.tostring(inv_item.to_xml()))
 
@@ -75,11 +75,10 @@ def db_date_dictionary_invoice_items(session, args):
     invoices_items = session.query(Iitem).order_by(Iitem.id)
 
     for invitem in invoices_items:
-        f, rel_dir = full_non_dated_xml_path(args.datadir, invitem)
-        rel_dir_set.add(rel_dir)
+        f = full_non_dated_xml_path(args.datadir, invitem)
         invitem_dict[f] = invitem.last_sync_time
 
-    return invitem_dict, invoices_items, rel_dir_set
+    return invitem_dict, invoices_items
 
 
 def verify_dirs_ready(data_dir, rel_dir_set):
@@ -126,12 +125,7 @@ def cache_invoices_items(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, inv_items, rel_dir_set = db_date_dictionary_invoice_items(session, args)
-
-    #
-    # Make sure destination directories exist
-    #
-    verify_dirs_ready(args.datadir, rel_dir_set)
+    date_dict, inv_items = db_date_dictionary_invoice_items(session, args)
 
     to_sync = []
     for inv_item in inv_items:
