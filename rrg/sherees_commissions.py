@@ -727,7 +727,7 @@ def inv_report(session, args):
                     idoc = ET.parse(filename).getroot()
                     iid = idoc.findall('id')[0].text
                     idate = idoc.findall('date')[0].text
-                    employee = idoc.findall('emploee')[0].text
+                    employee = idoc.findall('employee')[0].text
                     start = idoc.findall('period_start')[0].text
                     end = idoc.findall('period_end')[0].text
                     iitemsdoc = idoc.findall('invoice-items')
