@@ -462,31 +462,26 @@ def comm_item_xml_to_sa(citem):
 def year_month_statement(session, args):
     sum = 0
     res = []
-    if not args.cache:
-        payments, commissions = \
-            sherees_commissions_transactions_year_month(session, args)
-        for payment in payments:
+    
+    payments, commissions = \
+        sherees_commissions_transactions_year_month(session, args)
+    for payment in payments:
+        res.append({
+            'id': payment.check_number, 'date': payment.date,
+            'description': payment.description,
+            'amount': -payment.amount, 'employee_id': payment.employee_id})
+        sum -= payment.amount
+    for citem in commissions:
+        ci = comm_item_xml_to_sa(citem)
+        if ci.voided != 1:
             res.append({
-                'id': payment.check_number, 'date': payment.date,
-                'description': payment.description,
-                'amount': -payment.amount, 'employee_id': payment.employee_id})
-            sum -= payment.amount
-        print '"commissions"'
-        print commissions
-        for citem in commissions:
-            ci = comm_item_xml_to_sa(citem)
-            if ci.voided != 1:
-                res.append({
-                    'id': '',
-                    'date': dt.strftime(ci.date, YMD_FORMAT),
-                    'description': ci.description,
-                    'amount': round(ci.amount),
-                    'employee_id': ci.employee_id,
-                })
-                sum += ci.amount
-    else:
-        payments, commissions = \
-            sherees_commissions_transactions_year_month(session, args)
+                'id': '',
+                'date': dt.strftime(ci.date, YMD_FORMAT),
+                'description': ci.description,
+                'amount': round(ci.amount),
+                'employee_id': ci.employee_id,
+            })
+            sum += ci.amount
 
     return sum, res
 
