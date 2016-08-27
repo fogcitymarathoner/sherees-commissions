@@ -712,7 +712,7 @@ def iitem_exclude(session, args):
 
 def inv_report(session, args):
 
-    if args.cached:
+    if args.cache:
         for cm in comm_months(end=dt.now()):
             args.month = cm['month']
             args.year = cm['year']
