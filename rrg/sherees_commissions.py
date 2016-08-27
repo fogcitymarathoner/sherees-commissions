@@ -727,7 +727,7 @@ def inv_report(session, args):
                     idoc = ET.parse(filename).getroot()
                     iitemsdoc = idoc.findall('invoice-items')
                     for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
-                        iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text) + '.xml')
+                        iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
                         print iitemf
                         iitemdoc = ET.parse(iitemf).getroot()
                         print iitemdoc.findall('quantity')[0].text
