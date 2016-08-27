@@ -436,6 +436,7 @@ class Iitem(Base):
         ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
         ET.SubElement(doc, 'description').text = str(self.description)
         ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'cost').text = str(self.amount)
         ET.SubElement(doc, 'quantity').text = str(self.quantity)
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
 
