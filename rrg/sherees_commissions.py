@@ -732,9 +732,10 @@ def inv_report(session, args):
                     end = idoc.findall('period_end')[0].text
                     iitemsdoc = idoc.findall('invoice-items')
                     total = 0
-
+                    iids = []
                     for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
                         iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
+                        iids.append(str(iitem_id_ele.text))
                         iitemdoc = ET.parse(iitemf).getroot()
                         quantity = float(iitemdoc.findall('quantity')[0].text)
                         amount = float(iitemdoc.findall('amount')[0].text)
@@ -742,8 +743,8 @@ def inv_report(session, args):
                     print('Invoice %s' % iid)
                     print('\t%s %s %s %s-%s' % (idate, total, employee, start, end))
 
-                    for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
-                        iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
+                    for iid in iids:
+                        iitemf = os.path.join(inv_items_dir, iid.zfill(5) + '.xml')
                         iitemdoc = ET.parse(iitemf).getroot()
                         cost = float(iitemdoc.findall('cost')[0].text)
                         quantity = float(iitemdoc.findall('quantity')[0].text)
