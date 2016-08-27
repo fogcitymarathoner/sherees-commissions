@@ -8,12 +8,12 @@ from operator import itemgetter
 from sqlalchemy import and_
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
-from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
 from s3_mysql_backup import mkdirs
 
 from rrg.billing import full_dated_obj_xml_path
 from rrg.billing import full_non_dated_xml_path
+from rrg.billing import full_dated_comm_item_xml_path
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment
@@ -319,7 +319,7 @@ def db_date_dictionary_comm_item(session, args):
     citems = session.query(Citem).order_by(Citem.id)
 
     for comm_item in citems:
-        f, rel_dir = full_dated_obj_xml_path(args.datadir, comm_item)
+        f, rel_dir = full_dated_comm_item_xml_path(args.datadir, comm_item)
         rel_dir_set.add(rel_dir)
         citem_dict[f] = comm_item.last_sync_time
 

@@ -14,6 +14,11 @@ def full_dated_obj_xml_path(data_dir, obj):
     return os.path.join(data_dir, rel_dir, '%s.xml' % str(obj.id).zfill(5)), rel_dir
 
 
+def full_dated_comm_item_xml_path(data_dir, obj):
+    rel_dir = os.path.join(str(obj.employee_id), str(obj.date.year), str(obj.date.month).zfill(2))
+    return os.path.join(data_dir, rel_dir, '%s.xml' % str(obj.id).zfill(5)), rel_dir
+
+
 def full_non_dated_xml_path(data_dir, obj):
     return os.path.join(data_dir, '%s.xml' % str(obj.id).zfill(5))
 
