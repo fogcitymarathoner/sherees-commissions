@@ -601,8 +601,8 @@ def invoice_to_xml(inv):
 def cache_invoices(session, args):
     for inv in sherees_invoices_of_interest(session):
         f, rel_dir = full_dated_obj_xml_path(args.datadir, inv)
-        full_path = os.isdir(os.path.join(args.datadir, rel_dir))
-        if not full_path:
+        full_path = os.path.join(args.datadir, rel_dir)
+        if not os.isdir(full_path):
             os.makedirs(full_path)
         with open(f, 'w') as fh:
             fh.write(ET.tostring(invoice_to_xml(inv)))
