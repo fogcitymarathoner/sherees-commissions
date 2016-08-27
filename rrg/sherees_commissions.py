@@ -245,10 +245,10 @@ def sherees_comm_payments_year_month(session, args):
             .order_by(CommPayment.date)
     else:
         cps = []
-        '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/'
         dirname = os.path.join(args.datadir, 'invoice_items', 'commissions_payments', str(y), str(m).zfill(2))
-
+        print dirname
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
+            print fileList
             for fn in fileList:
                 print('reading %s' % fn)
         return cps
