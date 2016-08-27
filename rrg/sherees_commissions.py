@@ -745,6 +745,7 @@ def inv_report(session, args):
 
                     for iid in iids:
                         iitemf = os.path.join(inv_items_dir, iid.zfill(5) + '.xml')
+                        print iitemf
                         iitemdoc = ET.parse(iitemf).getroot()
                         cost = float(iitemdoc.findall('cost')[0].text)
                         quantity = float(iitemdoc.findall('quantity')[0].text)
