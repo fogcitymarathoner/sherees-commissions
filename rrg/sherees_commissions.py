@@ -10,6 +10,7 @@ from sqlalchemy import and_
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
+from s3_mysql_backup import mkdirs
 
 from rrg.billing import full_dated_obj_xml_path
 from rrg.billing import full_non_dated_xml_path
@@ -417,11 +418,11 @@ def cache_comm_payments(session, args):
         for pay in payments:
             if pay.amount > 0:
                 filename = full_dated_obj_xml_path(args.datadir, pay)
-                if not os.path.isdir(filename):
-                    os.path.makedirs(filename)
-                with open(filename, 'w') as fh:
-                    fh.write(pay.to_xml().tostring())
-                print('%s written')
+                if not os.path.isdir(os.path.dirname(filename[0])):
+                    mkdirs(os.path.dirname(filename[0]))
+                with open(filename[0], 'w') as fh:
+                    fh.write(ET.tostring(pay.to_xml()))
+                print('%s written' % filename[0])
 
 
 def comm_item_xml_to_dict(citem):
@@ -631,14 +632,14 @@ def cache_invoices_items(session, args):
 
     iex = iitem_exclude(session, args)
 
-    doc = ET.Element('excluded-invoice-itmes')
+    doc = ET.Element('excluded-invoice-items')
     for ix in iex:
 
-        ET.SubElement(doc, 'id').text = str(ix.id)
+        ET.SubElement(doc, 'hash').text = str(ix)
 
     ex_inv_filename = os.path.join(args.datadir, 'excludes.xml')
     with open(ex_inv_filename, 'w') as fh:
-        fh.write(ET.dump(doc))
+        fh.write(ET.tostring(doc))
 
     print('%s written' % ex_inv_filename)
 
