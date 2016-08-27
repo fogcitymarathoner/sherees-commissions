@@ -254,6 +254,13 @@ def sherees_comm_payments_year_month(session, args):
             print fileList
             for fn in fileList:
                 print('reading %s' % fn)
+
+                doc = CommPayment.from_xml(fn)
+                amount = float(doc.findall('amount')[0].text)
+                check_number = doc.findall('check_number')[0].text
+                description = doc.findall('description')[0].text
+                date = doc.findall('date')[0].text
+                cps.append(CommPayment(amount=amount, check_number=check_number, description=description, date=date))
         return cps
 
 def sa_sheree(session):
@@ -462,7 +469,7 @@ def comm_item_xml_to_sa(citem):
 def year_month_statement(session, args):
     sum = 0
     res = []
-    
+
     payments, commissions = \
         sherees_commissions_transactions_year_month(session, args)
     for payment in payments:
