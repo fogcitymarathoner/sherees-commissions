@@ -12,6 +12,7 @@ from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
 
 from rrg.billing import full_dated_obj_xml_path
+from rrg.billing import full_non_dated_xml_path
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment
@@ -609,7 +610,7 @@ def cache_invoices(session, args):
 def cache_invoices_items(session, args):
     for inv in sherees_invoices_of_interest(session):
         for iitem in inv.invoice_items:
-            f, rel_dir = full_dated_obj_xml_path(args.datadir, iitem)
+            f, rel_dir = full_non_dated_xml_path(args.datadir, iitem)
             with open(f, 'w') as fh:
                 fh.write(iitem_xml_pretty_str(iitem))
 

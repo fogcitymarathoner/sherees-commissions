@@ -14,6 +14,10 @@ def full_dated_obj_xml_path(data_dir, obj):
     return os.path.join(data_dir, rel_dir, '%s.xml' % str(obj.id).zfill(5)), rel_dir
 
 
+def full_non_dated_xml_path(data_dir, obj):
+    return os.path.join(data_dir, '%s.xml' % str(obj.id).zfill(5))
+
+
 def sync_invoice(session, data_dir, invoice):
     """
     writes xml file for invoices
@@ -31,7 +35,7 @@ def sync_invoice_item(session, data_dir, inv_item):
     """
     writes xml file for invoices
     """
-    f, rel_dir = full_dated_obj_xml_path(data_dir, inv_item)
+    f, rel_dir = full_non_dated_xml_path(data_dir, inv_item)
     with open(f, 'w') as fh:
         fh.write(ET.tostring(inv_item.to_xml()))
 
@@ -71,7 +75,7 @@ def db_date_dictionary_invoice_items(session, args):
     invoices_items = session.query(Iitem).order_by(Iitem.id)
 
     for invitem in invoices_items:
-        f, rel_dir = full_dated_obj_xml_path(args.datadir, invitem)
+        f, rel_dir = full_non_dated_xml_path(args.datadir, invitem)
         rel_dir_set.add(rel_dir)
         invitem_dict[f] = invitem.last_sync_time
 
@@ -131,7 +135,7 @@ def cache_invoices_items(session, args):
 
     to_sync = []
     for inv_item in inv_items:
-        file = full_dated_obj_xml_path(args.datadir, inv_item)
+        file = full_non_dated_xml_path(args.datadir, inv_item)
         # add to sync list if invoice not on disk
         if file[0] not in disk_dict:
             to_sync.append(inv_item)
