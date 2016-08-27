@@ -732,15 +732,23 @@ def inv_report(session, args):
                     end = idoc.findall('period_end')[0].text
                     iitemsdoc = idoc.findall('invoice-items')
                     total = 0
+                    iitemdocs = []
                     for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
                         iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
-                        print iitemf
                         iitemdoc = ET.parse(iitemf).getroot()
+                        iitemdocs.append(iitemdoc)
                         quantity = float(iitemdoc.findall('quantity')[0].text)
                         amount = float(iitemdoc.findall('amount')[0].text)
                         total += quantity * amount
+                    print('Invoice %s' % iid)
+                    print('\t%s %s %s %s-%s' % (idate, total, employee, start, end))
 
-                    print('%s %s %s %s %s-%s' % (iid, idate, total, employee, start, end))
+                    for iitemdoc in iitemdocs:
+
+                        cost = float(iitemdoc.findall('cost')[0].text)
+                        quantity = float(iitemdoc.findall('quantity')[0].text)
+                        amount = float(iitemdoc.findall('amount')[0].text)
+                        print('cost: %s quantity: %s amount: %s' % (cost, quantity, amount))
     else:
         iex = iitem_exclude(session, args)
         invs = sherees_invoices_of_interest(session)
