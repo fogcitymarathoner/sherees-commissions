@@ -150,13 +150,11 @@ class CommPayment(Base):
 
     def to_xml(self):
         doc = ET.Element('commissions-payment')
-
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'amount').text = str(self.amount)
         ET.SubElement(doc, 'check_number').text = str(self.check_number)
         ET.SubElement(doc, 'description').text = str(self.description)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
-
         return doc
 
 

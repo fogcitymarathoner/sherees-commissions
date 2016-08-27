@@ -20,6 +20,9 @@ parser.add_argument(
     '--datadir', required=True, help='datadir dir with ar.xml',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/')
 
+parser.add_argument('--cache', dest='cache', action='store_true')
+parser.add_argument('--no-cache', dest='cache', action='store_false')
+parser.set_defaults(cache=True)
 
 ledger_line_format = '%s %s %s %s'
 

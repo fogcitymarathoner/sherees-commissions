@@ -236,13 +236,22 @@ def sherees_comm_payments_year_month(session, args):
         nexty = int(y) + 1
         nextm = 1
 
-    return session.query(CommPayment) \
-        .filter(CommPayment.employee == sa_sheree(session)) \
-        .filter(CommPayment.date >= '%s-%s-01' % (y, m)) \
-        .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm)) \
-        .filter(CommPayment.voided == False) \
-        .order_by(CommPayment.date)
+    if not args.cache:
+        return session.query(CommPayment) \
+            .filter(CommPayment.employee == sa_sheree(session)) \
+            .filter(CommPayment.date >= '%s-%s-01' % (y, m)) \
+            .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm)) \
+            .filter(CommPayment.voided == False) \
+            .order_by(CommPayment.date)
+    else:
+        cps = []
+        '/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/'
+        dirname = os.path.join(args.datadir, 'invoice_items', 'commissions_payments', str(y), str(m).zfill(2))
 
+        for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
+            for fn in fileList:
+                print('reading %s' % fn)
+        return cps
 
 def sa_sheree(session):
     """
@@ -452,26 +461,29 @@ def comm_item_xml_to_sa(citem):
 def year_month_statement(session, args):
     sum = 0
     res = []
-
-    payments, commissions = \
-        sherees_commissions_transactions_year_month(session, args)
-    for payment in payments:
-        res.append({
-            'id': payment.check_number, 'date': payment.date,
-            'description': payment.description,
-            'amount': -payment.amount, 'employee_id': payment.employee_id})
-        sum -= payment.amount
-    for citem in commissions:
-        ci = comm_item_xml_to_sa(citem)
-        if ci.voided != 1:
+    if not args.cache:
+        payments, commissions = \
+            sherees_commissions_transactions_year_month(session, args)
+        for payment in payments:
             res.append({
-                'id': '',
-                'date': dt.strftime(ci.date, YMD_FORMAT),
-                'description': ci.description,
-                'amount': round(ci.amount),
-                'employee_id': ci.employee_id,
-            })
-            sum += ci.amount
+                'id': payment.check_number, 'date': payment.date,
+                'description': payment.description,
+                'amount': -payment.amount, 'employee_id': payment.employee_id})
+            sum -= payment.amount
+        for citem in commissions:
+            ci = comm_item_xml_to_sa(citem)
+            if ci.voided != 1:
+                res.append({
+                    'id': '',
+                    'date': dt.strftime(ci.date, YMD_FORMAT),
+                    'description': ci.description,
+                    'amount': round(ci.amount),
+                    'employee_id': ci.employee_id,
+                })
+                sum += ci.amount
+    else:
+        payments, commissions = \
+            sherees_commissions_transactions_year_month(session, args)
 
     return sum, res
 
