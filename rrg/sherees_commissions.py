@@ -725,12 +725,22 @@ def inv_report(session, args):
                     filename = os.path.join(dirName, fname)
                     print filename
                     idoc = ET.parse(filename).getroot()
+                    iid = idoc.findall('id')[0].text
+                    idate = idoc.findall('date')[0].text
+                    employee = idoc.findall('emploee')[0].text
+                    start = idoc.findall('period_start')[0].text
+                    end = idoc.findall('period_end')[0].text
                     iitemsdoc = idoc.findall('invoice-items')
+                    total = 0
                     for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
                         iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
                         print iitemf
                         iitemdoc = ET.parse(iitemf).getroot()
-                        print iitemdoc.findall('quantity')[0].text
+                        quantity = float(iitemdoc.findall('quantity')[0].text)
+                        amount = float(iitemdoc.findall('amount')[0].text)
+                        total += quantity * amount
+
+                    print('%s %s %s %s %s-%s' % (iid, idate, total, employee, start, end))
     else:
         iex = iitem_exclude(session, args)
         invs = sherees_invoices_of_interest(session)
