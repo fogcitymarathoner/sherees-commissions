@@ -717,12 +717,16 @@ def inv_report(session, args):
             args.month = cm['month']
             args.year = cm['year']
             invdir = os.path.join(args.datadir, str(args.year), str(args.month).zfill(2))
+            inv_items_dir = os.path.join(args.datadir, 'invoices_items')
 
             for dirName, subdirList, fileList in os.walk(invdir, topdown=False):
 
                 for fname in fileList:
                     filename = os.path.join(dirName, fname)
                     print filename
+                    idoc = ET.parse(filename).getroot()
+                    for iitem_id_ele in idoc.findall('invoice-items'):
+                        print os.path.join(inv_items_dir, str(iitem_id_ele.text))
     else:
         iex = iitem_exclude(session, args)
         invs = sherees_invoices_of_interest(session)
