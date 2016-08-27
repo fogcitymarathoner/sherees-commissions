@@ -716,7 +716,7 @@ def inv_report(session, args):
         for cm in comm_months(end=dt.now()):
             args.month = cm['month']
             args.year = cm['year']
-            invdir = os.path.join(args.datadir, 'commissions_items', 'invoices', str(args.year), str(args.month).zfill(2))
+            invdir = os.path.join(args.datadir, str(args.year), str(args.month).zfill(2))
 
             for dirName, subdirList, fileList in os.walk(invdir, topdown=False):
 
