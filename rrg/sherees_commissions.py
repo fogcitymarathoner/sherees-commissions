@@ -735,7 +735,6 @@ def inv_report(session, args):
                     iitemdocs_parsed = []
                     for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
                         iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
-                        iids.append(str(iitem_id_ele.text))
                         iitemdoc = ET.parse(iitemf).getroot()
                         iitemdocs_parsed.append(iitemdoc)
                         quantity = float(iitemdoc.findall('quantity')[0].text)
