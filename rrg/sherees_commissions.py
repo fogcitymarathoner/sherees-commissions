@@ -11,8 +11,7 @@ from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup import YMD_FORMAT
 
-from rrg.billing import full_invoice_xml_path
-from rrg.billing import full_invoice_item_xml_path
+from rrg.billing import full_dated_obj_xml_path
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment
@@ -600,7 +599,7 @@ def invoice_to_xml(inv):
 
 def cache_invoices(session, args):
     for inv in sherees_invoices_of_interest(session):
-        f, rel_dir = full_invoice_xml_path(args.datadir, inv)
+        f, rel_dir = full_dated_obj_xml_path(args.datadir, inv)
         with open(f, 'w') as fh:
             fh.write(ET.tostring(invoice_to_xml(inv)))
 
@@ -610,7 +609,7 @@ def cache_invoices(session, args):
 def cache_invoices_items(session, args):
     for inv in sherees_invoices_of_interest(session):
         for iitem in inv.invoice_items:
-            f, rel_dir = full_invoice_item_xml_path(args.datadir, iitem)
+            f, rel_dir = full_dated_obj_xml_path(args.datadir, iitem)
             with open(f, 'w') as fh:
                 fh.write(iitem_xml_pretty_str(iitem))
 
@@ -618,6 +617,11 @@ def cache_invoices_items(session, args):
 
 
 def invoices_items(session):
+    """
+    gathers a list of all of sherees invoice items of interest
+    :param session:
+    :return:
+    """
     iitems = []
     for inv in sherees_invoices_of_interest(session):
         for iitem in inv.invoice_items:
