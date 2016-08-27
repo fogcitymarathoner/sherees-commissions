@@ -748,7 +748,7 @@ def inv_report(session, args):
                         cost = float(iitemdoc.findall('cost')[0].text)
                         quantity = float(iitemdoc.findall('quantity')[0].text)
                         amount = float(iitemdoc.findall('amount')[0].text)
-                        description = float(iitemdoc.findall('description')[0].text)
+                        description = iitemdoc.findall('description')[0].text
                         print('description: %s cost: %s quantity: %s amount: %s' % (description, cost, quantity, amount))
     else:
         iex = iitem_exclude(session, args)
