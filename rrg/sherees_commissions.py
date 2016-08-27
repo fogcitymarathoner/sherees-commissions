@@ -356,7 +356,7 @@ def sync_comm_item(session, data_dir, comm_item):
     """
     writes xml file for commissions item
     """
-    f, rel_dir = full_dated_obj_xml_path(data_dir, comm_item)
+    f, rel_dir = full_dated_comm_item_xml_path(data_dir, comm_item)
     with open(f, 'w') as fh:
         fh.write(ET.tostring(comm_item.to_xml()))
 
