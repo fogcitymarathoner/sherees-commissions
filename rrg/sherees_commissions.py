@@ -253,9 +253,10 @@ def sherees_comm_payments_year_month(session, args):
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             print fileList
             for fn in fileList:
-                print('reading %s' % fn)
+                fullname = os.path.join(dirName, fn)
+                print('reading %s' % fullname)
 
-                doc = CommPayment.from_xml(fn)
+                doc = CommPayment.from_xml(fullname)
                 amount = float(doc.findall('amount')[0].text)
                 check_number = doc.findall('check_number')[0].text
                 description = doc.findall('description')[0].text
