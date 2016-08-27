@@ -195,6 +195,7 @@ def sherees_commissions_report(session, args):
 
 
 def sherees_commissions_transactions_year_month(session, args):
+    print(sherees_comm_items_year_month(session, args))
     return sherees_comm_payments_year_month(session, args), \
            sorted(sherees_comm_items_year_month(session, args),
                   key=lambda ci: dt.strptime(ci.findall('date')[0].text,
@@ -218,7 +219,6 @@ def sherees_comm_items_year_month(session, args):
 
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
-            print filename
             if re.search(
                     'transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/'
                     '[0-9]{5}\.xml$',
