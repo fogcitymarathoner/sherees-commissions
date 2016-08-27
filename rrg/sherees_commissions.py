@@ -725,7 +725,8 @@ def inv_report(session, args):
                     filename = os.path.join(dirName, fname)
                     print filename
                     idoc = ET.parse(filename).getroot()
-                    for iitem_id_ele in idoc.findall('invoice-item'):
+                    iitemsdoc = idoc.findall('invoice-items')
+                    for iitem_id_ele in iitemsdoc.findall('invoice-item'):
                         print os.path.join(inv_items_dir, str(iitem_id_ele.text))
     else:
         iex = iitem_exclude(session, args)
