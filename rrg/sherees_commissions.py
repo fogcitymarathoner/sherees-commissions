@@ -195,7 +195,6 @@ def sherees_commissions_report(session, args):
 
 
 def sherees_commissions_transactions_year_month(session, args):
-    print(sherees_comm_items_year_month(session, args))
     return sherees_comm_payments_year_month(session, args), \
            sorted(sherees_comm_items_year_month(session, args),
                   key=lambda ci: dt.strptime(ci.findall('date')[0].text,
@@ -214,7 +213,6 @@ def sherees_comm_items_year_month(session, args):
     """
     xml_comm_items = []
     dir = sherees_comm_path_year_month(session, args)
-    print dir
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
 
         for fname in fileList:
@@ -248,13 +246,9 @@ def sherees_comm_payments_year_month(session, args):
     else:
         cps = []
         dirname = os.path.join(args.datadir, 'commissions_payments', str(y), str(m).zfill(2))
-        print args.datadir
-        print dirname
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
-            print fileList
             for fn in fileList:
                 fullname = os.path.join(dirName, fn)
-                print('reading %s' % fullname)
 
                 doc = CommPayment.from_xml(fullname)
                 amount = float(doc.findall('amount')[0].text)
