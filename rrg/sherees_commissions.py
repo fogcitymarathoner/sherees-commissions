@@ -258,6 +258,7 @@ def sherees_comm_payments_year_month(session, args):
                 cps.append(CommPayment(amount=amount, check_number=check_number, description=description, date=date))
         return cps
 
+
 def sa_sheree(session):
     """
     return sheree's sa object
@@ -404,6 +405,7 @@ def cache_comm_items(session, args):
             file = full_dated_obj_xml_path(args.datadir, comm_item)
             # add to sync list if comm item not on disk
             if file[0] not in disk_dict:
+                print '%s not on disk' % file[0]
                 to_sync.append(comm_item)
             else:
                 # check the rest of the business rules for syncing
@@ -412,6 +414,7 @@ def cache_comm_items(session, args):
                     to_sync.append(comm_item)
                     continue
                 if comm_item.modified_date > comm_item.last_sync_time:
+                    print 'caught newer db copy %s' % comm_item
                     to_sync.append(comm_item)
 
     # Write out xml
