@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from tabulate import tabulate
 from operator import itemgetter
+from sqlalchemy import and_
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import mkdirs
@@ -536,8 +537,8 @@ def sherees_invoices_of_interest(session):
             cids.append(con.id)
     invs = []
     if len(cids):
-        invs = session.query(Invoice).filter(
-            Invoice.contract_id.in_(cids)).order_by(Invoice.date)
+        invs = session.query(Invoice).filter(and_(Invoice.voided == False,
+            Invoice.contract_id.in_(cids))).order_by(Invoice.date)
     else:
         print('There are no invoices of sherees interest')
     return invs
