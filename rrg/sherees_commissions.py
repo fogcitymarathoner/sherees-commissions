@@ -582,6 +582,7 @@ def iitem_to_xml(iitem):
             iitem.invoice.contract.employee.firstname,
             iitem.invoice.contract.employee.lastname, iitem.description))
     ET.SubElement(doc, 'amount').text = str(iitem.amount)
+    ET.SubElement(doc, 'cost').text = str(iitem.cost)
     ET.SubElement(doc, 'quantity').text = str(iitem.quantity)
     ET.SubElement(doc, 'cleared').text = str(iitem.cleared)
 
