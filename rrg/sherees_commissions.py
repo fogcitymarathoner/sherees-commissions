@@ -711,15 +711,28 @@ def iitem_exclude(session, args):
 
 
 def inv_report(session, args):
-    iex = iitem_exclude(session, args)
-    invs = sherees_invoices_of_interest(session)
-    for i in invs:
-        total = 0
-        for ii in i.invoice_items:
-            if hash(ii.description) not in iex and ii.quantity > 0:
-                total += ii.quantity * ii.amount
-                print(ii)
-        if total > 0:
-            print('%s %s %s %s %s' % (i.id, i.date, total,
-                                      i.contract.employee.firstname,
-                                      i.contract.employee.lastname))
+
+    if args.cached:
+        for cm in comm_months(end=dt.now()):
+            args.month = cm['month']
+            args.year = cm['year']
+            invdir = os.path.join(args.datadir, 'commissions_items', 'invoices', str(args.year), str(args.month).zfill(2))
+
+            for dirName, subdirList, fileList in os.walk(invdir, topdown=False):
+
+                for fname in fileList:
+                    filename = os.path.join(dirName, fname)
+                    print filename
+    else:
+        iex = iitem_exclude(session, args)
+        invs = sherees_invoices_of_interest(session)
+        for i in invs:
+            total = 0
+            for ii in i.invoice_items:
+                if hash(ii.description) not in iex and ii.quantity > 0:
+                    total += ii.quantity * ii.amount
+                    print(ii)
+            if total > 0:
+                print('%s %s %s %s %s' % (i.id, i.date, total,
+                                          i.contract.employee.firstname,
+                                          i.contract.employee.lastname))
