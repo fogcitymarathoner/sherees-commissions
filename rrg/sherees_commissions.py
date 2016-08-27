@@ -471,6 +471,7 @@ def year_month_statement(session, args):
                 'description': payment.description,
                 'amount': -payment.amount, 'employee_id': payment.employee_id})
             sum -= payment.amount
+        print '"commissions"'
         print commissions
         for citem in commissions:
             ci = comm_item_xml_to_sa(citem)
