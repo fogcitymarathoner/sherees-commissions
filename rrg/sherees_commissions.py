@@ -724,7 +724,6 @@ def inv_report(session, args):
 
                 for fname in fileList:
                     filename = os.path.join(dirName, fname)
-                    print filename
                     idoc = ET.parse(filename).getroot()
                     iid = idoc.findall('id')[0].text
                     idate = idoc.findall('date')[0].text
@@ -742,14 +741,14 @@ def inv_report(session, args):
                         amount = float(iitemdoc.findall('amount')[0].text)
                         total += quantity * amount
                     print('Invoice %s' % iid)
-                    print('\t%s %s %s %s-%s' % (idate, total, employee, start, end))
+                    print('\t%s $%.2f %s %s-%s' % (dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'), total, employee, dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'), dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y')))
 
                     for iitemdoc in iitemdocs_parsed:
                         cost = float(iitemdoc.findall('cost')[0].text)
                         quantity = float(iitemdoc.findall('quantity')[0].text)
                         amount = float(iitemdoc.findall('amount')[0].text)
                         description = iitemdoc.findall('description')[0].text
-                        print('description: %s cost: %s quantity: %s amount: %s' % (description, cost, quantity, amount))
+                        print('\t\t%s cost: %.2f quantity: %s amount: $%.2f' % (description, cost, quantity, amount))
     else:
         iex = iitem_exclude(session, args)
         invs = sherees_invoices_of_interest(session)
