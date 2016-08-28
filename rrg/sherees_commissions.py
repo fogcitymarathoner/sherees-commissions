@@ -263,7 +263,7 @@ def sa_sheree(session):
     """
     return sheree's sa object
     """
-    return  session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
+    return session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
 
 
 start = dt(year=2009, month=6, day=1)
@@ -419,7 +419,6 @@ def cache_comm_items(session, args):
 
 
 def cache_comm_payments(session, args):
-
     for cm in comm_months(end=dt.now()):
         args.month = cm['month']
         args.year = cm['year']
@@ -560,7 +559,7 @@ def sherees_invoices_of_interest(session):
     invs = []
     if len(cids):
         invs = session.query(Invoice).filter(and_(Invoice.voided == False,
-            Invoice.contract_id.in_(cids))).order_by(Invoice.date)
+                                                  Invoice.contract_id.in_(cids))).order_by(Invoice.date)
     else:
         print('There are no invoices of sherees interest')
     return invs
@@ -646,7 +645,6 @@ def cache_invoices_items(session, args):
 
     doc = ET.Element('excluded-invoice-items')
     for ix in iex:
-
         ET.SubElement(doc, 'hash').text = str(ix)
 
     ex_inv_filename = os.path.join(args.datadir, 'excludes.xml')
@@ -683,7 +681,6 @@ def invoices_items(session):
 
 
 def cached_comm_items(session, args):
-
     citems = []
     for cm in comm_months(end=dt.now()):
 
@@ -700,7 +697,6 @@ def cached_comm_items(session, args):
 
 
 def iitem_exclude(session, args):
-
     iitems = invoices_items(session)
     citems = cached_comm_items(session, args)
 
@@ -711,54 +707,62 @@ def iitem_exclude(session, args):
     return ex
 
 
-def inv_report(session, args):
+def invoice_report_month_year(args):
+    invdir = os.path.join(args.datadir, str(args.year), str(args.month).zfill(2))
+    inv_items_dir = os.path.join(args.datadir, 'invoices_items')
+    res = '%s/%s #######################' % (args.year, args.month)
+    for dirName, subdirList, fileList in os.walk(invdir, topdown=False):
 
+        for fname in fileList:
+            filename = os.path.join(dirName, fname)
+            idoc = ET.parse(filename).getroot()
+            iid = idoc.findall('id')[0].text
+            idate = idoc.findall('date')[0].text
+            employee = idoc.findall('employee')[0].text
+            start = idoc.findall('period_start')[0].text
+            end = idoc.findall('period_end')[0].text
+            iitemsdoc = idoc.findall('invoice-items')
+            total = 0
+            iitemdocs_parsed = []
+            for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
+                iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
+                iitemdoc = ET.parse(iitemf).getroot()
+                iitemdocs_parsed.append(iitemdoc)
+                quantity = float(iitemdoc.findall('quantity')[0].text)
+                amount = float(iitemdoc.findall('amount')[0].text)
+                total += quantity * amount
+            if total > 0:
+                res += 'Invoice %s' % iid
+            res += '\t%s $%.2f %s %s-%s' % (
+            dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'), total, employee,
+            dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
+            dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
+
+            for iitemdoc in iitemdocs_parsed:
+                cost = float(iitemdoc.findall('cost')[0].text)
+                quantity = float(iitemdoc.findall('quantity')[0].text)
+                amount = float(iitemdoc.findall('amount')[0].text)
+                description = iitemdoc.findall('description')[0].text
+                if float(amount) * float(quantity) > 0:
+                    res += '\t\t%s cost: %.2f quantity: %s amount: $%.2f' % (description, cost, quantity, amount)
+
+    return res
+
+
+def inv_report(session, args):
     if args.cache:
         for cm in comm_months(end=dt.now()):
             args.month = cm['month']
             args.year = cm['year']
-            invdir = os.path.join(args.datadir, str(args.year), str(args.month).zfill(2))
-            inv_items_dir = os.path.join(args.datadir, 'invoices_items')
-
-            for dirName, subdirList, fileList in os.walk(invdir, topdown=False):
-
-                for fname in fileList:
-                    filename = os.path.join(dirName, fname)
-                    idoc = ET.parse(filename).getroot()
-                    iid = idoc.findall('id')[0].text
-                    idate = idoc.findall('date')[0].text
-                    employee = idoc.findall('employee')[0].text
-                    start = idoc.findall('period_start')[0].text
-                    end = idoc.findall('period_end')[0].text
-                    iitemsdoc = idoc.findall('invoice-items')
-                    total = 0
-                    iitemdocs_parsed = []
-                    for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
-                        iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
-                        iitemdoc = ET.parse(iitemf).getroot()
-                        iitemdocs_parsed.append(iitemdoc)
-                        quantity = float(iitemdoc.findall('quantity')[0].text)
-                        amount = float(iitemdoc.findall('amount')[0].text)
-                        total += quantity * amount
-                    print('Invoice %s' % iid)
-                    print('\t%s $%.2f %s %s-%s' % (dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'), total, employee, dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'), dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y')))
-
-                    for iitemdoc in iitemdocs_parsed:
-                        cost = float(iitemdoc.findall('cost')[0].text)
-                        quantity = float(iitemdoc.findall('quantity')[0].text)
-                        amount = float(iitemdoc.findall('amount')[0].text)
-                        description = iitemdoc.findall('description')[0].text
-                        print('\t\t%s cost: %.2f quantity: %s amount: $%.2f' % (description, cost, quantity, amount))
+            print(invoice_report_month_year(args))
     else:
-        iex = iitem_exclude(session, args)
-        invs = sherees_invoices_of_interest(session)
-        for i in invs:
-            total = 0
-            for ii in i.invoice_items:
-                if hash(ii.description) not in iex and ii.quantity > 0:
-                    total += ii.quantity * ii.amount
-                    print(ii)
-            if total > 0:
-                print('%s %s %s %s %s' % (i.id, i.date, total,
-                                          i.contract.employee.firstname,
-                                          i.contract.employee.lastname))
+    iex = iitem_exclude(session, args)
+    invs = sherees_invoices_of_interest(session)
+    for i in invs:
+        total = 0
+        for ii in i.invoice_items:
+            if hash(ii.description) not in iex and ii.quantity > 0:
+                total += ii.quantity * ii.amount
+                print(ii)
+        if total > 0:
+            print('%s %s %s %s %s' % (i.id, i.date, total, i.contract.employee.firstname, i.contract.employee.lastname))
