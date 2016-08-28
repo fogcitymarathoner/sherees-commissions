@@ -710,7 +710,7 @@ def iitem_exclude(session, args):
 def invoice_report_month_year(args):
     invdir = os.path.join(args.datadir, str(args.year), str(args.month).zfill(2))
     inv_items_dir = os.path.join(args.datadir, 'invoices_items')
-    res = '%s/%s #######################' % (args.year, args.month)
+    res = '%s/%s #######################\n' % (args.year, args.month)
     for dirName, subdirList, fileList in os.walk(invdir, topdown=False):
 
         for fname in fileList:
@@ -732,8 +732,8 @@ def invoice_report_month_year(args):
                 amount = float(iitemdoc.findall('amount')[0].text)
                 total += quantity * amount
             if total > 0:
-                res += 'Invoice %s' % iid
-            res += '\t%s $%.2f %s %s-%s' % (
+                res += 'Invoice %s\n' % iid
+            res += '\t%s $%.2f %s %s-%s\n' % (
             dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'), total, employee,
             dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
             dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
@@ -744,7 +744,7 @@ def invoice_report_month_year(args):
                 amount = float(iitemdoc.findall('amount')[0].text)
                 description = iitemdoc.findall('description')[0].text
                 if float(amount) * float(quantity) > 0:
-                    res += '\t\t%s cost: %.2f quantity: %s amount: $%.2f' % (description, cost, quantity, amount)
+                    res += '\t\t%s cost: %.2f quantity: %s amount: $%.2f\n' % (description, cost, quantity, amount)
 
     return res
 
