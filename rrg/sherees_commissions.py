@@ -756,13 +756,14 @@ def inv_report(session, args):
             args.year = cm['year']
             print(invoice_report_month_year(args))
     else:
-    iex = iitem_exclude(session, args)
-    invs = sherees_invoices_of_interest(session)
-    for i in invs:
-        total = 0
-        for ii in i.invoice_items:
-            if hash(ii.description) not in iex and ii.quantity > 0:
-                total += ii.quantity * ii.amount
-                print(ii)
-        if total > 0:
-            print('%s %s %s %s %s' % (i.id, i.date, total, i.contract.employee.firstname, i.contract.employee.lastname))
+        iex = iitem_exclude(session, args)
+        invs = sherees_invoices_of_interest(session)
+        for i in invs:
+            total = 0
+            for ii in i.invoice_items:
+                if hash(ii.description) not in iex and ii.quantity > 0:
+                    total += ii.quantity * ii.amount
+                    print(ii)
+            if total > 0:
+                print(
+                '%s %s %s %s %s' % (i.id, i.date, total, i.contract.employee.firstname, i.contract.employee.lastname))
