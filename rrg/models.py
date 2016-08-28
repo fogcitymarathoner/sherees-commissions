@@ -396,6 +396,7 @@ class State(Base):
     name = Column(String(14))
     state_no = Column(String(9))
 
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -504,7 +505,10 @@ class Citem(Base):
         ET.SubElement(doc, 'date').text = dt.strftime(self.date,
                                                       TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'percent').text = str(self.percent)
-        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'amount').text = str((self.invoices_item.amount*self.invoices_item.quantity -
+                                                (self.invoices_item.cost*self.invoices_item.quantity -
+                                                 self.invoices_item.cost*self.invoices_item.quantity*.1) *
+                                                 self.percent*.10))
         ET.SubElement(doc, 'rel_inv_amt').text = str(self.rel_inv_amt)
         ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(
             self.rel_inv_line_item_amt)
