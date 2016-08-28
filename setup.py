@@ -135,6 +135,10 @@ setup(
             'rrg-cache-sherees-invoices-items=rrg.scripts.cache_sherees_invoices_items:cache_invoices_items',
             'rrg-sherees-invoices-items=rrg.scripts.sherees_invoices_items:invoices_items',
 
+
+            'rrg-sherees-inv-monthlies=rrg.scripts.sheree_inv_monthly_summaries:monthlies_summary',
+            'rrg-sherees-inv-monthly=rrg.scripts.sheree_inv_monthly_summary:monthly_detail',
+
             'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder'
         ],
     },

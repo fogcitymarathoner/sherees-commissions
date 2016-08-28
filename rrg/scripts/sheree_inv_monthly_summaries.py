@@ -1,18 +1,12 @@
-from rrg.models import session_maker
-
-from datetime import datetime as dt
 import argparse
-
-from tabulate import tabulate
-
-from rrg.sherees_commissions import year_month_statement
-from rrg.sherees_commissions import comm_months
+from rrg.models import session_maker
+from rrg.sherees_commissions import inv_report
 
 monthy_statement_ym_header = '%s/%s - ###################################' \
                              '######################'
 
 parser = argparse.ArgumentParser(description='RRG Sherees Monthly '
-                                             'Commissions Reports')
+                                             'Invoices Reports')
 
 parser.add_argument(
     '--datadir', required=True,
@@ -36,18 +30,4 @@ def monthlies_summary():
     args = parser.parse_args()
 
     session = session_maker(args)
-    balance = 0
-    for cm in comm_months(end=dt.now()):
-        print(monthy_statement_ym_header % (cm['month'], cm['year']))
-        args.year = cm['year']
-        args.month = cm['month']
-        total, res = year_month_statement(session, args)
-        balance += total
-
-        res_dict_transposed = {
-            'id': [''],
-            'date': ['%s/%s' % (cm['month'], cm['year'])],
-            'description': ['New Balance: %s' % balance],
-            'amount': ['Period Total %s' % total]
-        }
-        print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))
+    print(inv_report(session, args))

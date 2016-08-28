@@ -734,9 +734,9 @@ def invoice_report_month_year(args):
             if total > 0:
                 res += 'Invoice %s\n' % iid
             res += '\t%s $%.2f %s %s-%s\n' % (
-            dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'), total, employee,
-            dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
-            dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
+                dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'), total, employee,
+                dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
+                dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
 
             for iitemdoc in iitemdocs_parsed:
                 cost = float(iitemdoc.findall('cost')[0].text)
@@ -754,7 +754,7 @@ def inv_report(session, args):
         for cm in comm_months(end=dt.now()):
             args.month = cm['month']
             args.year = cm['year']
-            print(invoice_report_month_year(args))
+            return invoice_report_month_year(args)
     else:
         iex = iitem_exclude(session, args)
         invs = sherees_invoices_of_interest(session)
@@ -766,4 +766,5 @@ def inv_report(session, args):
                     print(ii)
             if total > 0:
                 print(
-                '%s %s %s %s %s' % (i.id, i.date, total, i.contract.employee.firstname, i.contract.employee.lastname))
+                    '%s %s %s %s %s' % (
+                    i.id, i.date, total, i.contract.employee.firstname, i.contract.employee.lastname))
