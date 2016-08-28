@@ -485,6 +485,11 @@ class Citem(Base):
             self.modified_date)
 
     def to_xml(self):
+
+        iitemamount = self.invoices_item.amount * self.invoices_item.quantity
+        wage = self.invoices_item.cost * self.invoices_item.quantity
+        empexp = self.invoices_item.cost * self.invoices_item.quantity*.1
+
         doc = ET.Element('invoices-items-commissions-item')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -505,10 +510,7 @@ class Citem(Base):
         ET.SubElement(doc, 'date').text = dt.strftime(self.date,
                                                       TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'percent').text = str(self.percent)
-        ET.SubElement(doc, 'amount').text = str((self.invoices_item.amount*self.invoices_item.quantity -
-                                                (self.invoices_item.cost*self.invoices_item.quantity -
-                                                 self.invoices_item.cost*self.invoices_item.quantity*.1) *
-                                                 self.percent*.10))
+        ET.SubElement(doc, 'amount').text = str((((iitemamount-wage-empexp)*self.percent)/100))
         ET.SubElement(doc, 'rel_inv_amt').text = str(self.rel_inv_amt)
         ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(
             self.rel_inv_line_item_amt)
