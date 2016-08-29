@@ -14,6 +14,9 @@ parser.add_argument(
     default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/'
             'invoices/invoice_items/commissions_items/')
 
+parser.add_argument(
+    '--format', required=True, choices=['plain', 'latex'],
+    help='output format', default='plain')
 
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')

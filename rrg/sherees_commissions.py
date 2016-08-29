@@ -245,7 +245,8 @@ def sherees_comm_payments_year_month(session, args):
             .order_by(CommPayment.date)
     else:
         cps = []
-        dirname = os.path.join(args.datadir, 'commissions_payments', str(y), str(m).zfill(2))
+        dirname = os.path.join(args.datadir, 'commissions_payments', str(y),
+                               str(m).zfill(2))
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             for fn in fileList:
                 fullname = os.path.join(dirName, fn)
@@ -255,7 +256,9 @@ def sherees_comm_payments_year_month(session, args):
                 check_number = doc.findall('check_number')[0].text
                 description = doc.findall('description')[0].text
                 date = doc.findall('date')[0].text
-                cps.append(CommPayment(amount=amount, check_number=check_number, description=description, date=date))
+                cps.append(
+                    CommPayment(amount=amount, check_number=check_number,
+                                description=description, date=date))
         return cps
 
 
@@ -263,7 +266,8 @@ def sa_sheree(session):
     """
     return sheree's sa object
     """
-    return session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
+    return \
+    session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
 
 
 start = dt(year=2009, month=6, day=1)
@@ -304,7 +308,8 @@ def sherees_comm_path_year_month(session, args):
 
     """
     sheree = sa_sheree(session)
-    return os.path.join(args.datadir, 'commissions_items', str(sheree.id), str(args.year),
+    return os.path.join(args.datadir, 'commissions_items', str(sheree.id),
+                        str(args.year),
                         str(args.month).zfill(2))
 
 
@@ -559,7 +564,9 @@ def sherees_invoices_of_interest(session):
     invs = []
     if len(cids):
         invs = session.query(Invoice).filter(and_(Invoice.voided == False,
-                                                  Invoice.contract_id.in_(cids))).order_by(Invoice.date)
+                                                  Invoice.contract_id.in_(
+                                                      cids))).order_by(
+            Invoice.date)
     else:
         print('There are no invoices of sherees interest')
     return invs
@@ -708,9 +715,14 @@ def iitem_exclude(session, args):
 
 
 def invoice_report_month_year(args):
-    invdir = os.path.join(args.datadir, str(args.year), str(args.month).zfill(2))
+    invdir = os.path.join(args.datadir, str(args.year),
+                          str(args.month).zfill(2))
     inv_items_dir = os.path.join(args.datadir, 'invoices_items')
-    res = '%s/%s #######################\n' % (args.year, args.month)
+    if args.format == 'latex':
+        res = ''
+        res += '\n\subsection{Invoices %s/%s}\n' % (args.year, args.month)
+    else:
+        res = '%s/%s #######################\n' % (args.year, args.month)
     for dirName, subdirList, fileList in os.walk(invdir, topdown=False):
 
         for fname in fileList:
@@ -725,7 +737,8 @@ def invoice_report_month_year(args):
             total = 0
             iitemdocs_parsed = []
             for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
-                iitemf = os.path.join(inv_items_dir, str(iitem_id_ele.text).zfill(5) + '.xml')
+                iitemf = os.path.join(inv_items_dir,
+                                      str(iitem_id_ele.text).zfill(5) + '.xml')
                 iitemdoc = ET.parse(iitemf).getroot()
                 iitemdocs_parsed.append(iitemdoc)
                 quantity = float(iitemdoc.findall('quantity')[0].text)
@@ -734,7 +747,8 @@ def invoice_report_month_year(args):
             if total > 0:
                 res += 'Invoice %s\n' % iid
             res += '\t%s $%.2f %s %s-%s\n' % (
-                dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'), total, employee,
+                dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
+                total, employee,
                 dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                 dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
 
@@ -744,17 +758,27 @@ def invoice_report_month_year(args):
                 amount = float(iitemdoc.findall('amount')[0].text)
                 description = iitemdoc.findall('description')[0].text
                 if float(amount) * float(quantity) > 0:
-                    res += '\t\t%s cost: %.2f quantity: %s amount: $%.2f\n' % (description, cost, quantity, amount)
+                    res += '\t\t%s cost: %.2f quantity: %s amount: $%.2f\n' % (
+                    description, cost, quantity, amount)
 
     return res
 
 
 def inv_report(session, args):
     if args.cache:
-        for cm in comm_months(end=dt.now()):
-            args.month = cm['month']
-            args.year = cm['year']
-            return invoice_report_month_year(args)
+        res = ''
+        if args.format == 'plain':
+            for cm in comm_months(end=dt.now()):
+                args.month = cm['month']
+                args.year = cm['year']
+                res += invoice_report_month_year(args)
+        else:
+            res = '\n\section{Invoices}\n'
+            for cm in comm_months(end=dt.now()):
+                args.month = cm['month']
+                args.year = cm['year']
+                res += invoice_report_month_year(args)
+        return res
     else:
         iex = iitem_exclude(session, args)
         invs = sherees_invoices_of_interest(session)
@@ -767,4 +791,5 @@ def inv_report(session, args):
             if total > 0:
                 print(
                     '%s %s %s %s %s' % (
-                    i.id, i.date, total, i.contract.employee.firstname, i.contract.employee.lastname))
+                        i.id, i.date, total, i.contract.employee.firstname,
+                        i.contract.employee.lastname))
