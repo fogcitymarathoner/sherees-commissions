@@ -12,7 +12,7 @@ parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with ar.xml',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/'
-            'invoices/invoice_items/commissions_items/')
+            'invoices/invoice_items/')
 
 parser.add_argument(
     '--format', required=True, choices=['plain', 'latex'],

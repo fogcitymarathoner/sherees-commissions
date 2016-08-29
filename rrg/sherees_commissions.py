@@ -267,7 +267,8 @@ def sa_sheree(session):
     return sheree's sa object
     """
     return \
-    session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
+        session.query(Employee).filter_by(firstname='sheree', salesforce=True)[
+            0]
 
 
 start = dt(year=2009, month=6, day=1)
@@ -717,7 +718,8 @@ def iitem_exclude(session, args):
 def invoice_report_month_year(args):
     invdir = os.path.join(args.datadir, str(args.year),
                           str(args.month).zfill(2))
-    inv_items_dir = os.path.join(args.datadir, 'invoices_items')
+    inv_items_dir = os.path.join(args.datadir, 'commissions_items',
+                                 'invoices_items')
     if args.format == 'latex':
         res = ''
         res += '\n\subsection{Invoices %s/%s}\n' % (args.year, args.month)
@@ -758,8 +760,8 @@ def invoice_report_month_year(args):
                 amount = float(iitemdoc.findall('amount')[0].text)
                 description = iitemdoc.findall('description')[0].text
                 if float(amount) * float(quantity) > 0:
-                    res += '\t\t%s cost: %.2f quantity: %s amount: $%.2f\n' % (
-                    description, cost, quantity, amount)
+                    res += '\t\t%s cost: $%.2f quantity: %s amount: $%.2f\n' % (
+                        description, cost, quantity, amount)
 
     return res
 
