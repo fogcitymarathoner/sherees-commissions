@@ -716,10 +716,11 @@ def iitem_exclude(session, args):
 
 
 def invoice_report_month_year(args):
-    invdir = os.path.join(args.datadir, str(args.year),
-                          str(args.month).zfill(2))
-    inv_items_dir = os.path.join(args.datadir, 'commissions_items',
-                                 'invoices_items')
+    invdir = os.path.join(args.datadir, 'transactions', 'invoices',
+                          'commissions_items', 'invoices',
+                          str(args.year), str(args.month).zfill(2))
+    inv_items_dir = os.path.join(args.datadir, 'transactions', 'invoices',
+                          'commissions_items', 'invoices', 'invoices_items')
     if args.format == 'latex':
         res = ''
         res += '\n\subsection{Invoices %s/%s}\n' % (args.year, args.month)
