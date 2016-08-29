@@ -17,9 +17,8 @@ parser.add_argument(
 
 parser.add_argument(
     '--datadir', required=True,
-    help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/'
-            'invoices/invoice_items/commissions_items/')
+    help='datadir',
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 parser.add_argument('--db-user', required=True, help='database user',
                     default='marcdba')
