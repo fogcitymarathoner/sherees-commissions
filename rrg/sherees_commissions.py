@@ -751,12 +751,23 @@ def invoice_report_month_year(args):
                 amount = float(iitemdoc.findall('amount')[0].text)
                 total += quantity * amount
             if total > 0:
-                res += 'Invoice %s\n' % iid
-            res += '\t%s $%.2f %s %s-%s\n' % (
-                dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
-                total, employee,
-                dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
-                dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
+                if args.format == 'plain':
+                    res += 'Invoice %s\n' % iid
+                else:
+                    res += 'Invoice %s\par' % iid
+            if args.format == 'plain':
+                res += '\t%s $%.2f %s %s-%s\n' % (
+                    dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
+                    total, employee,
+                    dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
+                    dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
+            else:
+                res += '\indent%s $%.2f %s %s-%s\par' % (
+                    dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
+                    total, employee,
+                    dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
+                    dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
+
 
             for iitemdoc in iitemdocs_parsed:
                 cost = float(iitemdoc.findall('cost')[0].text)
@@ -764,8 +775,12 @@ def invoice_report_month_year(args):
                 amount = float(iitemdoc.findall('amount')[0].text)
                 description = iitemdoc.findall('description')[0].text
                 if float(amount) * float(quantity) > 0:
-                    res += '\t\t%s cost: $%.2f quantity: %s amount: $%.2f\n' % (
-                        description, cost, quantity, amount)
+                    if args.format == 'plain':
+                        res += '\t\t%s cost: $%.2f quantity: %s amount: $%.2f\n' % (
+                            description, cost, quantity, amount)
+                    else:
+                        res += '\indent\indent%s cost: $%.2f quantity: %s amount: $%.2f\par' % (
+                            description, cost, quantity, amount)
 
     return res
 
