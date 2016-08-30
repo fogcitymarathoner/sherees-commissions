@@ -245,7 +245,8 @@ def sherees_comm_payments_year_month(session, args):
             .order_by(CommPayment.date)
     else:
         cps = []
-        dirname = os.path.join(args.datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments', str(y),
+        dirname = os.path.join(args.datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments',
+                               str(y),
                                str(m).zfill(2))
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             for fn in fileList:
@@ -721,7 +722,7 @@ def invoice_report_month_year(args):
                           'commissions_items', 'invoices',
                           str(args.year), str(args.month).zfill(2))
     inv_items_dir = os.path.join(args.datadir, 'transactions', 'invoices',
-                          'invoice_items',
+                                 'invoice_items',
                                  'commissions_items', 'invoices',
                                  'invoices_items')
     if args.format == 'latex':
@@ -740,6 +741,7 @@ def invoice_report_month_year(args):
             start = idoc.findall('period_start')[0].text
             end = idoc.findall('period_end')[0].text
             iitemsdoc = idoc.findall('invoice-items')
+            res = ''
             total = 0
             iitemdocs_parsed = []
             for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
@@ -751,15 +753,16 @@ def invoice_report_month_year(args):
                 amount = float(iitemdoc.findall('amount')[0].text)
                 total += quantity * amount
             if total > 0:
-                res += 'Invoice %s\n' % iid
                 if args.format == 'plain':
+                    res += 'Invoice %s\n' % iid
                     res += '\t%s $%.2f %s %s-%s\n' % (
                         dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                         total, employee,
                         dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                         dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
                 else:
-                    res += '\n\hspace{10mm}%s \char36 %.2f %s %s-%s' % (
+                    res += 'Invoice %s \\newline \n' % iid
+                    res += '\n\hspace{10mm}%s \char36 %.2f %s %s-%s \\newline \n' % (
                         dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                         total, employee,
                         dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
@@ -774,7 +777,8 @@ def invoice_report_month_year(args):
                             res += '\t\t%s cost: \char36 %.2f quantity: %s amount: \char36 %.2f\n' % (
                                 description, cost, quantity, amount)
                         else:
-                            res += '\n\hspace{20mm}%s cost: \char36 %.2f quantity: %s amount: \char36 %.2f' % (
+                            res += '\n\hspace{20mm}%s cost: \char36 %.2f quantity: %s amount: \char36 %.2f' \
+                                   ' \\newline \n' % (
                                 description, cost, quantity, amount)
 
     return res
