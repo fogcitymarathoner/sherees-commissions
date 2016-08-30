@@ -759,7 +759,7 @@ def invoice_report_month_year(args):
                         dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                         dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
                 else:
-                    res += '\n\hspace{10mm}%s $%.2f %s %s-%s' % (
+                    res += '\n\hspace{10mm}%s \char36%.2f %s %s-%s' % (
                         dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                         total, employee,
                         dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
@@ -771,10 +771,10 @@ def invoice_report_month_year(args):
                     description = iitemdoc.findall('description')[0].text
                     if float(amount) * float(quantity) > 0:
                         if args.format == 'plain':
-                            res += '\t\t%s cost: $%.2f quantity: %s amount: $%.2f\n' % (
+                            res += '\t\t%s cost: \char36%.2f quantity: %s amount: \char36%.2f\n' % (
                                 description, cost, quantity, amount)
                         else:
-                            res += '\n\hspace{20mm}%s cost: $%.2f quantity: %s amount: $%.2f' % (
+                            res += '\n\hspace{20mm}%s cost: \char36%.2f quantity: %s amount: \char36%.2f' % (
                                 description, cost, quantity, amount)
 
     return res
