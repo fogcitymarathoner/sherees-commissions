@@ -762,7 +762,7 @@ def invoice_report_month_year(args):
                     dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                     dt.strftime(dt.strptime(end, TIMESTAMP_FORMAT), '%m/%d/%Y'))
             else:
-                res += '\indent%s $%.2f %s %s-%s\par' % (
+                res += '\hspace{10mm}%s $%.2f %s %s-%s\par' % (
                     dt.strftime(dt.strptime(idate, TIMESTAMP_FORMAT), '%m/%d/%Y'),
                     total, employee,
                     dt.strftime(dt.strptime(start, TIMESTAMP_FORMAT), '%m/%d/%Y'),
@@ -779,7 +779,7 @@ def invoice_report_month_year(args):
                         res += '\t\t%s cost: $%.2f quantity: %s amount: $%.2f\n' % (
                             description, cost, quantity, amount)
                     else:
-                        res += '\indent\indent%s cost: $%.2f quantity: %s amount: $%.2f\par' % (
+                        res += '\hspace{10mm}\hspace{10mm}%s cost: $%.2f quantity: %s amount: $%.2f\par' % (
                             description, cost, quantity, amount)
 
     return res
