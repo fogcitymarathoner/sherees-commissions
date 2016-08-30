@@ -23,8 +23,8 @@ def sherees_payroll():
 
     if args.format == 'latex':
         report = comm_latex_document_header("Sheree's Hourly")
-        report += payroll_due_report(session, args)(session, args)
+        report += payroll_due_report(session, args)
         report += '\n\end{document}\n'
         print(report)
     else:
-        print(payroll_due_report(session, args)(session, args))
+        print(payroll_due_report(session, args))

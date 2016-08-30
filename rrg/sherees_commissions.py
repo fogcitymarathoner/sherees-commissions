@@ -245,7 +245,7 @@ def sherees_comm_payments_year_month(session, args):
             .order_by(CommPayment.date)
     else:
         cps = []
-        dirname = os.path.join(args.datadir, 'commissions_payments', str(y),
+        dirname = os.path.join(args.datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments', str(y),
                                str(m).zfill(2))
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             for fn in fileList:
@@ -309,7 +309,7 @@ def sherees_comm_path_year_month(session, args):
 
     """
     sheree = sa_sheree(session)
-    return os.path.join(args.datadir, 'commissions_items', str(sheree.id),
+    return os.path.join(args.datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items', str(sheree.id),
                         str(args.year),
                         str(args.month).zfill(2))
 
@@ -721,6 +721,7 @@ def invoice_report_month_year(args):
                           'commissions_items', 'invoices',
                           str(args.year), str(args.month).zfill(2))
     inv_items_dir = os.path.join(args.datadir, 'transactions', 'invoices',
+                          'invoice_items',
                                  'commissions_items', 'invoices',
                                  'invoices_items')
     if args.format == 'latex':
