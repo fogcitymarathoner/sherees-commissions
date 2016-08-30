@@ -12,44 +12,6 @@ from rrg.models import session_maker
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
 
-
-try:
-    env_str = 'DB_USER'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        DB_USER = os.getenv(env_str)
-
-    env_str = 'DB_PASS'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        DB_PASS = os.getenv(env_str)
-
-    env_str = 'MYSQL_SERVER_PORT_3306_TCP_ADDR'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        MYSQL_PORT_3306_TCP_ADDR = os.getenv(env_str)
-
-    env_str = 'MYSQL_SERVER_PORT_3306_TCP_PORT'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        MYSQL_PORT_3306_TCP_PORT = os.getenv(env_str)
-    DATABASE = 'rrg'
-
-    env_str = 'DATABASE'
-    if os.getenv(env_str) is None:
-        raise MissingEnvVar('%s is not set' % env_str)
-    else:
-        DATABASE = os.getenv(env_str)
-
-except MissingEnvVar as e:
-    print(e.value)
-    raise
-
-
 parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
 parser.add_argument('reminders', metavar='N', type=int, nargs='+',
                     help='setup reminders for timecards')
