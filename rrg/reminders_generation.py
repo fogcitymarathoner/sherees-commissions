@@ -122,10 +122,12 @@ def reminders(session, reminder_period_start, payroll_run_date, t_set, args):
     return reminders
 
 
-def forget_reminder(session, reminder_period_start, payroll_run_date, t_set, args):
+def forget_reminder(session, reminder_period_start, payroll_run_date, t_set,
+                    args):
     # create voided invoice for args.number'th reminder from reminders
 
-    reminders_tbs = reminders(session, reminder_period_start, payroll_run_date, t_set, args)
+    reminders_tbs = reminders(session, reminder_period_start, payroll_run_date,
+                              t_set, args)
 
     contract, start, end = reminders_tbs[args.number - 1]
     new_inv = create_invoice_for_period(session, contract, start, end)
@@ -153,42 +155,50 @@ def rebuild_empty_invoice_commissions(session, inv):
     for iitem in inv.invoice_items:
         logger.debug(iitem)
         ci = Citem(
-            invoices_item_id=iitem.id, employee_id=1025, commissions_report_id=0,
+            invoices_item_id=iitem.id, employee_id=1025,
+            commissions_report_id=0,
             created_date=dt.now(), modified_date=dt.now(),
             created_user_id=2, modified_user_id=2,
             percent=61.5, date=inv.date, description=iitem.description,
             amount=.615 * (
-            iitem.quantity * (iitem.amount - iitem.cost) -
-            iitem.quantity * (iitem.amount - iitem.cost) * .1))
+                iitem.quantity * (iitem.amount - iitem.cost) -
+                iitem.quantity * (iitem.amount - iitem.cost) * .1))
 
         session.add(ci)
 
         ci = Citem(
-            invoices_item_id=iitem.id, employee_id=1479, commissions_report_id=0,
+            invoices_item_id=iitem.id, employee_id=1479,
+            commissions_report_id=0,
             created_date=dt.now(), modified_date=dt.now(),
             created_user_id=2, modified_user_id=2,
             percent=38.5, date=inv.date, description=iitem.description,
             amount=.385 * (
-            iitem.quantity * (iitem.amount - iitem.cost) - iitem.quantity * (
-            iitem.amount - iitem.cost) * .1))
+                iitem.quantity * (
+                iitem.amount - iitem.cost) - iitem.quantity * (
+                    iitem.amount - iitem.cost) * .1))
 
         session.add(ci)
 
 
-def create_invoice_for_period(session, contract, period_start, period_end, date=None):
+def create_invoice_for_period(session, contract, period_start, period_end,
+                              date=None):
     if not date:
         date = dt.now()
-    new_inv = Invoice(contract_id=contract.id, period_start=period_start, period_end=period_end, date=date,
-                      terms=contract.terms)
+    new_inv = Invoice(contract_id=contract.id, period_start=period_start,
+                      period_end=period_end, date=date,
+                      employerexpenserate=.10, terms=contract.terms)
     session.add(new_inv)
     session.flush()
 
     for citem in contract.contract_items:
-        new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description, cost=citem.cost, amount=citem.amt)
+        new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description,
+                          cost=citem.cost, amount=citem.amt)
         session.add(new_iitem)
         session.flush()
         for comm_item in citem.contract_comm_items:
-            new_sales_comm_item = Citem(invoices_item_id=new_iitem.id, employee_id=comm_item.employee_id,
-                                        percent=comm_item.percent, description=new_iitem.description)
+            new_sales_comm_item = Citem(invoices_item_id=new_iitem.id,
+                                        employee_id=comm_item.employee_id,
+                                        percent=comm_item.percent,
+                                        description=new_iitem.description)
             session.add(new_sales_comm_item)
     return new_inv
