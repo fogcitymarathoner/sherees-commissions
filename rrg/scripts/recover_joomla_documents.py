@@ -44,6 +44,6 @@ def recover_joomla_documents():
         outfile = os.path.join(args.datadir, f.realname)
         for chunk in chunks:
             print(chunk)
-            with os.open(outfile, 'w') as fh:
-                fh.write(chunk.datachunk)
+            with os.open(outfile, os.O_WRONLY | os.O_CREAT | os.O_TRUNC) as fh:
+                os.write(fh, chunk.datachunk)
         print('Wrote file %s' % outfile)
