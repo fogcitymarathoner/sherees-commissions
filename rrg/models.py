@@ -17,16 +17,15 @@ from sqlalchemy import Float
 from sqlalchemy.orm import relationship
 from sqlalchemy import TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+
 import xml.etree.ElementTree as ET
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import YMD_FORMAT
 
 from rrg.helpers import date_to_datetime
-
-from sqlalchemy.orm import sessionmaker
-
-from sqlalchemy import create_engine
 
 
 def default_date():

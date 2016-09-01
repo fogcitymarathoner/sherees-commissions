@@ -8,7 +8,6 @@ from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
 from rrg.models import is_pastdue
-from rrg.models import session_maker
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
 

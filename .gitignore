@@ -5,6 +5,7 @@ dist
 *egg-info
 .idea/
 *.pyc
+*.pdf
 rrg/tmp
 *.log
 .coverage

@@ -62,7 +62,8 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=find_packages(exclude=['contrib', 'docs', 'tests', 'scripts', 'fabfile', 'python']),
+    packages=find_packages(
+        exclude=['contrib', 'docs', 'tests', 'scripts', 'fabfile', 'python']),
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
@@ -72,7 +73,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['s3_mysql_backup', 'sqlalchemy', 
+    install_requires=['s3_mysql_backup', 'sqlalchemy',
                       'tabulate', 'mysql-python'],
 
     # List additional groups of dependencies here (e.g. development
@@ -135,11 +136,11 @@ setup(
             'rrg-cache-sherees-invoices-items=rrg.scripts.cache_sherees_invoices_items:cache_invoices_items',
             'rrg-sherees-invoices-items=rrg.scripts.sherees_invoices_items:invoices_items',
 
-
             'rrg-sherees-inv-monthlies=rrg.scripts.sheree_inv_monthly_summaries:monthlies_summary',
             'rrg-sherees-inv-monthly=rrg.scripts.sheree_inv_monthly_summary:monthly_detail',
 
             'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder'
+            'rrg-recover-joomla-files=rrg.scripts.recover_joomla_documents:recover_joomla_documents'
         ],
     },
     setup_requires=['pytest-runner', ],
