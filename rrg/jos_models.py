@@ -33,7 +33,7 @@ class DownloadBlob(Base):
 
     id = Column(Integer, primary_key=True)
 
-    file_id = Column(Integer, ForeignKey('jos_downloads_files.id'))
+    fileid = Column(Integer, ForeignKey('jos_downloads_files.id'))
     file = relationship("DownloadFile")
     chunkid = Column(Integer)
     bloblength = Column(Integer)

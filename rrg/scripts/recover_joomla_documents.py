@@ -39,7 +39,8 @@ def recover_joomla_documents():
     for f in all_files:
         print(f)
         chunks = session.query(
-            DownloadBlob).filter(DownloadBlob.file == f).order_by(DownloadBlob.chunkid)
+            DownloadBlob).filter(DownloadBlob.file == f).order_by(
+            DownloadBlob.chunkid)
         outfile = os.path.join(args.datadir, f.realname)
         for chunk in chunks:
             print(chunk)
