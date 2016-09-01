@@ -139,7 +139,7 @@ setup(
             'rrg-sherees-inv-monthlies=rrg.scripts.sheree_inv_monthly_summaries:monthlies_summary',
             'rrg-sherees-inv-monthly=rrg.scripts.sheree_inv_monthly_summary:monthly_detail',
 
-            'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder'
+            'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder',
             'rrg-recover-joomla-files=rrg.scripts.recover_joomla_documents:recover_joomla_documents'
         ],
     },
