@@ -186,12 +186,17 @@ def create_invoice_for_period(session, contract, period_start, period_end,
         date = dt.now()
     new_inv = Invoice(contract_id=contract.id, period_start=period_start,
                       period_end=period_end, date=date,
-                      employerexpenserate=.10, terms=contract.terms)
+                      employerexpenserate=.10, terms=contract.terms, 
+                      timecard=False, posted=False, prcleared=False,
+                      cleared=False, timecard_receipt_sent=False,
+                      message='Thank you for your business!', amount=0,
+                      voided=False)
     session.add(new_inv)
     session.flush()
 
     for citem in contract.contract_items:
         new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description,
+                          quantity=0.0, cleared=False,
                           cost=citem.cost, amount=citem.amt)
         session.add(new_iitem)
         session.flush()
@@ -199,6 +204,7 @@ def create_invoice_for_period(session, contract, period_start, period_end,
             new_sales_comm_item = Citem(invoices_item_id=new_iitem.id,
                                         employee_id=comm_item.employee_id,
                                         percent=comm_item.percent,
+                                        cleared=False, amount=0,
                                         description=new_iitem.description)
             session.add(new_sales_comm_item)
     return new_inv
