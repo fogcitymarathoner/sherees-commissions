@@ -77,11 +77,3 @@ def cache_clients_ar(session, args):
     tree.write(outfile)
 
     print('Wrote to %s' % outfile)
-
-
-def main():
-
-    args = parser.parse_args()
-    print(args)
-    print('hi world!')
-
