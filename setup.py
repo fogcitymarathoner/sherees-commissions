@@ -102,7 +102,6 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'rrg-cli=rrg:main',
             'rrg-create-test-db=rrg.utils:create_db',
             'rrg-ar=rrg.scripts.ar_report:ar_report',
 
