@@ -1,7 +1,7 @@
 
 import argparse
 
-from s3_mysql_backup.backup_db import backup_db as s3_backup_db
+from s3_mysql_backup.backup_db import backup as s3_backup_db
 
 parser = argparse.ArgumentParser(description='S3 DB Bzckup')
 
