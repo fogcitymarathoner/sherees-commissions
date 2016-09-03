@@ -121,6 +121,7 @@ setup(
             'monthly_detail',
 
             'rrg-get-last-db-backup=rrg.scripts.get_last_backup:get_last_db_backup',
+            'rrg-backup-db=rrg.scripts.backup_db:backup_db',
 
             'rrg-notes=rrg.scripts.notes_report:'
             'notes',
