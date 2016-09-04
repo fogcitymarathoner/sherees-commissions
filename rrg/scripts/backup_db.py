@@ -4,8 +4,7 @@ from s3_mysql_backup.backup_db import backup_db as s3_backup_db
 
 parser = argparse.ArgumentParser(description='S3 DB Backup')
 
-parser.add_argument('--db-backups-dir', required=True, help='database backups directory',
-                    default='/php-apps/cake.rocketsredglare.com/rrg/data/backups/')
+parser.add_argument('--db-backups-dir', help='database backups directory', default='/php-apps/db_backups/')
 
 parser.add_argument('--s3-folder',  help='S3 Folder', default='')
 parser.add_argument('--bucket-name', required=True, help='Bucket Name', default='php-apps-cluster')
