@@ -1,5 +1,6 @@
 import argparse
 from s3_mysql_backup import download_last_db_backup
+from s3_mysql_backup import s3_bucket
 
 parser = argparse.ArgumentParser(description='RRG Get Last Backup')
 parser.add_argument('--db-backups-dir', help='database backups directory', default='/php-apps/db_backups/')
@@ -19,4 +20,6 @@ def get_last_db_backup():
     """
     args = parser.parse_args()
     args.pat = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-%s.sql.bz2" % args.database
+    bucket = s3_bucket(args)
+    args.bucketlist = bucket.list()
     download_last_db_backup(args)
