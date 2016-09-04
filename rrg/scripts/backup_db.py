@@ -18,11 +18,6 @@ parser.add_argument('--db-pass', required=True, help='database pw', default='dea
 
 parser.add_argument('database', help='database name')
 
-#
-# Databases to backup
-#
-# dbs = ['biz', 'personal', 'rrg', 'coppermine']
-
 
 def backup_db():
     """
