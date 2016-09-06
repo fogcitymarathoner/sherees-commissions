@@ -9,8 +9,10 @@ from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
 from rrg.models import Client
+from rrg.models import ClientCheck
 from rrg.models import Employee
 from rrg.models import Invoice
+from rrg.models import InvoicePayment
 from rrg.models import Iitem
 from rrg.models import Citem
 from rrg.models import periods
@@ -53,8 +55,7 @@ class Test:
         with self.session.no_autoflush:
             objects = []
             client_active = Client(name='weekly', active=True, terms=30)
-            client_inactive = Client(name='weekly-inactive', active=False,
-                                     terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
             objects.append(client_active)
             objects.append(client_inactive)
 
@@ -64,15 +65,10 @@ class Test:
 
             objects = []
 
-            employee_active = Employee(firstname='firstname',
-                                       lastname='activelastname', active=True)
-            employee_inactive = Employee(firstname='firstname',
-                                         lastname='inactivelastname',
-                                         active=False)
-            employee_sales_person1 = Employee(firstname='sales',
-                                              lastname='person1', active=True)
-            employee_sales_person2 = Employee(firstname='sales',
-                                              lastname='person2', active=True)
+            employee_active = Employee(firstname='firstname', lastname='activelastname', active=True)
+            employee_inactive = Employee(firstname='firstname', lastname='inactivelastname', active=False)
+            employee_sales_person1 = Employee(firstname='sales', lastname='person1', active=True)
+            employee_sales_person2 = Employee(firstname='sales', lastname='person2', active=True)
 
             objects.append(employee_active)
             objects.append(employee_inactive)
@@ -278,11 +274,19 @@ class Test:
 
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
 
-            current_semimonth(dt(year=self.payroll_run_date.year,
-                                 month=self.payroll_run_date.month, day=16))
+            current_semimonth(dt(year=self.payroll_run_date.year, month=self.payroll_run_date.month, day=16))
 
-            assert not weeks_between_dates(self.payroll_run_date + td(days=1),
-                                           self.payroll_run_date)
+            assert not weeks_between_dates(self.payroll_run_date + td(days=1), self.payroll_run_date)
+            i = 0
+            invs = self.session.query(Invoice).all()
+            for inv in invs:
+                objects = []
+                ck = ClientCheck(amount=1, client_id=inv.contract.client.id, number=i, date=dt.now())
+                objects.append(ck)
+                self.session.bulk_save_objects(objects)
+                objects = []
+                ipay = InvoicePayment(amount=1, invoice=inv, check=ck)
+                objects.append(ipay)
 
     def teardown_class(self):
         logger.debug('Teardown reminders')
@@ -306,10 +310,10 @@ class Test:
         inv = self.session.query(Invoice)[0]
 
         ele = inv.to_xml()
-        assert base_doc.findall('period_start')[0].text == \
-               ele.findall('period_start')[0].text
-        assert base_doc.findall('period_end')[0].text == \
-               ele.findall('period_end')[0].text
+        assert base_doc.findall('period_start')[0].text == ele.findall('period_start')[0].text
+        assert base_doc.findall('period_end')[0].text == ele.findall('period_end')[0].text
+        assert int == type(int(ele.findall('invoice-items')[0].findall('invoice-item')[0].text))
+        assert int == type(int(ele.findall('invoice-payments')[0].findall('invoice-payment')[0].text))
 
     def test_citem_to_xml(self):
         """
@@ -353,3 +357,33 @@ class Test:
         logger.debug(ele.findall('quantity')[0].text)
         assert base_doc.findall('quantity')[0].text == ele.findall('quantity')[
             0].text
+
+    def test_client_check_to_xml(self):
+        """
+        test xml output of client checks
+        :return:
+        """
+
+        check = self.session.query(ClientCheck)[0]
+        logger.debug('check-to-xml')
+        rdoc = check.to_xml()
+        xstr = ET.tostring(rdoc)
+        logger.debug(xstr)
+        baseline = """<client-check><id>218</id><client_id>643</client_id><number>0</number><amount>1.0</amount><notes>None</notes><date>2016-08-08-00-00-00</date></client-check>"""
+        base_doc = ET.fromstring(baseline)
+        assert 1.0 == float(base_doc.findall('amount')[0].text)
+        assert 1.0 == float(rdoc.findall('amount')[0].text)
+
+    def test_invoice_payment_to_xml(self):
+        """
+        test xml output of invoice payment
+        :return:
+        """
+        ipay = self.session.query(InvoicePayment)[0]
+        logger.debug('ipay-to-xml')
+        rdoc = ipay.to_xml()
+        logger.debug(ET.tostring(rdoc))
+        baseline = """<invoice-payment><id>109</id><invoice_id>3889</invoice_id><check_id>230</check_id><amount>1.0</amount><notes>None</notes></invoice-payment>"""
+        base_doc = ET.fromstring(baseline)
+        assert 1.0 == float(base_doc.findall('amount')[0].text)
+        assert 1.0 == float(rdoc.findall('amount')[0].text)

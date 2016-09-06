@@ -277,6 +277,20 @@ class InvoicePayment(Base):
 
     amount = Column(Float)
     notes = Column(String(100))
+    last_sync_time = Column(TIMESTAMP)
+
+    def __repr__(self):
+        return "<InvoicePayment(id='%s', invoice='%s', amount='%s', number='%s', date='%s')>" % (
+                   self.id, self.invoice_id, self.amount, self.check.number, self.check.date)
+
+    def to_xml(self):
+        doc = ET.Element('invoice-payment')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
+        ET.SubElement(doc, 'check_id').text = str(self.check_id)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        return doc
 
 
 class ClientCheck(Base):
@@ -298,6 +312,20 @@ class ClientCheck(Base):
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
+
+    def __repr__(self):
+        return "<ClientCheck(id='%s', client='%s', amount='%s', number='%s', date='%s')>" % (
+                   self.id, self.client.name, self.amount, self.number, self.date)
+
+    def to_xml(self):
+        doc = ET.Element('client-check')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'client_id').text = str(self.client_id)
+        ET.SubElement(doc, 'number').text = str(self.number)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        return doc
 
 
 class Invoice(Base):
@@ -359,41 +387,33 @@ class Invoice(Base):
 
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'contract_id').text = str(self.contract_id)
-        ET.SubElement(doc, 'date').text = dt.strftime(self.date,
-                                                      TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'po').text = str(self.po)
-        ET.SubElement(doc, 'employerexpenserate').text = str(
-            self.employerexpenserate)
+        ET.SubElement(doc, 'employerexpenserate').text = str(self.employerexpenserate)
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'timecard').text = str(self.timecard)
         ET.SubElement(doc, 'notes').text = str(self.notes)
-        ET.SubElement(doc, 'period_start').text = dt.strftime(
-            self.period_start, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'period_end').text = dt.strftime(
-            self.period_end,
-            TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'period_start').text = dt.strftime(self.period_start, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'period_end').text = dt.strftime(self.period_end, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'posted').text = str(self.posted)
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'prcleared').text = str(self.prcleared)
         ET.SubElement(doc, 'message').text = str(self.message)
         ET.SubElement(doc, 'amount').text = str(self.amount)
-        ET.SubElement(doc, 'created_date').text = dt.strftime(
-            self.created_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'modified_date').text = dt.strftime(
-            self.modified_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'created_user_id').text = str(
-            self.created_user_id)
-        ET.SubElement(doc, 'modified_user_id').text = str(
-            self.modified_user_id)
-        ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(),
-                                                          TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(),
-                                                                TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
+        ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        iitems = ET.SubElement(doc, 'invoice-items')
+        for i in self.invoice_items:
+            ET.SubElement(iitems, 'invoice-item').text = i.id
+        ipayments = ET.SubElement(doc, 'invoice-payments')
+        for i in self.invoice_payments:
+            ET.SubElement(ipayments, 'invoice-payment').text = i.id
         return doc
-
-
-
 
 
 def is_pastdue(inv, date=None):

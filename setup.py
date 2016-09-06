@@ -111,20 +111,18 @@ setup(
             'rrg-cache-comm-payments=rrg.scripts.cache_comm_payments:cache_comm_payments',
             'rrg-cache-invoices=rrg.scripts.cache_invoices:cache_invoices',
             'rrg-cache-invoices-items=rrg.scripts.cache_invoices_items:cache_invoices_items',
+            'rrg-cache-invoices-payments=rrg.scripts.cache_invoices_payments:cache_invoice_payments',
+            'rrg-cache-clients-checks=rrg.scripts.cache_clients_checks:cache_checks',
 
-            'rrg-comm=rrg.scripts.commissions:'
-            'comm',
+            'rrg-comm=rrg.scripts.commissions:comm',
 
-            'rrg-comm-monthlies=rrg.scripts.commissions_monthly_summaries:'
-            'monthlies_summary',
-            'rrg-comm-monthly=rrg.scripts.commissions_monthly_summary:'
-            'monthly_detail',
+            'rrg-comm-monthlies=rrg.scripts.commissions_monthly_summaries:monthlies_summary',
+            'rrg-comm-monthly=rrg.scripts.commissions_monthly_summary:monthly_detail',
 
             'rrg-get-last-db-backup=rrg.scripts.get_last_backup:get_last_db_backup',
             'rrg-backup-db=rrg.scripts.backup_db:backup_db',
 
-            'rrg-notes=rrg.scripts.notes_report:'
-            'notes',
+            'rrg-notes=rrg.scripts.notes_report:notes',
             'rrg-reminders=rrg.scripts.reminders:reminders',
             'rrg-sherees-payroll=rrg.scripts.sherees_payroll:sherees_payroll',
             'rrg-invoices-monthly='

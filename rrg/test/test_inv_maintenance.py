@@ -36,7 +36,7 @@ class Args(object):
     db_user = 'root'
     db_pass = 'my_very_secret_password'
     db = 'rrg_test'
-    days_past = 91
+    past_days = 91
 
 
 class Test:
