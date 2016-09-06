@@ -85,15 +85,13 @@ def db_date_dictionary_invoice(session, args):
     """
 
     inv_dict = {}
-    rel_dir_set = set()
     invoices = session.query(Invoice).order_by(Invoice.id)
 
     for inv in invoices:
-        f, rel_dir = full_non_dated_xml_path(args.datadir, inv)
-        rel_dir_set.add(rel_dir)
+        f = full_non_dated_xml_path(args.datadir, inv)
         inv_dict[f] = inv.last_sync_time
 
-    return inv_dict, invoices, rel_dir_set
+    return inv_dict, invoices
 
 
 def db_date_dictionary_invoice_items(session, args):
@@ -162,12 +160,12 @@ def cache_invoices(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, invoices, rel_dir_set = db_date_dictionary_invoice(session, args)
+    date_dict, invoices = db_date_dictionary_invoice(session, args)
 
     #
     # Make sure destination directories exist
     #
-    verify_dirs_ready(args.datadir, rel_dir_set)
+    verify_dirs_ready(args.datadir, [args.datadir])
 
     to_sync = []
     for inv in invoices:
