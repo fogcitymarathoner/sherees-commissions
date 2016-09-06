@@ -6,6 +6,7 @@ from s3_mysql_backup import mkdirs
 
 from rrg.models import Invoice
 from rrg.models import Iitem
+from rrg.models import ClientCheck
 from rrg.utils import directory_date_dictionary
 
 
@@ -76,7 +77,6 @@ def db_date_dictionary_invoice_items(session, args):
     """
 
     invitem_dict = {}
-    rel_dir_set = set()
     invoices_items = session.query(Iitem).order_by(Iitem.id)
 
     for invitem in invoices_items:
@@ -84,6 +84,24 @@ def db_date_dictionary_invoice_items(session, args):
         invitem_dict[f] = invitem.last_sync_time
 
     return invitem_dict, invoices_items
+
+
+def db_date_dictionary_client_checks(session, args):
+    """
+    returns database dictionary counter part to directory_date_dictionary for sync determination
+    :param data_dir:
+    :return:
+    """
+
+    cchecks_dict = {}
+
+    clients_checks = session.query(ClientCheck).order_by(ClientCheck.id)
+
+    for ccheck in clients_checks:
+        f = full_non_dated_xml_path(args.datadir, ccheck)
+        cchecks_dict[f] = ccheck.last_sync_time
+
+    return cchecks_dict, clients_checks
 
 
 def verify_dirs_ready(data_dir, rel_dir_set):
@@ -151,3 +169,7 @@ def cache_invoices_items(session, args):
     for comm_item in to_sync:
         sync_invoice_item(session, args.datadir, comm_item)
 
+
+def cache_clients_checks(session, args):
+
+    session.query(ClientCheck).all()

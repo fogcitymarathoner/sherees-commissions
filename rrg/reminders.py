@@ -1,7 +1,6 @@
 from datetime import datetime as dt
 from datetime import timedelta as td
 import calendar
-from rrg.queries import contracts_per_period
 """
 Python utility library for payroll calendars - weekly, biweekly, semimonthly
 and monthly

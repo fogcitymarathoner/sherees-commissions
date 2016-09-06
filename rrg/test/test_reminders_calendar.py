@@ -2,10 +2,8 @@ import sys
 import re
 from datetime import datetime as dt
 from datetime import timedelta as td
-
 import logging
-from rrg import MYSQL_PORT_3306_TCP_ADDR
-from rrg import DATABASE
+
 from rrg.reminders import current_week
 from rrg.reminders import current_month
 from rrg.reminders import first_biweek_of_year
@@ -26,10 +24,6 @@ logger = logging.getLogger('test')
 class Test:
     def setup_class(self):
         assert sys._called_from_test
-        assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
-        if not re.search('.*test.*', DATABASE):
-            print('You have a non test database set')
-        assert re.search('.*test.*', DATABASE)
         self.payroll_run_date = dt(year=2016, month=8, day=8)
 
     def test_in_test(self):
@@ -38,7 +32,6 @@ class Test:
         :return:
         """
         assert sys._called_from_test
-        assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
 
     def test_previous_monday(self, capsys):
         """

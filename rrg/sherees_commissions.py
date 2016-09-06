@@ -566,9 +566,7 @@ def sherees_invoices_of_interest(session):
     invs = []
     if len(cids):
         invs = session.query(Invoice).filter(and_(Invoice.voided == False,
-                                                  Invoice.contract_id.in_(
-                                                      cids))).order_by(
-            Invoice.date)
+                                                  Invoice.contract_id.in_(cids))).order_by(Invoice.date)
     else:
         print('There are no invoices of sherees interest')
     return invs
@@ -629,16 +627,20 @@ def invoice_to_xml(inv):
     return doc
 
 
+def cache_invoice(session, args, inv):
+    f, rel_dir = full_dated_obj_xml_path(args.datadir, inv)
+    full_path = os.path.join(args.datadir, rel_dir)
+    if not os.path.isdir(full_path):
+        os.makedirs(full_path)
+    with open(f, 'w') as fh:
+        fh.write(ET.tostring(invoice_to_xml(inv)))
+
+    print('%s written' % f)
+
+
 def cache_invoices(session, args):
     for inv in sherees_invoices_of_interest(session):
-        f, rel_dir = full_dated_obj_xml_path(args.datadir, inv)
-        full_path = os.path.join(args.datadir, rel_dir)
-        if not os.path.isdir(full_path):
-            os.makedirs(full_path)
-        with open(f, 'w') as fh:
-            fh.write(ET.tostring(invoice_to_xml(inv)))
-
-        print('%s written' % f)
+        cache_invoice(session, args, inv)
 
 
 def cache_invoices_items(session, args):
@@ -813,3 +815,13 @@ def inv_report(session, args):
                     '%s %s %s %s %s' % (
                         i.id, i.date, total, i.contract.employee.firstname,
                         i.contract.employee.lastname))
+
+
+def delete_old_voided_invoices(session, args):
+
+    vinvs = session.query(Invoice).filter(and_(Invoice.voided == 1, Invoice.period_end < dt.now() - td(days=args.days_back)))
+    for inv in vinvs:
+        pass
+        # fixme: reinstate with commitems migration
+        #cache_invoice(session, args, inv)
+        #session.delete(inv)
