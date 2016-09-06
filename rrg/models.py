@@ -335,7 +335,6 @@ class Invoice(Base):
     token = Column(String(64))
     view_count = Column(Integer)
     mock = Column(Boolean)
-    timecard_document = Column(TEXT)
     created_date = Column(Date, default=default_date)
     modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user_id = Column(Integer)
@@ -498,8 +497,6 @@ class Citem(Base):
     invoices_item_id = Column(Integer, ForeignKey('invoices_items.id'))
     invoices_item = relationship("Iitem", back_populates="comm_items")
 
-    commissions_report_id = Column(Integer)
-    commissions_reports_tag_id = Column(Integer)
     description = Column(String(50))
     date = Column(Date, index=True, default=default_date)
     percent = Column(Float)
