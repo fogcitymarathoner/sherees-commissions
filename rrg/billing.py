@@ -194,7 +194,7 @@ def cache_invoices_items(session, args):
     for inv_item in inv_items:
         file = full_non_dated_xml_path(args.datadir, inv_item)
         # add to sync list if invoice not on disk
-        if file[0] not in disk_dict:
+        if file not in disk_dict:
             to_sync.append(inv_item)
         else:
             # check the rest of the business rules for syncing
@@ -220,7 +220,7 @@ def cache_clients_checks(session, args):
     for check in client_checks:
         file = full_non_dated_xml_path(args.datadir, check)
         # add to sync list if invoice not on disk
-        if file[0] not in disk_dict:
+        if file not in disk_dict:
             to_sync.append(check)
         else:
             # check the rest of the business rules for syncing
@@ -246,7 +246,7 @@ def cache_invoices_payments(session, args):
     for ipay in invoices_payments:
         file = full_non_dated_xml_path(args.datadir, ipay)
         # add to sync list if invoice not on disk
-        if file[0] not in disk_dict:
+        if file not in disk_dict:
             to_sync.append(ipay)
         else:
             if ipay.modified_date > ipay.last_sync_time:
