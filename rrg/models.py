@@ -277,6 +277,11 @@ class InvoicePayment(Base):
 
     amount = Column(Float)
     notes = Column(String(100))
+
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
@@ -479,6 +484,11 @@ class Iitem(Base):
     ordering = Column(Integer)
     cleared = Column(Boolean)
     comm_items = relationship("Citem", back_populates="invoices_item", cascade="all, delete, delete-orphan")
+
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
