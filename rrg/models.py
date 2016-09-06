@@ -543,11 +543,6 @@ class Citem(Base):
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
         ET.SubElement(doc, 'invoices_item_id').text = str(
             self.invoices_item_id)
-        ET.SubElement(doc, 'commissions_report_id').text = str(
-            self.commissions_report_id)
-        ET.SubElement(
-            doc, 'commissions_reports_tag_id').text = str(
-            self.commissions_reports_tag_id)
         ET.SubElement(doc, 'description').text = '%s-%s %s' % (
              dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
              dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),

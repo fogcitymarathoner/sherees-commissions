@@ -333,7 +333,7 @@ class Test:
         test xml output of invoice item
         :return:
         """
-        baseline_string = """<invoice-item><id>1126</id><invoice_id>None</invoice_id><description>Regular</description><amount>10.0</amount><quantity>None</quantity><cleared>None</cleared></invoice-item>"""
+        baseline_string = """<invoice-item><id>1126</id><invoice_id>None</invoice_id><description>Regular</description><amount>10.0</amount><quantity>0.0</quantity><cleared>None</cleared></invoice-item>"""
         base_doc = ET.fromstring(baseline_string)
         iitem = self.session.query(Iitem)[0]
         logger.debug('iitem')
