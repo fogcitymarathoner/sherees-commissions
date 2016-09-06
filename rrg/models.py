@@ -186,26 +186,6 @@ class Client(Base):
         return "<Client(id='%s', name='%s')>" % (self.id, self.name)
 
 
-class ClientCheck(Base):
-    __tablename__ = 'clients_checks'
-
-    id = Column(Integer, primary_key=True)
-
-    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
-    client = relationship("Client")
-
-    number = Column(String(20))
-    amount = Column(Float)
-    notes = Column(String(100))
-
-    date = Column(Date, nullable=False)
-    created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
-    created_user_id = Column(Integer)
-    modified_user_id = Column(Integer)
-    last_sync_time = Column(TIMESTAMP)
-
-
 class ContractItemCommItem(Base):
     """
 
@@ -282,6 +262,42 @@ class Contract(Base):
         return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
             self.id, self.client.name, self.title, self.employee.firstname,
             self.employee.lastname)
+
+
+class InvoicePayment(Base):
+    __tablename__ = 'invoices_payments'
+
+    id = Column(Integer, primary_key=True)
+
+    invoice_id = Column(Integer, ForeignKey('invoices.id'), nullable=False)
+    invoice = relationship("Invoice", back_populates='invoice_payments')
+
+    check_id = Column(Integer, ForeignKey('clients_checks.id'), nullable=False)
+    check = relationship("ClientCheck", back_populates='invoice_payments')
+
+    amount = Column(Float)
+    notes = Column(String(100))
+
+
+class ClientCheck(Base):
+    __tablename__ = 'clients_checks'
+
+    id = Column(Integer, primary_key=True)
+
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
+    client = relationship("Client")
+
+    invoice_payments = relationship("InvoicePayment", back_populates="check", cascade="all, delete, delete-orphan")
+    number = Column(String(20))
+    amount = Column(Float)
+    notes = Column(String(100))
+
+    date = Column(Date, nullable=False)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
 
 
 class Invoice(Base):
@@ -378,19 +394,7 @@ class Invoice(Base):
         return doc
 
 
-class InvoicePayment(Base):
-    __tablename__ = 'invoices_payments'
 
-    id = Column(Integer, primary_key=True)
-
-    invoice_id = Column(Integer, ForeignKey('invoices.id'), nullable=False)
-    invoice = relationship("Invoice", back_populates='invoice_payments')
-
-    check_id = Column(Integer, ForeignKey('clients_checks.id'), nullable=False)
-    check = relationship("ClientCheck", back_populates='clients_checks')
-
-    amount = Column(Float)
-    notes = Column(String(100))
 
 
 def is_pastdue(inv, date=None):

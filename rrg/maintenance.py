@@ -14,6 +14,5 @@ def delete_old_void_invoices(session, args):
 
 def delete_old_zeroed_invoice_items(session, args):
     for ii, i in session.query(
-            Iitem, Invoice).\
-            join(Invoice).filter(and_(Iitem.amount == 0, Invoice.date < dt.now() - td(days=args.days_past))):
+            Iitem, Invoice).filter(and_(Iitem.amount == 0, Invoice.date < dt.now() - td(days=args.days_past))):
         session.delete(ii)
