@@ -29,7 +29,7 @@ def sync_invoice(session, data_dir, invoice):
     """
     writes xml file for invoices
     """
-    f, rel_dir = full_dated_obj_xml_path(data_dir, invoice)
+    f = full_non_dated_xml_path(data_dir, invoice)
     with open(f, 'w') as fh:
         fh.write(ET.tostring(invoice.to_xml()))
 
