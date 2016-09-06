@@ -33,8 +33,7 @@ def sync_invoice(session, data_dir, invoice):
     with open(f, 'w') as fh:
         fh.write(ET.tostring(invoice.to_xml()))
 
-    session.query(Invoice).filter_by(id=invoice.id).update(
-        {"last_sync_time": dt.now()})
+    session.query(Invoice).filter_by(id=invoice.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -46,8 +45,7 @@ def sync_invoice_item(session, data_dir, inv_item):
     with open(f, 'w') as fh:
         fh.write(ET.tostring(inv_item.to_xml()))
 
-    session.query(Iitem).filter_by(id=inv_item.id).update(
-        {"last_sync_time": dt.now()})
+    session.query(Iitem).filter_by(id=inv_item.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -72,8 +70,7 @@ def sync_invoice_payment(session, data_dir, ccheck):
     with open(f, 'w') as fh:
         fh.write(ET.tostring(ccheck.to_xml()))
 
-    session.query(InvoicePayment).filter_by(id=ccheck.id).update(
-        {"last_sync_time": dt.now()})
+    session.query(InvoicePayment).filter_by(id=ccheck.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -171,7 +168,7 @@ def cache_invoices(session, args):
     for inv in invoices:
         file = full_non_dated_xml_path(args.datadir, inv)
         # add to sync list if invoice not on disk
-        if file[0] not in disk_dict:
+        if file not in disk_dict:
             to_sync.append(inv)
         else:
             # check the rest of the business rules for syncing

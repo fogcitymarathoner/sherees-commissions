@@ -374,9 +374,7 @@ class Invoice(Base):
                "duedate='%s', period_start='%s', " \
                "period_end='%s', date='%s', voided='%s')>" % (
                    self.id, self.contract.title, self.amount, '%s %s' % (
-                       self.contract.employee.firstname,
-                       self.contract.employee.lastname),
-                   self.duedate(),
+                       self.contract.employee.firstname, self.contract.employee.lastname), self.duedate(),
                    self.period_start, self.period_end, self.date, self.voided)
 
     def duedate(self):
