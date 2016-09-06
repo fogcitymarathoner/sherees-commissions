@@ -5,13 +5,13 @@ import logging
 from freezegun import freeze_time
 import xml.etree.ElementTree as ET
 
-from rrg import MYSQL_PORT_3306_TCP_ADDR
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
 from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import Invoice
+from rrg.models import Citem
 from rrg.models import periods
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
@@ -25,7 +25,7 @@ from rrg.sherees_commissions import invoice_to_xml
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
-logger = logging.getLogger('test')
+logger = logging.getLogger(__name__)
 
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
@@ -269,11 +269,9 @@ DEBUG:test:<Employee(id='1640', firstname='sales', lastname='person2')>
 
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
 
-            current_semimonth(dt(year=self.payroll_run_date.year,
-                                 month=self.payroll_run_date.month, day=16))
+            current_semimonth(dt(year=self.payroll_run_date.year, month=self.payroll_run_date.month, day=16))
 
-            assert not weeks_between_dates(self.payroll_run_date + td(days=1),
-                                           self.payroll_run_date)
+            assert not weeks_between_dates(self.payroll_run_date + td(days=1), self.payroll_run_date)
 
     def teardown_class(self):
         logger.debug('Teardown reminders')
@@ -286,26 +284,6 @@ DEBUG:test:<Employee(id='1640', firstname='sales', lastname='person2')>
         :return:
         """
         assert sys._called_from_test
-        assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
-
-    def test_sherees_invoices_of_interest(self):
-        """
-        test xml output of invoice
-        :return:
-        """
-        invoices = sherees_invoices_of_interest(self.session)
-        print('test_sherees_invoices_of_interest invoices')
-        print(invoices)
-        cids = []
-        for con, cl in invoices:
-            print(con)
-            cids.append(con.id)
-        invs = self.session.query(Invoice).join(Contract).filter(
-            Invoice.contract_id.in_(cids))
-        for i in invs:
-            print(i)
-
-        assert 1 == 2
 
     def test_sherees_contracts_of_interest(self):
         """
@@ -318,22 +296,20 @@ DEBUG:test:<Employee(id='1640', firstname='sales', lastname='person2')>
             logger.debug(c)
         assert 12 == len(contracts)
 
-    def test_sherees_invoices_of_interest(self):
-        invs = sherees_invoices_of_interest(self.session)
-        logger.debug('Sherees Invs')
-        sheree_as_worker = 0
-        for i in invs:
-            logger.debug(i)
-            if i.contract.employee_id == 1025:
-                sheree_as_worker += 1
-        assert 12 == invs.count()
-        assert 0 == sheree_as_worker
-
     def test_sherees_invoices_of_interest_xml(self):
         invs = sherees_invoices_of_interest(self.session)
         for i in invs:
+            logger.debug('inv of inst')
+            logger.debug(i)
             ixml = invoice_to_xml(i)
             ixml_str = ET.tostring(ixml)
             logger.debug(ixml_str)
             root = ET.fromstring(ixml_str)
             assert 1 == len(root.findall('invoice-items'))
+
+    def test_sherees_invoices_of_interest(self):
+        """
+        test results of sherees invoices of interest
+        :return:
+        """
+        assert 12 == sherees_invoices_of_interest(self.session).count()

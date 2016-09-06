@@ -186,6 +186,26 @@ class Client(Base):
         return "<Client(id='%s', name='%s')>" % (self.id, self.name)
 
 
+class ClientCheck(Base):
+    __tablename__ = 'clients_checks'
+
+    id = Column(Integer, primary_key=True)
+
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
+    client = relationship("Client")
+
+    number = Column(String(20))
+    amount = Column(Float)
+    notes = Column(String(100))
+
+    date = Column(Date, nullable=False)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
+
+
 class ContractItemCommItem(Base):
     """
 
@@ -269,12 +289,12 @@ class Invoice(Base):
 
     id = Column(Integer, primary_key=True)
 
-    contract_id = Column(Integer, ForeignKey('clients_contracts.id'),
-                         nullable=False)
+    contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
 
     contract = relationship("Contract", backref="clients_contracts")
 
-    invoice_items = relationship("Iitem", back_populates="invoice")
+    invoice_items = relationship("Iitem", back_populates="invoice", cascade="all, delete, delete-orphan")
+    invoice_payments = relationship("InvoicePayment", back_populates="invoice", cascade="all, delete, delete-orphan")
 
     date = Column(Date, nullable=False)
 
@@ -308,12 +328,12 @@ class Invoice(Base):
     def __repr__(self):
         return "<Invoice(id='%s', contract='%s', amount='%s', worker='%s'" \
                "duedate='%s', period_start='%s', " \
-               "period_end='%s', date='%s')>" % (
+               "period_end='%s', date='%s', voided='%s')>" % (
                    self.id, self.contract.title, self.amount, '%s %s' % (
                        self.contract.employee.firstname,
                        self.contract.employee.lastname),
                    self.duedate(),
-                   self.period_start, self.period_end, self.date)
+                   self.period_start, self.period_end, self.date, self.voided)
 
     def duedate(self):
         return date_to_datetime(self.date) + td(days=self.terms)
@@ -355,6 +375,21 @@ class Invoice(Base):
         ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(),
                                                                 TIMESTAMP_FORMAT)
         return doc
+
+
+class InvoicePayment(Base):
+    __tablename__ = 'invoices_payments'
+
+    id = Column(Integer, primary_key=True)
+
+    invoice_id = Column(Integer, ForeignKey('invoices.id'), nullable=False)
+    invoice = relationship("Invoice", back_populates='invoice_payments')
+
+    check_id = Column(Integer, ForeignKey('clients_checks.id'), nullable=False)
+    check = relationship("ClientCheck", back_populates='clients_checks')
+
+    amount = Column(Float)
+    notes = Column(String(100))
 
 
 def is_pastdue(inv, date=None):
@@ -403,6 +438,7 @@ class User(Base):
 
     lastname = Column(String(60))
 
+
 class Iitem(Base):
     """
 
@@ -420,7 +456,7 @@ class Iitem(Base):
     cost = Column(Float)
     ordering = Column(Integer)
     cleared = Column(Boolean)
-    comm_items = relationship("Citem", back_populates="invoices_item")
+    comm_items = relationship("Citem", back_populates="invoices_item", cascade="all, delete, delete-orphan")
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
@@ -469,22 +505,31 @@ class Citem(Base):
     cleared = Column(Float)
     voided = Column(Float)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date,
-                           onupdate=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user_id = Column(Integer, default=2)
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s'. mod_date='%s')>" % (
+        return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s'. mod_date='%s', " \
+               "invoices_item_id='%s', invoice_id='%s', contract='%s', contract_id='%s')>" % (
             self.description, self.id, self.employee_id, self.amount,
-            self.modified_date)
+            self.modified_date, self.invoices_item_id, self.invoices_item.invoice.id,
+            self.invoices_item.invoice.contract.title, self.invoices_item.invoice.contract.id)
 
     def to_xml(self):
-
-        iitemamount = self.invoices_item.amount * self.invoices_item.quantity
-        wage = self.invoices_item.cost * self.invoices_item.quantity
-        empexp = self.invoices_item.cost * self.invoices_item.quantity*.1
+        if self.invoices_item.amount and self.invoices_item.quantity:
+            iitemamount = self.invoices_item.amount * self.invoices_item.quantity
+        else:
+            iitemamount = 0.0
+        if self.invoices_item.cost and self.invoices_item.quantity:
+            wage = self.invoices_item.cost * self.invoices_item.quantity
+        else:
+            wage = 0.0
+        if self.invoices_item.cost and self.invoices_item.quantity:
+            empexp = self.invoices_item.cost * self.invoices_item.quantity*.1
+        else:
+            empexp = 0.0
 
         doc = ET.Element('invoices-items-commissions-item')
 

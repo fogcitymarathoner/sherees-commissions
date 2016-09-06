@@ -3,7 +3,6 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 import logging
 
-from rrg import MYSQL_PORT_3306_TCP_ADDR
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import Client
@@ -292,7 +291,6 @@ class Test:
         :return:
         """
         assert sys._called_from_test
-        assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
 
     def test_rebuild(self, capsys):
         """

@@ -4,7 +4,6 @@ from datetime import timedelta as td
 import logging
 from tabulate import tabulate
 
-from rrg import MYSQL_PORT_3306_TCP_ADDR
 from rrg.models import Contract
 from rrg.models import Client
 from rrg.models import Employee
@@ -200,10 +199,10 @@ class Test:
             objects.append(Invoice(contract_id=contracts[11].id, terms=contracts[11].terms, period_start=start.date(),
                                    period_end=end.date(),
                                    date=self.payroll_run_date.date()))
-            for o in objects:
-                logger.debug(o)
             self.session.bulk_save_objects(objects)
 
+            for i in self.session.query(Invoice).all():
+                logger.debug(i)
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
 
             current_semimonth(dt(year=self.payroll_run_date.year, month=self.payroll_run_date.month, day=16))
@@ -221,7 +220,6 @@ class Test:
         :return:
         """
         assert sys._called_from_test
-        assert 'localhost' == MYSQL_PORT_3306_TCP_ADDR
 
     def test_due_date_pastdue(self, capsys):
         """

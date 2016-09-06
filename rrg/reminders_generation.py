@@ -180,8 +180,7 @@ def rebuild_empty_invoice_commissions(session, inv):
         session.add(ci)
 
 
-def create_invoice_for_period(session, contract, period_start, period_end,
-                              date=None):
+def create_invoice_for_period(session, contract, period_start, period_end, date=None):
     if not date:
         date = dt.now()
     new_inv = Invoice(contract_id=contract.id, period_start=period_start,
