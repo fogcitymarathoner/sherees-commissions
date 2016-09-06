@@ -409,10 +409,10 @@ class Invoice(Base):
         ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
         iitems = ET.SubElement(doc, 'invoice-items')
         for i in self.invoice_items:
-            ET.SubElement(iitems, 'invoice-item').text = i.id
+            ET.SubElement(iitems, 'invoice-item').text = str(i.id)
         ipayments = ET.SubElement(doc, 'invoice-payments')
         for i in self.invoice_payments:
-            ET.SubElement(ipayments, 'invoice-payment').text = i.id
+            ET.SubElement(ipayments, 'invoice-payment').text = str(i.id)
         return doc
 
 
