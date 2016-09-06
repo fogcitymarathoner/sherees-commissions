@@ -8,11 +8,11 @@ from rrg.models import Iitem
 
 def delete_old_void_invoices(session, args):
     for i in session.query(
-            Invoice).filter(and_(Invoice.voided == True, Invoice.date < dt.now() - td(days=args.days_past))):
+            Invoice).filter(and_(Invoice.voided == True, Invoice.date < dt.now() - td(days=args.past_days))):
         session.delete(i)
 
 
 def delete_old_zeroed_invoice_items(session, args):
     for ii, i in session.query(
-            Iitem, Invoice).filter(and_(Iitem.amount == 0, Invoice.date < dt.now() - td(days=args.days_past))):
+            Iitem, Invoice).filter(and_(Iitem.amount == 0, Invoice.date < dt.now() - td(days=args.past_days))):
         session.delete(ii)
