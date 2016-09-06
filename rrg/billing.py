@@ -89,7 +89,7 @@ def db_date_dictionary_invoice(session, args):
     invoices = session.query(Invoice).order_by(Invoice.id)
 
     for inv in invoices:
-        f, rel_dir = full_dated_obj_xml_path(args.datadir, inv)
+        f, rel_dir = full_non_dated_xml_path(args.datadir, inv)
         rel_dir_set.add(rel_dir)
         inv_dict[f] = inv.last_sync_time
 
