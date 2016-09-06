@@ -171,7 +171,7 @@ def cache_invoices(session, args):
 
     to_sync = []
     for inv in invoices:
-        file = full_dated_obj_xml_path(args.datadir, inv)
+        file = full_non_dated_xml_path(args.datadir, inv)
         # add to sync list if invoice not on disk
         if file[0] not in disk_dict:
             to_sync.append(inv)
