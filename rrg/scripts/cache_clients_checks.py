@@ -8,7 +8,7 @@ parser.add_argument('project', help='project name', choices=['rrg', 'biz'])
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with invoices',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/checks/')
 
 parser.add_argument('--db-user', required=True, help='database user',
                     default='marcdba')
