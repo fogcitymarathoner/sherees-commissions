@@ -115,7 +115,7 @@ class Employee(Base):
     bankroutingnumber_clear = Column(String(255))
     bankaccmountnumber_clear = Column(String(255))
     ssn_clear = Column(String(255))
-    
+
     directdeposit = Column(Boolean)
     allowancefederal = Column(Integer)
     allowancestate = Column(Integer)
