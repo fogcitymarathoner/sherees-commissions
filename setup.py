@@ -74,7 +74,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['s3_mysql_backup', 'sqlalchemy',
-                      'tabulate', 'mysql-python'],
+                      'tabulate', 'mysql-python', 'python-keyczar'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,

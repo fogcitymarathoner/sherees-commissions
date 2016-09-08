@@ -107,13 +107,13 @@ class Employee(Base):
     state =  relationship("State")
     zip = Column(String(10))
     ssn_crypto = Column(String(255))
-    bankaccmountnumber_crypto = Column(String(255))
+    bankaccountnumber_crypto = Column(String(255))
     bankaccounttype = Column(String(8))
     bankname = Column(String(35))
     bankroutingnumber_crypto = Column(String(255))
 
     bankroutingnumber_clear = Column(String(255))
-    bankaccmountnumber_clear = Column(String(255))
+    bankaccountnumber_clear = Column(String(255))
     ssn_clear = Column(String(255))
     
     directdeposit = Column(Boolean)
