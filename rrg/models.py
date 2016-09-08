@@ -177,7 +177,7 @@ class Employee(Base):
         ET.SubElement(doc, 'nickname').text = self.nickname
         ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
         ET.SubElement(doc, 'nickname').text = self.nickname
-        ET.SubElement(doc, 'bankaccmountnumber_crypto').text = self.bankaccmountnumber_crypto
+        ET.SubElement(doc, 'bankaccountnumber_crypto').text = self.bankaccountnumber_crypto
         ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
         ET.SubElement(doc, 'bankroutingnumber_crypto').text = self.bankroutingnumber_crypto
         ET.SubElement(doc, 'directdeposit').text = str(self.directdeposit)
