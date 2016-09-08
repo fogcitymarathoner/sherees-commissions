@@ -8,6 +8,8 @@ from rrg.models import Invoice
 from rrg.models import InvoicePayment
 from rrg.models import Iitem
 from rrg.models import ClientCheck
+from rrg.models import Employee
+from rrg.models import EmployeePayment
 from rrg.utils import directory_date_dictionary
 
 
@@ -39,7 +41,7 @@ def sync_invoice(session, data_dir, invoice):
 
 def sync_invoice_item(session, data_dir, inv_item):
     """
-    writes xml file for invoices
+    writes xml file for invoice item
     """
     f = full_non_dated_xml_path(data_dir, inv_item)
     with open(f, 'w') as fh:
@@ -64,13 +66,35 @@ def sync_clients_check(session, data_dir, ccheck):
 
 def sync_invoice_payment(session, data_dir, ccheck):
     """
-    writes xml file for clients checks
+    writes xml file for invoice payment
     """
     f = full_non_dated_xml_path(data_dir, ccheck)
     with open(f, 'w') as fh:
         fh.write(ET.tostring(ccheck.to_xml()))
 
     session.query(InvoicePayment).filter_by(id=ccheck.id).update({"last_sync_time": dt.now()})
+    print('%s written' % f)
+
+
+def sync_employee(session, data_dir, e):
+    """
+    writes xml file for employee
+    """
+    f = full_non_dated_xml_path(data_dir, e)
+    with open(f, 'w') as fh:
+        fh.write(ET.tostring(e.to_xml()))
+    session.query(Employee).filter_by(id=e.id).update({"last_sync_time": dt.now()})
+    print('%s written' % f)
+
+
+def sync_employee_payment(session, data_dir, ep):
+    """
+    writes xml file for employee payment
+    """
+    f = full_non_dated_xml_path(data_dir, ep)
+    with open(f, 'w') as fh:
+        fh.write(ET.tostring(ep.to_xml()))
+    session.query(EmployeePayment).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -142,6 +166,34 @@ def db_date_dictionary_invoices_payments(session, args):
         ipay_dict[f] = ipay.last_sync_time
 
     return ipay_dict, ipays
+
+
+def db_date_dictionary_employees(session, args):
+    """
+    returns database dictionary counter part to directory_date_dictionary for sync determination
+    :param data_dir:
+    :return:
+    """
+    e_dict = {}
+    employees = session.query(Employee)
+    for e in employees:
+        f = full_non_dated_xml_path(args.datadir, e)
+        e_dict[f] = e.last_sync_time
+    return e_dict, employees
+
+
+def db_date_dictionary_employees_payments(session, args):
+    """
+    returns database dictionary counter part to directory_date_dictionary for sync determination
+    :param data_dir:
+    :return:
+    """
+    ep_dict = {}
+    employeespayments = session.query(EmployeePayment)
+    for e in employeespayments:
+        f = full_non_dated_xml_path(args.datadir, e)
+        ep_dict[f] = e.last_sync_time
+    return ep_dict, employeespayments
 
 
 def verify_dirs_ready(data_dir, rel_dir_set):
@@ -255,3 +307,46 @@ def cache_invoices_payments(session, args):
     # Write out xml
     for comm_item in to_sync:
         sync_invoice_payment(session, args.datadir, comm_item)
+
+
+def cache_employees(session, args):
+    disk_dict = directory_date_dictionary(args.datadir)
+
+    # Make query, assemble lists
+    date_dict, employees = db_date_dictionary_employees(session, args)
+
+    to_sync = []
+    for e in employees:
+        filename = full_non_dated_xml_path(args.datadir, e)
+        # add to sync list if invoice not on disk
+        if filename not in disk_dict:
+            to_sync.append(e)
+        else:
+            if e.modified_date > e.last_sync_time:
+                to_sync.append(e)
+
+    # Write out xml
+    for emp in to_sync:
+        sync_employee(session, args.datadir, emp)
+
+
+
+def cache_employees_payments(session, args):
+    disk_dict = directory_date_dictionary(args.datadir)
+
+    # Make query, assemble lists
+    date_dict, employees_payments = db_date_dictionary_employees_payments(session, args)
+
+    to_sync = []
+    for ep in employees_payments:
+        filename = full_non_dated_xml_path(args.datadir, e)
+        # add to sync list if invoice not on disk
+        if filename not in disk_dict:
+            to_sync.append(ep)
+        else:
+            if ep.modified_date > ep.last_sync_time:
+                to_sync.append(e)
+
+    # Write out xml
+    for ep in to_sync:
+        sync_employee_payment(session, args.datadir, pe)

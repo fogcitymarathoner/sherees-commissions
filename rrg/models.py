@@ -82,11 +82,28 @@ class EmployeePayment(Base):
 
     notes = Column(String(100))
 
+    amount = Column(Float)
+    date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
     modified_date = Column(Date, default=default_date, onupdate=default_date)
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
+
+    def __repr__(self):
+        return "<EmployeePayment(id='%s', firstname='%s', lastname='%s', invoice_id='%s', start='%s', end='%s')>" % (
+            self.id, self.employee.firstname, self.employee.lastname, self.invoice.id, self.invoice.period_start,
+            self.invoice.period_end)
+
+    def to_xml(self):
+        doc = ET.Element('employee-payment')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
+        ET.SubElement(doc, 'payroll_id').text = str(self.payroll_id)
+        ET.SubElement(doc, 'notes').text = self.notes
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
 
 
 class Employee(Base):
@@ -104,7 +121,7 @@ class Employee(Base):
     street2 = Column(String(40))
     city = Column(String(20))
     state_id = Column(Integer, ForeignKey('states.id'))
-    state =  relationship("State")
+    state = relationship("State")
     zip = Column(String(10))
     ssn_crypto = Column(String(255))
     bankaccountnumber_crypto = Column(String(255))
@@ -112,17 +129,13 @@ class Employee(Base):
     bankname = Column(String(35))
     bankroutingnumber_crypto = Column(String(255))
 
-    bankroutingnumber_clear = Column(String(255))
-    bankaccountnumber_clear = Column(String(255))
-    ssn_clear = Column(String(255))
-
     directdeposit = Column(Boolean)
     allowancefederal = Column(Integer)
     allowancestate = Column(Integer)
     extradeductionfed = Column(Integer)
     extradeductionstate = Column(Integer)
     maritalstatusfed = Column(String(40))
-    maritalstatusstate= Column(String(40))
+    maritalstatusstate = Column(String(40))
     usworkstatus = Column(Integer)
     notes = Column(TEXT)
     tcard = Column(Boolean)
@@ -142,7 +155,6 @@ class Employee(Base):
     contracts = relationship("Contract", back_populates="employee")
 
     voided = Column(Boolean)
-
 
     startdate = Column(Date)
     enddate = Column(Date)
@@ -279,6 +291,7 @@ class CommPayment(Base):
         """
         return ET.parse(xml_file_name).getroot()
 
+
 class Client(Base):
     __tablename__ = 'clients'
 
@@ -352,7 +365,7 @@ class ContractItem(Base):
     last_sync_time = Column(Date)
 
     def __repr__(self):
-        return "<ContractItem(id='%s', description='%s')>" % ( self.id, self.description)
+        return "<ContractItem(id='%s', description='%s')>" % (self.id, self.description)
 
 
 class Contract(Base):
@@ -402,7 +415,7 @@ class InvoicePayment(Base):
 
     def __repr__(self):
         return "<InvoicePayment(id='%s', invoice='%s', amount='%s', number='%s', date='%s')>" % (
-                   self.id, self.invoice_id, self.amount, self.check.number, self.check.date)
+            self.id, self.invoice_id, self.amount, self.check.number, self.check.date)
 
     def to_xml(self):
         doc = ET.Element('invoice-payment')
@@ -436,7 +449,7 @@ class ClientCheck(Base):
 
     def __repr__(self):
         return "<ClientCheck(id='%s', client='%s', amount='%s', number='%s', date='%s')>" % (
-                   self.id, self.client.name, self.amount, self.number, self.date)
+            self.id, self.client.name, self.amount, self.number, self.date)
 
     def to_xml(self):
         doc = ET.Element('client-check')
@@ -547,6 +560,7 @@ def is_pastdue(inv, date=None):
         return True
     else:
         return False
+
 
 # XML
 
@@ -661,9 +675,9 @@ class Citem(Base):
     def __repr__(self):
         return "<Citem(description='%s', id='%s', employee_id='%s', amount='%s'. mod_date='%s', " \
                "invoices_item_id='%s', invoice_id='%s', contract='%s', contract_id='%s')>" % (
-            self.description, self.id, self.employee_id, self.amount,
-            self.modified_date, self.invoices_item_id, self.invoices_item.invoice.id,
-            self.invoices_item.invoice.contract.title, self.invoices_item.invoice.contract.id)
+                   self.description, self.id, self.employee_id, self.amount,
+                   self.modified_date, self.invoices_item_id, self.invoices_item.invoice.id,
+                   self.invoices_item.invoice.contract.title, self.invoices_item.invoice.contract.id)
 
     def to_xml(self):
         if self.invoices_item.amount and self.invoices_item.quantity:
@@ -675,7 +689,7 @@ class Citem(Base):
         else:
             wage = 0.0
         if self.invoices_item.cost and self.invoices_item.quantity:
-            empexp = self.invoices_item.cost * self.invoices_item.quantity*.1
+            empexp = self.invoices_item.cost * self.invoices_item.quantity * .1
         else:
             empexp = 0.0
 
@@ -688,13 +702,13 @@ class Citem(Base):
         ET.SubElement(doc, 'invoices_item_id').text = str(
             self.invoices_item_id)
         ET.SubElement(doc, 'description').text = '%s-%s %s' % (
-             dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
-             dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),
-             self.description)
+            dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
+            dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),
+            self.description)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date,
                                                       TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'percent').text = str(self.percent)
-        ET.SubElement(doc, 'amount').text = str((((iitemamount-wage-empexp)*self.percent)/100))
+        ET.SubElement(doc, 'amount').text = str((((iitemamount - wage - empexp) * self.percent) / 100))
         ET.SubElement(doc, 'rel_inv_amt').text = str(self.rel_inv_amt)
         ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(
             self.rel_inv_line_item_amt)

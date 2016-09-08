@@ -105,14 +105,15 @@ setup(
             'rrg-create-test-db=rrg.utils:create_db',
             'rrg-ar=rrg.scripts.ar_report:ar_report',
 
-            'rrg-cache-clients-ar=rrg.scripts.cache_clients_ar:'
-            'cache_client_accounts_receivable',
+            'rrg-cache-clients-ar=rrg.scripts.cache_clients_ar:cache_client_accounts_receivable',
             'rrg-cache-comm-items=rrg.scripts.cache_comm_items:cache_comm_items',
             'rrg-cache-comm-payments=rrg.scripts.cache_comm_payments:cache_comm_payments',
             'rrg-cache-invoices=rrg.scripts.cache_invoices:cache_invoices',
             'rrg-cache-invoices-items=rrg.scripts.cache_invoices_items:cache_invoices_items',
             'rrg-cache-invoices-payments=rrg.scripts.cache_invoices_payments:cache_invoice_payments',
             'rrg-cache-clients-checks=rrg.scripts.cache_clients_checks:cache_checks',
+            'rrg-cache-employees=scripts.cache_employees:cache_employees',
+            'rrg-cache-employees-payments=scripts.cache_employees_payments:cache_employees_payments',
 
             'rrg-comm=rrg.scripts.commissions:comm',
 
