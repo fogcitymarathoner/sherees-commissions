@@ -322,7 +322,9 @@ def cache_employees(session, args):
         if filename not in disk_dict:
             to_sync.append(e)
         else:
-            if e.modified_date > e.last_sync_time:
+            if not e.modified_date or not e.last_sync_time:
+                to_sync.append(e)
+            elif e.modified_date > e.last_sync_time:
                 to_sync.append(e)
 
     # Write out xml
