@@ -1,7 +1,7 @@
 """
 does not work on alpine because libmysqlclient-dev package is not available.
 """
-
+import re
 from datetime import date
 from datetime import datetime as dt
 from datetime import timedelta as td
@@ -67,7 +67,7 @@ class Payroll(Base):
 
 
 class EmployeePayment(Base):
-    __tablename__ = 'employees-payments'
+    __tablename__ = 'employees_payments'
 
     id = Column(Integer, primary_key=True)
 
@@ -91,11 +91,12 @@ class EmployeePayment(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<EmployeePayment(id='%s', firstname='%s', lastname='%s', invoice_id='%s', start='%s', end='%s')>" % (
-            self.id, self.employee.firstname, self.employee.lastname, self.invoice.id, self.invoice.period_start,
-            self.invoice.period_end)
+        return "<EmployeePayment(id='%s', firstname='%s', lastname='%s', invoice_id='%s', start='%s', end='%s', date='%s', amount='%s')>" % (
+            self.id, self.employee.firstname, self.employee.lastname, self.invoice_id, self.invoice.period_start,
+            self.invoice.period_end, self.date, self.amount)
 
     def to_xml(self):
+        print self
         doc = ET.Element('employee-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
@@ -104,6 +105,7 @@ class EmployeePayment(Base):
         ET.SubElement(doc, 'notes').text = self.notes
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'amount').text = str(self.amount)
+        return doc
 
 
 class Employee(Base):
@@ -176,7 +178,6 @@ class Employee(Base):
         ET.SubElement(doc, 'mi').text = self.mi
         ET.SubElement(doc, 'nickname').text = self.nickname
         ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
-        ET.SubElement(doc, 'nickname').text = self.nickname
         ET.SubElement(doc, 'bankaccountnumber_crypto').text = self.bankaccountnumber_crypto
         ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
         ET.SubElement(doc, 'bankroutingnumber_crypto').text = self.bankroutingnumber_crypto
@@ -188,7 +189,7 @@ class Employee(Base):
         ET.SubElement(doc, 'maritalstatusfed').text = self.maritalstatusfed
         ET.SubElement(doc, 'maritalstatusstate').text = self.maritalstatusstate
         ET.SubElement(doc, 'usworkstatus').text = str(self.usworkstatus)
-        ET.SubElement(doc, 'notes').text = self.notes
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]',' ', self.notes)
         ET.SubElement(doc, 'state_id').text = str(self.state_id)
         ET.SubElement(doc, 'salesforce').text = str(self.salesforce)
         ET.SubElement(doc, 'active').text = str(self.active)
@@ -200,7 +201,18 @@ class Employee(Base):
         ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'indust').text = str(self.indust)
         ET.SubElement(doc, 'info').text = str(self.info)
-        ET.SubElement(doc, 'phone').text = self.phone
+        ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]',' ', self.phone)
+        print(self.firstname)
+        print(self.lastname)
+        print(self.nickname)
+        print(self.notes)
+        print(self.maritalstatusfed)
+        print(self.maritalstatusstate)
+        print(self.bankaccounttype)
+        print(self.dob)
+        print(self.phone)
+        print(self.startdate)
+        print(self.enddate)
         ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate, TIMESTAMP_FORMAT)
