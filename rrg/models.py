@@ -56,6 +56,39 @@ Base = declarative_base()
 # sherees_commissions
 
 
+class Payroll(Base):
+    __tablename__ = 'payrolls'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(72))
+    notes = Column(TEXT)
+    amount = Column(Float)
+    date = Column(Date)
+
+
+class EmployeePayment(Base):
+    __tablename__ = 'employees-payments'
+
+    id = Column(Integer, primary_key=True)
+
+    employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
+    employee = relationship("Employee")
+
+    invoice_id = Column(Integer, ForeignKey('invoices.id'), nullable=False)
+    invoice = relationship("Invoice")
+
+    payroll_id = Column(Integer, ForeignKey('payrolls.id'), nullable=False)
+    payroll = relationship("Payroll")
+
+    notes = Column(String(100))
+
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
+
+
 class Employee(Base):
     __tablename__ = 'employees'
 
@@ -65,18 +98,96 @@ class Employee(Base):
 
     firstname = Column(String(20))
     lastname = Column(String(20))
+    mi = Column(String(2))
+    nickname = Column(String(20))
+    street1 = Column(String(40))
+    street2 = Column(String(40))
+    city = Column(String(20))
+    state_id = Column(Integer, ForeignKey('states.id'))
+    state =  relationship("State")
+    zip = Column(String(10))
+    ssn_crypto = Column(String(255))
+    bankaccmountnumber_crypto = Column(String(255))
+    bankaccounttype = Column(String(8))
+    bankname = Column(String(35))
+    bankroutingnumber_crypto = Column(String(255))
+    directdeposit = Column(Boolean)
+    allowancefederal = Column(Integer)
+    allowancestate = Column(Integer)
+    extradeductionfed = Column(Integer)
+    extradeductionstate = Column(Integer)
+    maritalstatusfed = Column(String(40))
+    maritalstatusstate= Column(String(40))
+    usworkstatus = Column(Integer)
+    notes = Column(TEXT)
+    tcard = Column(Boolean)
+    voided = Column(Boolean)
+    w4 = Column(Boolean)
+    de34 = Column(Boolean)
+    i9 = Column(Boolean)
+    medical = Column(Boolean)
+    indust = Column(Boolean)
+    info = Column(Boolean)
+    phone = Column(String(100))
     dob = Column(Date)
     salesforce = Column(Boolean)
     comm_items = relationship("Citem", back_populates="employee")
-    notes = relationship("Note", back_populates="employee")
+    cnotes = relationship("Note", back_populates="employee")
     notes_payments = relationship("NotePayment", back_populates="employee")
     contracts = relationship("Contract", back_populates="employee")
 
     voided = Column(Boolean)
 
+
+    startdate = Column(Date)
+    enddate = Column(Date)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
+
     def __repr__(self):
         return "<Employee(id='%s', firstname='%s', lastname='%s')>" % (
             self.id, self.firstname, self.lastname)
+
+    def to_xml(self):
+        doc = ET.Element('employee')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'firstname').text = self.firstname
+        ET.SubElement(doc, 'lastname').text = self.lastname
+        ET.SubElement(doc, 'mi').text = self.mi
+        ET.SubElement(doc, 'nickname').text = self.nickname
+        ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
+        ET.SubElement(doc, 'nickname').text = self.nickname
+        ET.SubElement(doc, 'bankaccmountnumber_crypto').text = self.bankaccmountnumber_crypto
+        ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
+        ET.SubElement(doc, 'bankroutingnumber_crypto').text = self.bankroutingnumber_crypto
+        ET.SubElement(doc, 'directdeposit').text = str(self.directdeposit)
+        ET.SubElement(doc, 'allowancefederal').text = str(self.allowancefederal)
+        ET.SubElement(doc, 'allowancestate').text = str(self.allowancestate)
+        ET.SubElement(doc, 'extradeductionfed').text = str(self.extradeductionfed)
+        ET.SubElement(doc, 'extradeductionstate').text = str(self.extradeductionstate)
+        ET.SubElement(doc, 'maritalstatusfed').text = self.maritalstatusfed
+        ET.SubElement(doc, 'maritalstatusstate').text = self.maritalstatusstate
+        ET.SubElement(doc, 'usworkstatus').text = str(self.usworkstatus)
+        ET.SubElement(doc, 'notes').text = self.notes
+        ET.SubElement(doc, 'state_id').text = str(self.state_id)
+        ET.SubElement(doc, 'salesforce').text = str(self.salesforce)
+        ET.SubElement(doc, 'active').text = str(self.active)
+        ET.SubElement(doc, 'tcard').text = str(self.tcard)
+        ET.SubElement(doc, 'w4').text = str(self.w4)
+        ET.SubElement(doc, 'de34').text = str(self.de34)
+        ET.SubElement(doc, 'i9').text = str(self.i9)
+        ET.SubElement(doc, 'medical').text = str(self.medical)
+        ET.SubElement(doc, 'voided').text = str(self.voided)
+        ET.SubElement(doc, 'indust').text = str(self.indust)
+        ET.SubElement(doc, 'info').text = str(self.info)
+        ET.SubElement(doc, 'phone').text = self.phone
+        ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate, TIMESTAMP_FORMAT)
+        return doc
 
 
 class NotePayment(Base):
