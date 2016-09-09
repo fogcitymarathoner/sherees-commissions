@@ -2,7 +2,7 @@ import argparse
 from rrg.billing import cache_employees as routine
 from rrg.models import session_maker
 
-parser = argparse.ArgumentParser(description='RRG Cache Clients AR')
+parser = argparse.ArgumentParser(description='RRG Employees')
 
 parser.add_argument(
     '--datadir', required=True,

@@ -329,8 +329,6 @@ def cache_employees(session, args):
 
     # Write out xml
     for emp in to_sync:
-        print(emp)
-        print(emp.dob)
         sync_employee(session, args.datadir, emp)
 
 

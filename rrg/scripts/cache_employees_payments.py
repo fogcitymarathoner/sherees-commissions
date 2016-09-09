@@ -2,13 +2,10 @@ import argparse
 from rrg.billing import cache_employees_payments as routine
 from rrg.models import session_maker
 
-parser = argparse.ArgumentParser(description='RRG Cache Clients AR')
+parser = argparse.ArgumentParser(description='RRG Cache Employees Payments')
 
-parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir with ar.xml',
+parser.add_argument('--datadir', required=True,  help='datadir dir with ar.xml',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/employees/payments/')
-
 parser.add_argument('--db-user', required=True, help='database user',  default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
 parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)

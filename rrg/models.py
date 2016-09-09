@@ -96,7 +96,6 @@ class EmployeePayment(Base):
             self.invoice.period_end, self.date, self.amount)
 
     def to_xml(self):
-        print self
         doc = ET.Element('employee-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
@@ -202,17 +201,6 @@ class Employee(Base):
         ET.SubElement(doc, 'indust').text = str(self.indust)
         ET.SubElement(doc, 'info').text = str(self.info)
         ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]',' ', self.phone)
-        print(self.firstname)
-        print(self.lastname)
-        print(self.nickname)
-        print(self.notes)
-        print(self.maritalstatusfed)
-        print(self.maritalstatusstate)
-        print(self.bankaccounttype)
-        print(self.dob)
-        print(self.phone)
-        print(self.startdate)
-        print(self.enddate)
         ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate, TIMESTAMP_FORMAT)
