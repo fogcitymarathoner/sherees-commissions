@@ -350,11 +350,11 @@ class ContractItem(Base):
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
 
-    contract_id = Column(Integer, ForeignKey('clients_contracts.id'),
-                         nullable=False)
+    contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
     contract = relationship("Contract")
 
-    contract_comm_items = relationship("ContractItemCommItem", back_populates="contract_item")
+    contract_comm_items = relationship(
+        "ContractItemCommItem", back_populates="contract_item", cascade="all, delete, delete-orphan")
 
     amt = Column(Float)
     cost = Column(Float)
@@ -381,7 +381,8 @@ class Contract(Base):
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
     employee = relationship("Employee")
 
-    contract_items = relationship("ContractItem", back_populates="contract")
+    invoices = relationship("Invoice", back_populates="contract", cascade="all, delete, delete-orphan")
+    contract_items = relationship("ContractItem", back_populates="contract", cascade="all, delete, delete-orphan")
     period_id = Column(Integer)
     active = Column(Boolean)
     notes = Column(TEXT)
