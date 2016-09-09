@@ -358,7 +358,7 @@ class Client(Base):
 
     def __repr__(self):
         return "<Client(id='%s', name='%s', street1='%s', street2='%s', state_id='%s', zip='%s', terms='%s', active='%s'" \
-               ")>" % (self.id, self.name, self.street1, self,street2, self.state_id, self.zip, self.terms, self.active)
+               ")>" % (self.id, self.name, self.street1, self.street2, self.state_id, self.zip, self.terms, self.active)
 
     def to_xml(self):
         doc = ET.Element('client')
