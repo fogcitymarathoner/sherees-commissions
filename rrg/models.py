@@ -477,9 +477,10 @@ class Contract(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
-            self.id, self.client.name, self.title, self.employee.firstname,
-            self.employee.lastname)
+        if self.enddate:
+            return "<Contract(id='%s', client=%s, title='%s', employee='%s %s', startdate='%s', enddate='%s')>" % (
+                self.id, self.client.name, self.title, self.employee.firstname,
+                self.employee.lastname, self.startdate, self.enddate)
 
     def to_xml(self):
         doc = ET.Element('contract')
