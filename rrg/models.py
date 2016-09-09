@@ -372,6 +372,7 @@ class Client(Base):
         ET.SubElement(doc, 'active').text = str(self.active)
         return doc
 
+
 class ClientMemo(Base):
     __tablename__ = 'clients_memos'
 
@@ -473,11 +474,26 @@ class Contract(Base):
     terms = Column(Integer, nullable=False)
     startdate = Column(Date)
     enddate = Column(Date)
+    last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
         return "<Contract(id='%s', client=%s, title='%s', employee='%s %s')>" % (
             self.id, self.client.name, self.title, self.employee.firstname,
             self.employee.lastname)
+
+    def to_xml(self):
+        doc = ET.Element('contract')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'title').text = self.title
+        ET.SubElement(doc, 'notes').text = self.notes
+        ET.SubElement(doc, 'client_id').text = str(self.client_id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'period_id').text = str(self.period_id)
+        ET.SubElement(doc, 'active').text = str(self.active)
+        ET.SubElement(doc, 'terms').text = str(self.terms)
+        ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate, TIMESTAMP_FORMAT)
+        return doc
 
 
 class InvoicePayment(Base):
