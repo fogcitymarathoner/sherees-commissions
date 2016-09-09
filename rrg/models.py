@@ -370,6 +370,7 @@ class Client(Base):
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'active').text = str(self.active)
+        return doc
 
 class ClientMemo(Base):
     __tablename__ = 'clients_memos'
