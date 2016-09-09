@@ -481,6 +481,10 @@ class Contract(Base):
             return "<Contract(id='%s', client=%s, title='%s', employee='%s %s', startdate='%s', enddate='%s')>" % (
                 self.id, self.client.name, self.title, self.employee.firstname,
                 self.employee.lastname, self.startdate, self.enddate)
+        else:
+            return "<Contract(id='%s', client=%s, title='%s', employee='%s %s', startdate='%s'>" % (
+                self.id, self.client.name, self.title, self.employee.firstname,
+                self.employee.lastname, self.startdate)
 
     def to_xml(self):
         doc = ET.Element('contract')
