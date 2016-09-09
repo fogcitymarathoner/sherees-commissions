@@ -124,6 +124,7 @@ class EmployeeMemo(Base):
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        return doc
 
 
 class Employee(Base):
@@ -381,6 +382,7 @@ class ClientMemo(Base):
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        return doc
 
 
 class ContractItemCommItem(Base):

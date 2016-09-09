@@ -66,16 +66,15 @@ def sync_clients_check(session, data_dir, ccheck):
     print('%s written' % f)
 
 
-def sync_clients_memo(session, data_dir, ccheck):
+def sync_clients_memo(session, data_dir, memo):
     """
     writes xml file for clients memos
     """
-    f = full_non_dated_xml_path(data_dir, ccheck)
+    f = full_non_dated_xml_path(data_dir, memo)
     with open(f, 'w') as fh:
-        fh.write(ET.tostring(ccheck.to_xml()))
+        fh.write(ET.tostring(memo.to_xml()))
 
-    session.query(ClientMemo).filter_by(id=ccheck.id).update(
-        {"last_sync_time": dt.now()})
+    session.query(ClientMemo).filter_by(id=memo.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
