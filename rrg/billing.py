@@ -332,7 +332,6 @@ def cache_employees(session, args):
         sync_employee(session, args.datadir, emp)
 
 
-
 def cache_employees_payments(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
@@ -351,4 +350,4 @@ def cache_employees_payments(session, args):
 
     # Write out xml
     for ep in to_sync:
-        sync_employee_payment(session, args.datadir, pe)
+        sync_employee_payment(session, args.datadir, ep)
