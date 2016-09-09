@@ -296,6 +296,9 @@ class Client(Base):
     __tablename__ = 'clients'
 
     id = Column(Integer, primary_key=True)
+
+    contracts = relationship("Contract", back_populates="client", cascade="all, delete, delete-orphan")
+
     name = Column(String(50))
     street1 = Column(String(50))
     street2 = Column(String(50))
