@@ -180,7 +180,7 @@ def db_date_dictionary_client_checks(session, args):
 
     cchecks_dict = {}
 
-    clients_checks = session.query(ClientCheck).order_by(ClientCheck.id)
+    clients_checks = session.query(ClientCheck)
 
     for ccheck in clients_checks:
         f = full_non_dated_xml_path(args.datadir, ccheck)
