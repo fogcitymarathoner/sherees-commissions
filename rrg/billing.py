@@ -381,7 +381,7 @@ def cache_clients(session, args):
 
     to_sync = []
     for client in clients:
-        file = full_non_dated_xml_path(args.datadir, check)
+        file = full_non_dated_xml_path(args.datadir, client)
         # add to sync list if invoice not on disk
         if file not in disk_dict:
             to_sync.append(client)
