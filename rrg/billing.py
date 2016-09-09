@@ -101,7 +101,7 @@ def sync_employee_payment(session, data_dir, ep):
 def db_date_dictionary_invoice(session, args):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
+    :param :
     :return:
     """
 
@@ -118,7 +118,7 @@ def db_date_dictionary_invoice(session, args):
 def db_date_dictionary_invoice_items(session, args):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
+    :param :
     :return:
     """
 
@@ -329,6 +329,8 @@ def cache_employees(session, args):
 
     # Write out xml
     for emp in to_sync:
+        print(emp)
+        print(emp.dob)
         sync_employee(session, args.datadir, emp)
 
 
@@ -340,13 +342,15 @@ def cache_employees_payments(session, args):
 
     to_sync = []
     for ep in employees_payments:
-        filename = full_non_dated_xml_path(args.datadir, e)
+        filename = full_non_dated_xml_path(args.datadir, ep)
         # add to sync list if invoice not on disk
         if filename not in disk_dict:
             to_sync.append(ep)
         else:
-            if ep.modified_date > ep.last_sync_time:
-                to_sync.append(e)
+            if not ep.modified_date or not ep.last_sync_time:
+                to_sync.append(ep)
+            elif ep.modified_date > dt.date(ep.last_sync_time):
+                to_sync.append(ep)
 
     # Write out xml
     for ep in to_sync:
