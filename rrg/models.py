@@ -200,6 +200,10 @@ class Employee(Base):
         ET.SubElement(doc, 'lastname').text = self.lastname
         ET.SubElement(doc, 'mi').text = self.mi
         ET.SubElement(doc, 'nickname').text = self.nickname
+        ET.SubElement(doc, 'street1').text = self.street1
+        ET.SubElement(doc, 'street2').text = self.street2
+        ET.SubElement(doc, 'state_id').text = str(self.state_id)
+        ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
         ET.SubElement(doc, 'bankaccountnumber_crypto').text = self.bankaccountnumber_crypto
         ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
@@ -355,6 +359,16 @@ class Client(Base):
     def __repr__(self):
         return "<Client(id='%s', name='%s')>" % (self.id, self.name)
 
+    def to_xml(self):
+        doc = ET.Element('client')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'name').text = self.name
+        ET.SubElement(doc, 'street1').text = self.street1
+        ET.SubElement(doc, 'street2').text = self.street2
+        ET.SubElement(doc, 'state_id').text = str(self.state_id)
+        ET.SubElement(doc, 'zip').text = self.zip
+        ET.SubElement(doc, 'terms').text = str(self.terms)
+        ET.SubElement(doc, 'active').text = str(self.active)
 
 class ClientMemo(Base):
     __tablename__ = 'clients_memos'

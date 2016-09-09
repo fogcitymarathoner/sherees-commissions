@@ -7,6 +7,7 @@ from s3_mysql_backup import mkdirs
 from rrg.models import Invoice
 from rrg.models import InvoicePayment
 from rrg.models import Iitem
+from rrg.models import Client
 from rrg.models import ClientCheck
 from rrg.models import ClientMemo
 from rrg.models import Employee
@@ -50,6 +51,19 @@ def sync_invoice_item(session, data_dir, inv_item):
         fh.write(ET.tostring(inv_item.to_xml()))
 
     session.query(Iitem).filter_by(id=inv_item.id).update({"last_sync_time": dt.now()})
+    print('%s written' % f)
+
+
+def sync_client(session, data_dir, client):
+    """
+    writes xml file for client
+    """
+    f = full_non_dated_xml_path(data_dir, client)
+    with open(f, 'w') as fh:
+        fh.write(ET.tostring(client.to_xml()))
+
+    session.query(ClientCheck).filter_by(id=client.id).update(
+        {"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -173,6 +187,24 @@ def db_date_dictionary_client_checks(session, args):
         cchecks_dict[f] = ccheck.last_sync_time
 
     return cchecks_dict, clients_checks
+
+
+def db_date_dictionary_clients(session, args):
+    """
+    returns database dictionary counter part to directory_date_dictionary for sync determination
+    :param data_dir:
+    :return:
+    """
+
+    clients_dict = {}
+
+    clients = session.query(Client)
+
+    for client in clients:
+        f = full_non_dated_xml_path(args.datadir, client)
+        clients_dict[f] = client.last_sync_time
+
+    return clients_dict, clients
 
 
 def db_date_dictionary_client_memos(session, args):
@@ -339,6 +371,32 @@ def cache_clients_checks(session, args):
     # Write out xml
     for comm_item in to_sync:
         sync_clients_check(session, args.datadir, comm_item)
+
+
+def cache_clients(session, args):
+    disk_dict = directory_date_dictionary(args.datadir)
+
+    # Make query, assemble lists
+    date_dict, clients = db_date_dictionary_clients(session, args)
+
+    to_sync = []
+    for client in clients:
+        file = full_non_dated_xml_path(args.datadir, check)
+        # add to sync list if invoice not on disk
+        if file not in disk_dict:
+            to_sync.append(client)
+        else:
+            # check the rest of the business rules for syncing
+            # no time stamps, timestamps out of sync
+            if client.last_sync_time is None or client.modified_date is None:
+                to_sync.append(client)
+                continue
+            if client.modified_date > client.last_sync_time:
+                to_sync.append(client)
+
+    # Write out xml
+    for comm_item in to_sync:
+        sync_client(session, args.datadir, comm_item)
 
 
 def cache_clients_memos(session, args):
