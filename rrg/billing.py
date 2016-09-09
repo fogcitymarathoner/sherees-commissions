@@ -8,7 +8,9 @@ from rrg.models import Invoice
 from rrg.models import InvoicePayment
 from rrg.models import Iitem
 from rrg.models import ClientCheck
+from rrg.models import ClientMemo
 from rrg.models import Employee
+from rrg.models import EmployeeMemo
 from rrg.models import EmployeePayment
 from rrg.utils import directory_date_dictionary
 
@@ -64,6 +66,19 @@ def sync_clients_check(session, data_dir, ccheck):
     print('%s written' % f)
 
 
+def sync_clients_memo(session, data_dir, ccheck):
+    """
+    writes xml file for clients memos
+    """
+    f = full_non_dated_xml_path(data_dir, ccheck)
+    with open(f, 'w') as fh:
+        fh.write(ET.tostring(ccheck.to_xml()))
+
+    session.query(ClientMemo).filter_by(id=ccheck.id).update(
+        {"last_sync_time": dt.now()})
+    print('%s written' % f)
+
+
 def sync_invoice_payment(session, data_dir, ccheck):
     """
     writes xml file for invoice payment
@@ -95,6 +110,17 @@ def sync_employee_payment(session, data_dir, ep):
     with open(f, 'w') as fh:
         fh.write(ET.tostring(ep.to_xml()))
     session.query(EmployeePayment).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
+    print('%s written' % f)
+
+
+def sync_employee_memo(session, data_dir, ep):
+    """
+    writes xml file for employee memo
+    """
+    f = full_non_dated_xml_path(data_dir, ep)
+    with open(f, 'w') as fh:
+        fh.write(ET.tostring(ep.to_xml()))
+    session.query(EmployeeMemo).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -150,6 +176,20 @@ def db_date_dictionary_client_checks(session, args):
     return cchecks_dict, clients_checks
 
 
+def db_date_dictionary_client_memos(session, args):
+    """
+    returns database dictionary counter part to directory_date_dictionary for sync determination
+    :param data_dir:
+    :return:
+    """
+    cmemos_dict = {}
+    clients_memos = session.query(ClientMemo).order_by(ClientCheck.id)
+    for ccheck in clients_memos:
+        f = full_non_dated_xml_path(args.datadir, ccheck)
+        cmemos_dict[f] = ccheck.last_sync_time
+    return cmemos_dict, clients_memos
+
+
 def db_date_dictionary_invoices_payments(session, args):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
@@ -194,6 +234,20 @@ def db_date_dictionary_employees_payments(session, args):
         f = full_non_dated_xml_path(args.datadir, e)
         ep_dict[f] = e.last_sync_time
     return ep_dict, employeespayments
+
+
+def db_date_dictionary_employees_memoss(session, args):
+    """
+    returns database dictionary counter part to directory_date_dictionary for sync determination
+    :param data_dir:
+    :return:
+    """
+    em_dict = {}
+    employeesmemos = session.query(EmployeeMemo)
+    for e in employeesmemos:
+        f = full_non_dated_xml_path(args.datadir, e)
+        em_dict[f] = e.last_sync_time
+    return em_dict, employeesmemos
 
 
 def verify_dirs_ready(data_dir, rel_dir_set):
@@ -288,6 +342,32 @@ def cache_clients_checks(session, args):
         sync_clients_check(session, args.datadir, comm_item)
 
 
+def cache_clients_memos(session, args):
+    disk_dict = directory_date_dictionary(args.datadir)
+
+    # Make query, assemble lists
+    date_dict, client_memos = db_date_dictionary_client_memos(session, args)
+
+    to_sync = []
+    for check in client_memos:
+        file = full_non_dated_xml_path(args.datadir, check)
+        # add to sync list if invoice not on disk
+        if file not in disk_dict:
+            to_sync.append(check)
+        else:
+            # check the rest of the business rules for syncing
+            # no time stamps, timestamps out of sync
+            if check.last_sync_time is None or check.modified_date is None:
+                to_sync.append(check)
+                continue
+            if check.modified_date > check.last_sync_time:
+                to_sync.append(check)
+
+    # Write out xml
+    for comm_item in to_sync:
+        sync_clients_memo(session, args.datadir, comm_item)
+
+
 def cache_invoices_payments(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
@@ -353,3 +433,26 @@ def cache_employees_payments(session, args):
     # Write out xml
     for ep in to_sync:
         sync_employee_payment(session, args.datadir, ep)
+
+
+def cache_employees_memos(session, args):
+    disk_dict = directory_date_dictionary(args.datadir)
+
+    # Make query, assemble lists
+    date_dict, employees_memos = db_date_dictionary_employees_memos(session, args)
+
+    to_sync = []
+    for ep in employees_memos:
+        filename = full_non_dated_xml_path(args.datadir, ep)
+        # add to sync list if invoice not on disk
+        if filename not in disk_dict:
+            to_sync.append(ep)
+        else:
+            if not ep.modified_date or not ep.last_sync_time:
+                to_sync.append(ep)
+            elif ep.modified_date > dt.date(ep.last_sync_time):
+                to_sync.append(ep)
+
+    # Write out xml
+    for ep in to_sync:
+        sync_employee_memo(session, args.datadir, ep)

@@ -112,8 +112,10 @@ setup(
             'rrg-cache-invoices-items=rrg.scripts.cache_invoices_items:cache_invoices_items',
             'rrg-cache-invoices-payments=rrg.scripts.cache_invoices_payments:cache_invoice_payments',
             'rrg-cache-clients-checks=rrg.scripts.cache_clients_checks:cache_checks',
+            'rrg-cache-clients-memos=rrg.scripts.cache_client_memos:cache_client_memos',
             'rrg-cache-employees=rrg.scripts.cache_employees:cache_employees',
             'rrg-cache-employees-payments=rrg.scripts.cache_employees_payments:cache_employees_payments',
+            'rrg-cache-employees-memos=rrg.scripts.cache_employee_memos:cache_employee_memos',
 
             'rrg-comm=rrg.scripts.commissions:comm',
 

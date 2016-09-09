@@ -1,14 +1,14 @@
 import argparse
-from rrg.billing import cache_clients_checks as routine
+from rrg.billing import cache_clients_memos as routine
 from rrg.models import session_maker
 
-parser = argparse.ArgumentParser(description='RRG Cache Clients Checks')
+parser = argparse.ArgumentParser(description='RRG Cache Clients Memos')
 
 parser.add_argument('project', help='project name', choices=['rrg', 'biz'])
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with invoices',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/checks/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/clients/memos/')
 
 parser.add_argument('--db-user', required=True, help='database user',
                     default='marcdba')
@@ -22,14 +22,14 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 
-def cache_checks():
+def cache_client_memos():
     """
-    replaces cake cache clients checks
+    replaces cake cache clients memos
     """
     args = parser.parse_args()
 
     session = session_maker(args)
 
-    print('Caching Clients Checks')
+    print('Caching Clients Memos')
     routine(session, args)
     session.commit()

@@ -113,6 +113,18 @@ class EmployeeMemo(Base):
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
 
+    def __repr__(self):
+        return "<EmployeeMemo(id='%s', employee='%s %s', date='%s', notes='%s')>" % (
+            self.id, self.employee.firstname, self.employee.lastname, dt.strftime(self.date, TIMESTAMP_FORMAT),
+            self.notes)
+
+    def to_xml(self):
+        doc = ET.Element('employee-memo')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+
 
 class Employee(Base):
     __tablename__ = 'employees'
@@ -358,6 +370,17 @@ class ClientMemo(Base):
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
+
+    def __repr__(self):
+        return "<ClientMemo(id='%s', client='%s', date='%s', notes='%s')>" % (
+            self.id, self.client.name, dt.strftime(self.date, TIMESTAMP_FORMAT), self.notes)
+
+    def to_xml(self):
+        doc = ET.Element('client-memo')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'client_id').text = str(self.client_id)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
 
 
 class ContractItemCommItem(Base):
