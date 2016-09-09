@@ -493,8 +493,8 @@ class Contract(Base):
     def to_xml(self):
         doc = ET.Element('contract')
         ET.SubElement(doc, 'id').text = str(self.id)
-        ET.SubElement(doc, 'title').text = self.title
-        ET.SubElement(doc, 'notes').text = self.notes
+        ET.SubElement(doc, 'title').text = re.sub(r'[^\x00-\x7F]', ' ', self.title)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes)
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
         ET.SubElement(doc, 'period_id').text = str(self.period_id)
