@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description='RRG Clients')
 
 parser.add_argument(
     '--datadir', required=True,
-    help='datadir dir with ar.xml',
+    help='datadir dir',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/clients/')
 
 parser.add_argument('--db-user', required=True, help='database user',
