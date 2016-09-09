@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser(description='RRG Cache Contracts')
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/clients/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/contracts/')
 
 parser.add_argument('--db-user', required=True, help='database user',
                     default='marcdba')

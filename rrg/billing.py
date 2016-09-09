@@ -13,6 +13,7 @@ from rrg.models import ClientMemo
 from rrg.models import Employee
 from rrg.models import EmployeeMemo
 from rrg.models import EmployeePayment
+from rrg.models import Contract
 from rrg.utils import directory_date_dictionary
 
 
