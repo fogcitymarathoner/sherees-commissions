@@ -183,7 +183,7 @@ def db_date_dictionary_client_memos(session, args):
     :return:
     """
     cmemos_dict = {}
-    clients_memos = session.query(ClientMemo).order_by(ClientCheck.id)
+    clients_memos = session.query(ClientMemo)
     for ccheck in clients_memos:
         f = full_non_dated_xml_path(args.datadir, ccheck)
         cmemos_dict[f] = ccheck.last_sync_time
