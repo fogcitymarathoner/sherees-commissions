@@ -474,6 +474,10 @@ class Contract(Base):
     terms = Column(Integer, nullable=False)
     startdate = Column(Date)
     enddate = Column(Date)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_user_id = Column(Integer)
+    created_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
