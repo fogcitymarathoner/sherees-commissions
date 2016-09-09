@@ -56,16 +56,6 @@ Base = declarative_base()
 # sherees_commissions
 
 
-class Payroll(Base):
-    __tablename__ = 'payrolls'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(72))
-    notes = Column(TEXT)
-    amount = Column(Float)
-    date = Column(Date)
-
-
 class EmployeePayment(Base):
     __tablename__ = 'employees_payments'
 
@@ -107,11 +97,32 @@ class EmployeePayment(Base):
         return doc
 
 
+class EmployeeMemo(Base):
+    __tablename__ = 'employees_memos'
+
+    id = Column(Integer, primary_key=True)
+
+    employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
+    employee = relationship("Employee")
+
+    notes = Column(String(100))
+    date = Column(Date, nullable=False)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
+
+
 class Employee(Base):
     __tablename__ = 'employees'
 
     id = Column(Integer, primary_key=True)
 
+    checks = relationship("EmployeePayment", back_populates="employee", cascade="all, delete, delete-orphan")
+    memos = relationship("EmployeeMemo", back_populates="employee", cascade="all, delete, delete-orphan")
+    # delete cascade does not work on Contracts
+    contracts = relationship("Contract", back_populates="employee")
     active = Column(Boolean)
 
     firstname = Column(String(20))
@@ -188,7 +199,7 @@ class Employee(Base):
         ET.SubElement(doc, 'maritalstatusfed').text = self.maritalstatusfed
         ET.SubElement(doc, 'maritalstatusstate').text = self.maritalstatusstate
         ET.SubElement(doc, 'usworkstatus').text = str(self.usworkstatus)
-        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]',' ', self.notes)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes)
         ET.SubElement(doc, 'state_id').text = str(self.state_id)
         ET.SubElement(doc, 'salesforce').text = str(self.salesforce)
         ET.SubElement(doc, 'active').text = str(self.active)
@@ -200,11 +211,23 @@ class Employee(Base):
         ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'indust').text = str(self.indust)
         ET.SubElement(doc, 'info').text = str(self.info)
-        ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]',' ', self.phone)
+        ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]', ' ', self.phone)
         ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate, TIMESTAMP_FORMAT)
         return doc
+
+
+def delete_employee(session, delemp):
+    """
+    delete cascade to contracts does not work, contracts must be deleted first
+    :param session:
+    :param delemp:
+    :return:
+    """
+    for con in session.query(Contract).filter(Contract.employee_id == delemp.id):
+        session.delete(con)
+    session.delete(delemp)
 
 
 class NotePayment(Base):
@@ -298,6 +321,8 @@ class Client(Base):
     id = Column(Integer, primary_key=True)
 
     contracts = relationship("Contract", back_populates="client", cascade="all, delete, delete-orphan")
+    checks = relationship("ClientCheck", back_populates="client", cascade="all, delete, delete-orphan")
+    memos = relationship("ClientMemo", back_populates="client", cascade="all, delete, delete-orphan")
 
     name = Column(String(50))
     street1 = Column(String(50))
@@ -316,6 +341,23 @@ class Client(Base):
 
     def __repr__(self):
         return "<Client(id='%s', name='%s')>" % (self.id, self.name)
+
+
+class ClientMemo(Base):
+    __tablename__ = 'clients_memos'
+
+    id = Column(Integer, primary_key=True)
+
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
+    client = relationship("Client")
+
+    notes = Column(String(100))
+    date = Column(Date, nullable=False)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
 
 
 class ContractItemCommItem(Base):
@@ -477,6 +519,7 @@ class Invoice(Base):
 
     invoice_items = relationship("Iitem", back_populates="invoice", cascade="all, delete, delete-orphan")
     invoice_payments = relationship("InvoicePayment", back_populates="invoice", cascade="all, delete, delete-orphan")
+    employee_payments = relationship("EmployeePayment", back_populates="invoice", cascade="all, delete, delete-orphan")
 
     date = Column(Date, nullable=False)
 
@@ -742,3 +785,14 @@ class Citem(Base):
         returns DOM of comm item from file
         """
         return ET.parse(xml_file_name).getroot()
+
+
+class Payroll(Base):
+    __tablename__ = 'payrolls'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(72), nullable=False)
+
+    notes = Column(TEXT, nullable=False)
+    amount = Column(Float, nullable=False)
+    date = Column(Date, index=True, nullable=False, default=default_date, onupdate=default_date)
