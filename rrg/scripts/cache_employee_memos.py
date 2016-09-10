@@ -24,3 +24,4 @@ def cache_employee_memos():
 
     print('Caching Employees Memos %s' % args.db)
     routine(session, args)
+    session.commit()
