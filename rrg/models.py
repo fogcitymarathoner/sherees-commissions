@@ -464,7 +464,7 @@ class ContractItem(Base):
         ET.SubElement(doc, 'amt').text = str(self.amt)
         ET.SubElement(doc, 'cost').text = str(self.cost)
         ET.SubElement(doc, 'description').text = re.sub(r'[^\x00-\x7F]', ' ', self.description) if self.description else ''
-        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.note) if self.note else ''
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         return doc
 
 
