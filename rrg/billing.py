@@ -319,14 +319,14 @@ def db_date_dictionary_contracts(session, args):
     return em_dict, contracts
 
 
-def db_date_dictionary_contract_items(session, args):
+def db_date_dictionary_model(session, args, model):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
     :param data_dir:
     :return:
     """
     em_dict = {}
-    contract_items = session.query(ContractItem)
+    contract_items = session.query(model)
     for e in contract_items:
         f = full_non_dated_xml_path(args.datadir, e)
         em_dict[f] = e.last_sync_time
@@ -571,7 +571,7 @@ def cache_contracts(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, contracts = db_date_dictionary_contracts(session, args)
+    date_dict, contracts = db_date_dictionary_model(session, args, Contract)
 
     to_sync = []
     for ep in contracts:
@@ -590,12 +590,11 @@ def cache_contracts(session, args):
         sync_contract(session, args.datadir, ep)
 
 
-
 def cache_contract_items(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, contract_items = db_date_dictionary_contract_items(session, args)
+    date_dict, contract_items = db_date_dictionary_model(session, args, ContractItem)
 
     to_sync = []
     for ep in contract_items:

@@ -301,9 +301,15 @@ class Test:
             epay1 = EmployeePayment(employee_id=employees[1].id, amount=2.0, date=dt.now(), invoice_id=invoices[1].id,
                                     payroll_id=payrolls[0].id)
             objects = [epay0, epay1]
+            self.session.bulk_save_objects(objects)
 
-from rrg.models import Note
-from rrg.models import NotePayment
+            note0 = Note(employee_id=employees[0].id, amount=1.0)
+            note1 = Note(employee_id=employees[1].id, amount=2.0)
+            objects = [note0, note1]
+            self.session.bulk_save_objects(objects)
+            notepayment0 = NotePayment(employee_id=employees[0].id, amount=1.0)
+            notepayment1 = NotePayment(employee_id=employees[1].id, amount=2.0)
+            objects = [notepayment0, notepayment1]
             self.session.bulk_save_objects(objects)
 
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
@@ -343,8 +349,8 @@ from rrg.models import NotePayment
         assert 4 == self.session.query(EmployeeMemo).count()
         assert 48 == self.session.query(ContractItemCommItem).count()
         assert 1 == self.session.query(Payroll).count()
-        assert 1 == self.session.query(Note).count()
-        assert 1 == self.session.query(NotePayment).count()
+        assert 2 == self.session.query(Note).count()
+        assert 2 == self.session.query(NotePayment).count()
         logger.debug('DELETEEMPLOYEE')
         delemp = self.session.query(Employee)[0]
         logger.debug(delemp)
