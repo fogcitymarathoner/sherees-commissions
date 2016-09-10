@@ -22,6 +22,6 @@ def cache_employees_payments():
     args = parser.parse_args()
     session = session_maker(args)
 
-    print('Caching Employees Payments %s into %s' % (args.db, args.datadir))
+    print('Caching Employees-Payments %s into %s' % (args.db, args.datadir))
     routine(session, args)
     session.commit()

@@ -22,6 +22,6 @@ def cache_employee_memos():
     args = parser.parse_args()
     session = session_maker(args)
 
-    print('Caching Employees Memos %s into %s' % (args.db, args.datadir))
+    print('Caching Employees-Memos %s into %s' % (args.db, args.datadir))
     routine(session, args)
     session.commit()
