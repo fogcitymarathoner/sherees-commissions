@@ -17,7 +17,8 @@ from rrg.models import Iitem
 from rrg.models import Citem
 from rrg.models import Payroll
 from rrg.models import periods
-from rrg.models import delete_employee
+from rrg.models import Note
+from rrg.models import NotePayment
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
 from rrg.reminders import semimonths_between_dates
@@ -301,6 +302,8 @@ class Test:
                                     payroll_id=payrolls[0].id)
             objects = [epay0, epay1]
 
+from rrg.models import Note
+from rrg.models import NotePayment
             self.session.bulk_save_objects(objects)
 
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
@@ -340,12 +343,14 @@ class Test:
         assert 4 == self.session.query(EmployeeMemo).count()
         assert 48 == self.session.query(ContractItemCommItem).count()
         assert 1 == self.session.query(Payroll).count()
+        assert 1 == self.session.query(Note).count()
+        assert 1 == self.session.query(NotePayment).count()
         logger.debug('DELETEEMPLOYEE')
         delemp = self.session.query(Employee)[0]
         logger.debug(delemp)
 
         with self.session.no_autoflush:
-            delete_employee(self.session, delemp)
+            self.session.delete(delemp)
         assert 3 == self.session.query(Employee).count()
         assert 8 == self.session.query(Contract).count()
         assert 8 == self.session.query(Invoice).count()
@@ -357,3 +362,5 @@ class Test:
         assert 3 == self.session.query(EmployeeMemo).count()
         assert 32 == self.session.query(ContractItemCommItem).count()
         assert 1 == self.session.query(Payroll).count()
+        assert 1 == self.session.query(Note).count()
+        assert 1 == self.session.query(NotePayment).count()

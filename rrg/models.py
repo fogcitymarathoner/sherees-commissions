@@ -135,7 +135,11 @@ class Employee(Base):
     checks = relationship("EmployeePayment", back_populates="employee", cascade="all, delete, delete-orphan")
     memos = relationship("EmployeeMemo", back_populates="employee", cascade="all, delete, delete-orphan")
     # delete cascade does not work on Contracts
-    contracts = relationship("Contract", back_populates="employee")
+    contracts = relationship("Contract", back_populates="employee", cascade="all, delete, delete-orphan")
+    comm_items = relationship("Citem", back_populates="employee", cascade="all, delete, delete-orphan")
+    cnotes = relationship("Note", back_populates="employee", cascade="all, delete, delete-orphan")
+    notes_payments = relationship("NotePayment", back_populates="employee", cascade="all, delete, delete-orphan")
+
     active = Column(Boolean)
 
     firstname = Column(String(20))
@@ -174,10 +178,6 @@ class Employee(Base):
     phone = Column(String(100))
     dob = Column(Date)
     salesforce = Column(Boolean)
-    comm_items = relationship("Citem", back_populates="employee")
-    cnotes = relationship("Note", back_populates="employee")
-    notes_payments = relationship("NotePayment", back_populates="employee")
-    contracts = relationship("Contract", back_populates="employee")
 
     voided = Column(Boolean)
 
@@ -234,6 +234,15 @@ class Employee(Base):
         ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
                                                          TIMESTAMP_FORMAT) if self.enddate else dt.strftime(
             dt.now(), TIMESTAMP_FORMAT)
+
+        checks = ET.Element('employee-checks')
+        memos = ET.Element('employee-memos')
+        contracts = ET.Element('employee-contracts')
+
+        comm_items = ET.Element('employee-commissions-items')
+        cnotes = ET.Element('employee-commissions-notes')
+        notes_payments = ET.Element('employee-notes-payments')
+
         return doc
 
 
