@@ -31,6 +31,6 @@ def cache_contracts():
     args = parser.parse_args()
     session = session_maker(args)
 
-    print('Caching Contracts')
+    print('Caching Contracts %s' % args.db)
     routine(session, args)
     session.commit()

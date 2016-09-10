@@ -30,6 +30,6 @@ def cache_client_memos():
 
     session = session_maker(args)
 
-    print('Caching Clients Memos')
+    print('Caching Clients Memos %s' % args.db)
     routine(session, args)
     session.commit()
