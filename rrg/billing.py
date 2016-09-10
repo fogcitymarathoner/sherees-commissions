@@ -32,124 +32,6 @@ def full_non_dated_xml_path(data_dir, obj):
     return os.path.join(data_dir, '%s.xml' % str(obj.id).zfill(5))
 
 
-def sync_invoice(session, data_dir, invoice):
-    """
-    writes xml file for invoices
-    """
-    f = full_non_dated_xml_path(data_dir, invoice)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(invoice.to_xml()))
-
-    session.query(Invoice).filter_by(id=invoice.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_invoice_item(session, data_dir, inv_item):
-    """
-    writes xml file for invoice item
-    """
-    f = full_non_dated_xml_path(data_dir, inv_item)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(inv_item.to_xml()))
-
-    session.query(Iitem).filter_by(id=inv_item.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_client(session, data_dir, client):
-    """
-    writes xml file for client
-    """
-    f = full_non_dated_xml_path(data_dir, client)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(client.to_xml()))
-
-    session.query(Client).filter_by(id=client.id).update(
-        {"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_clients_check(session, data_dir, ccheck):
-    """
-    writes xml file for clients checks
-    """
-    f = full_non_dated_xml_path(data_dir, ccheck)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(ccheck.to_xml()))
-
-    session.query(ClientCheck).filter_by(id=ccheck.id).update(
-        {"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_clients_memo(session, data_dir, memo):
-    """
-    writes xml file for clients memos
-    """
-    f = full_non_dated_xml_path(data_dir, memo)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(memo.to_xml()))
-
-    session.query(ClientMemo).filter_by(id=memo.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_invoice_payment(session, data_dir, ccheck):
-    """
-    writes xml file for invoice payment
-    """
-    f = full_non_dated_xml_path(data_dir, ccheck)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(ccheck.to_xml()))
-
-    session.query(InvoicePayment).filter_by(id=ccheck.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_employee(session, data_dir, e):
-    """
-    writes xml file for employee
-    """
-    f = full_non_dated_xml_path(data_dir, e)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(e.to_xml()))
-    session.query(Employee).filter_by(id=e.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_employee_payment(session, data_dir, ep):
-    """
-    writes xml file for employee payment
-    """
-    f = full_non_dated_xml_path(data_dir, ep)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(ep.to_xml()))
-    session.query(EmployeePayment).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_employee_memo(session, data_dir, ep):
-    """
-    writes xml file for employee memo
-    """
-    f = full_non_dated_xml_path(data_dir, ep)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(ep.to_xml()))
-    session.query(EmployeeMemo).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
-def sync_contract(session, data_dir, ep):
-    """
-    writes xml file for contract
-    """
-    f = full_non_dated_xml_path(data_dir, ep)
-    with open(f, 'w') as fh:
-        fh.write(ET.tostring(ep.to_xml()))
-    session.query(Contract).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
-    print('%s written' % f)
-
-
 def sync(session, data_dir, ep, model):
     """
     writes xml file for contract
@@ -212,7 +94,7 @@ def cache_invoices(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_invoice(session, args.datadir, comm_item)
+        sync(session, args.datadir, comm_item, Invoice)
 
 
 def cache_invoices_items(session, args):
@@ -238,7 +120,7 @@ def cache_invoices_items(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_invoice_item(session, args.datadir, comm_item)
+        sync(session, args.datadir, comm_item, Iitem)
 
 
 def cache_clients_checks(session, args):
@@ -264,7 +146,7 @@ def cache_clients_checks(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_clients_check(session, args.datadir, comm_item)
+        sync(session, args.datadir, comm_item, ClientCheck)
 
 
 def cache_clients(session, args):
@@ -290,7 +172,7 @@ def cache_clients(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_client(session, args.datadir, comm_item)
+        sync(session, args.datadir, comm_item, Client)
 
 
 def cache_clients_memos(session, args):
@@ -316,7 +198,7 @@ def cache_clients_memos(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_clients_memo(session, args.datadir, comm_item)
+        sync(session, args.datadir, comm_item, ClientMemo)
 
 
 def cache_invoices_payments(session, args):
@@ -337,7 +219,7 @@ def cache_invoices_payments(session, args):
 
     # Write out xml
     for comm_item in to_sync:
-        sync_invoice_payment(session, args.datadir, comm_item)
+        sync(session, args.datadir, comm_item, InvoicePayment)
 
 
 def cache_employees(session, args):
@@ -360,7 +242,7 @@ def cache_employees(session, args):
 
     # Write out xml
     for emp in to_sync:
-        sync_employee(session, args.datadir, emp)
+        sync(session, args.datadir, emp, Employee)
 
 
 def cache_employees_payments(session, args):
@@ -383,7 +265,7 @@ def cache_employees_payments(session, args):
 
     # Write out xml
     for ep in to_sync:
-        sync_employee_payment(session, args.datadir, ep)
+        sync(session, args.datadir, ep, EmployeePayment)
 
 
 def cache_employees_memos(session, args):
@@ -406,7 +288,7 @@ def cache_employees_memos(session, args):
 
     # Write out xml
     for ep in to_sync:
-        sync_employee_memo(session, args.datadir, ep)
+        sync(session, args.datadir, ep, EmployeeMemo)
 
 
 def cache_contracts(session, args):
@@ -429,7 +311,7 @@ def cache_contracts(session, args):
 
     # Write out xml
     for ep in to_sync:
-        sync_contract(session, args.datadir, ep)
+        sync(session, args.datadir, ep, Contract)
 
 
 def cache_contract_items(session, args):
