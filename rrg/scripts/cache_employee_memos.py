@@ -1,5 +1,5 @@
 import argparse
-from rrg.billing import cache_employees_memoss as routine
+from rrg.billing import cache_employees_memos as routine
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Cache Employees Memos')
