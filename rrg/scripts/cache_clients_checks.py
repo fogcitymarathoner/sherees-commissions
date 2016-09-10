@@ -30,6 +30,6 @@ def cache_checks():
 
     session = session_maker(args)
 
-    print('Caching Clients Checks %s' % args.db)
+    print('Caching Clients Checks %s into %s' % (args.db, args.datadir))
     routine(session, args)
     session.commit()

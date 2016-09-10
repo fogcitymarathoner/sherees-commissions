@@ -29,6 +29,6 @@ def cache_invoices_items():
 
     session = session_maker(args)
 
-    print('Caching Invoices Items %s' % args.db)
+    print('Caching Invoices Items %s into %s' % (args.db, args.datadir))
     cache_invoices_items_routine(session, args)
     session.commit()

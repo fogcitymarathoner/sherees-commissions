@@ -25,6 +25,6 @@ def cache_invoice_payments():
 
     session = session_maker(args)
 
-    print('Caching Invoice Payments %s' % args.db)
+    print('Caching Invoice Payments %s into %s' % (args.db, args.datadir))
     routine(session, args)
     session.commit()
