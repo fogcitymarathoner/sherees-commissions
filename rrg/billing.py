@@ -279,7 +279,7 @@ def db_date_dictionary_employees_payments(session, args):
     return ep_dict, employeespayments
 
 
-def db_date_dictionary_employees_memoss(session, args):
+def db_date_dictionary_employees_memos(session, args):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
     :param data_dir:
