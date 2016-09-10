@@ -556,7 +556,7 @@ def cache_contracts(session, args):
         else:
             if not ep.modified_date or not ep.last_sync_time:
                 to_sync.append(ep)
-            elif ep.modified_date > dt.date(ep.last_sync_time):
+            elif ep.modified_date > ep.last_sync_time:
                 to_sync.append(ep)
 
     # Write out xml
