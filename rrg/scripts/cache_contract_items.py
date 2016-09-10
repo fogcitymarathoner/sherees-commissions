@@ -2,12 +2,12 @@ import argparse
 from rrg.billing import cache_contract_items as routine
 from rrg.models import session_maker
 
-parser = argparse.ArgumentParser(description='RRG Cache Contracts')
+parser = argparse.ArgumentParser(description='RRG Cache Contract Items')
 
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/contracts/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/contracts/contracts_items/')
 
 parser.add_argument('--db-user', required=True, help='database user',
                     default='marcdba')
