@@ -161,164 +161,6 @@ def sync_contract_item(session, data_dir, ep):
     print('%s written' % f)
 
 
-def db_date_dictionary_invoice(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param :
-    :return:
-    """
-
-    inv_dict = {}
-    invoices = session.query(Invoice).order_by(Invoice.id)
-
-    for inv in invoices:
-        f = full_non_dated_xml_path(args.datadir, inv)
-        inv_dict[f] = inv.last_sync_time
-
-    return inv_dict, invoices
-
-
-def db_date_dictionary_invoice_items(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param :
-    :return:
-    """
-
-    invitem_dict = {}
-    invoices_items = session.query(Iitem).order_by(Iitem.id)
-
-    for invitem in invoices_items:
-        f = full_non_dated_xml_path(args.datadir, invitem)
-        invitem_dict[f] = invitem.last_sync_time
-
-    return invitem_dict, invoices_items
-
-
-def db_date_dictionary_client_checks(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-
-    cchecks_dict = {}
-
-    clients_checks = session.query(ClientCheck)
-
-    for ccheck in clients_checks:
-        f = full_non_dated_xml_path(args.datadir, ccheck)
-        cchecks_dict[f] = ccheck.last_sync_time
-
-    return cchecks_dict, clients_checks
-
-
-def db_date_dictionary_clients(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-
-    clients_dict = {}
-
-    clients = session.query(Client)
-
-    for client in clients:
-        f = full_non_dated_xml_path(args.datadir, client)
-        clients_dict[f] = client.last_sync_time
-
-    return clients_dict, clients
-
-
-def db_date_dictionary_client_memos(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-    cmemos_dict = {}
-    clients_memos = session.query(ClientMemo)
-    for ccheck in clients_memos:
-        f = full_non_dated_xml_path(args.datadir, ccheck)
-        cmemos_dict[f] = ccheck.last_sync_time
-    return cmemos_dict, clients_memos
-
-
-def db_date_dictionary_invoices_payments(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-
-    ipay_dict = {}
-
-    ipays = session.query(InvoicePayment).order_by(InvoicePayment.id)
-
-    for ipay in ipays:
-        f = full_non_dated_xml_path(args.datadir, ipay)
-        ipay_dict[f] = ipay.last_sync_time
-
-    return ipay_dict, ipays
-
-
-def db_date_dictionary_employees(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-    e_dict = {}
-    employees = session.query(Employee)
-    for e in employees:
-        f = full_non_dated_xml_path(args.datadir, e)
-        e_dict[f] = e.last_sync_time
-    return e_dict, employees
-
-
-def db_date_dictionary_employees_payments(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-    ep_dict = {}
-    employeespayments = session.query(EmployeePayment)
-    for e in employeespayments:
-        f = full_non_dated_xml_path(args.datadir, e)
-        ep_dict[f] = e.last_sync_time
-    return ep_dict, employeespayments
-
-
-def db_date_dictionary_employees_memos(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-    em_dict = {}
-    employeesmemos = session.query(EmployeeMemo)
-    for e in employeesmemos:
-        f = full_non_dated_xml_path(args.datadir, e)
-        em_dict[f] = e.last_sync_time
-    return em_dict, employeesmemos
-
-
-def db_date_dictionary_contracts(session, args):
-    """
-    returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
-    :return:
-    """
-    em_dict = {}
-    contracts = session.query(Contract)
-    for e in contracts:
-        f = full_non_dated_xml_path(args.datadir, e)
-        em_dict[f] = e.last_sync_time
-    return em_dict, contracts
-
-
 def db_date_dictionary_model(session, args, model):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
@@ -346,7 +188,7 @@ def cache_invoices(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, invoices = db_date_dictionary_invoice(session, args)
+    date_dict, invoices = db_date_dictionary_model(session, args, Invoice)
 
     #
     # Make sure destination directories exist
@@ -377,7 +219,7 @@ def cache_invoices_items(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, inv_items = db_date_dictionary_invoice_items(session, args)
+    date_dict, inv_items = db_date_dictionary_model(session, args, Iitem)
 
     to_sync = []
     for inv_item in inv_items:
@@ -403,7 +245,7 @@ def cache_clients_checks(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, client_checks = db_date_dictionary_client_checks(session, args)
+    date_dict, client_checks = db_date_dictionary_model(session, args, ClientCheck)
 
     to_sync = []
     for check in client_checks:
@@ -429,7 +271,7 @@ def cache_clients(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, clients = db_date_dictionary_clients(session, args)
+    date_dict, clients = db_date_dictionary_model(session, args, Client)
 
     to_sync = []
     for client in clients:
@@ -455,7 +297,7 @@ def cache_clients_memos(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, client_memos = db_date_dictionary_client_memos(session, args)
+    date_dict, client_memos = db_date_dictionary_model(session, args, ClientMemo)
 
     to_sync = []
     for check in client_memos:
@@ -481,7 +323,7 @@ def cache_invoices_payments(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, invoices_payments = db_date_dictionary_invoices_payments(session, args)
+    date_dict, invoices_payments = db_date_dictionary_model(session, args, InvoicePayment)
 
     to_sync = []
     for ipay in invoices_payments:
@@ -502,7 +344,7 @@ def cache_employees(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, employees = db_date_dictionary_employees(session, args)
+    date_dict, employees = db_date_dictionary_model(session, args, Employee)
 
     to_sync = []
     for e in employees:
@@ -525,7 +367,7 @@ def cache_employees_payments(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, employees_payments = db_date_dictionary_employees_payments(session, args)
+    date_dict, employees_payments = db_date_dictionary_model(session, args, EmployeePayment)
 
     to_sync = []
     for ep in employees_payments:
@@ -548,7 +390,7 @@ def cache_employees_memos(session, args):
     disk_dict = directory_date_dictionary(args.datadir)
 
     # Make query, assemble lists
-    date_dict, employees_memos = db_date_dictionary_employees_memos(session, args)
+    date_dict, employees_memos = db_date_dictionary_model(session, args, EmployeeMemo)
 
     to_sync = []
     for ep in employees_memos:
