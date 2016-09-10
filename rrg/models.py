@@ -456,6 +456,17 @@ class ContractItem(Base):
     def __repr__(self):
         return "<ContractItem(id='%s', description='%s')>" % (self.id, self.description)
 
+    def to_xml(self):
+        doc = ET.Element('contract-item')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'active').text = str(self.active)
+        ET.SubElement(doc, 'contract_id').text = str(self.contract_id)
+        ET.SubElement(doc, 'amt').text = str(self.amt)
+        ET.SubElement(doc, 'cost').text = str(self.cost)
+        ET.SubElement(doc, 'description').text = re.sub(r'[^\x00-\x7F]', ' ', self.description) if self.description else ''
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.note) if self.note else ''
+        return doc
+
 
 class Contract(Base):
     __tablename__ = 'clients_contracts'

@@ -14,6 +14,7 @@ from rrg.models import Employee
 from rrg.models import EmployeeMemo
 from rrg.models import EmployeePayment
 from rrg.models import Contract
+from rrg.models import ContractItem
 from rrg.utils import directory_date_dictionary
 
 
@@ -146,6 +147,17 @@ def sync_contract(session, data_dir, ep):
     with open(f, 'w') as fh:
         fh.write(ET.tostring(ep.to_xml()))
     session.query(Contract).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
+    print('%s written' % f)
+
+
+def sync_contract_item(session, data_dir, ep):
+    """
+    writes xml file for contract
+    """
+    f = full_non_dated_xml_path(data_dir, ep)
+    with open(f, 'w') as fh:
+        fh.write(ET.tostring(ep.to_xml()))
+    session.query(ContractItem).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -305,6 +317,20 @@ def db_date_dictionary_contracts(session, args):
         f = full_non_dated_xml_path(args.datadir, e)
         em_dict[f] = e.last_sync_time
     return em_dict, contracts
+
+
+def db_date_dictionary_contract_items(session, args):
+    """
+    returns database dictionary counter part to directory_date_dictionary for sync determination
+    :param data_dir:
+    :return:
+    """
+    em_dict = {}
+    contract_items = session.query(ContractItem)
+    for e in contract_items:
+        f = full_non_dated_xml_path(args.datadir, e)
+        em_dict[f] = e.last_sync_time
+    return em_dict, contract_items
 
 
 def verify_dirs_ready(data_dir, rel_dir_set):
@@ -562,3 +588,27 @@ def cache_contracts(session, args):
     # Write out xml
     for ep in to_sync:
         sync_contract(session, args.datadir, ep)
+
+
+
+def cache_contract_items(session, args):
+    disk_dict = directory_date_dictionary(args.datadir)
+
+    # Make query, assemble lists
+    date_dict, contract_items = db_date_dictionary_contract_items(session, args)
+
+    to_sync = []
+    for ep in contract_items:
+        filename = full_non_dated_xml_path(args.datadir, ep)
+        # add to sync list if invoice not on disk
+        if filename not in disk_dict:
+            to_sync.append(ep)
+        else:
+            if not ep.modified_date or not ep.last_sync_time:
+                to_sync.append(ep)
+            elif ep.modified_date > ep.last_sync_time:
+                to_sync.append(ep)
+
+    # Write out xml
+    for ep in to_sync:
+        sync_contract_item(session, args.datadir, ep)
