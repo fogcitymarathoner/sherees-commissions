@@ -122,7 +122,7 @@ class EmployeeMemo(Base):
         doc = ET.Element('employee-memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
 
