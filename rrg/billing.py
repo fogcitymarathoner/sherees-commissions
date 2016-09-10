@@ -150,14 +150,14 @@ def sync_contract(session, data_dir, ep):
     print('%s written' % f)
 
 
-def sync_contract_item(session, data_dir, ep):
+def sync(session, data_dir, ep, model):
     """
     writes xml file for contract
     """
     f = full_non_dated_xml_path(data_dir, ep)
     with open(f, 'w') as fh:
         fh.write(ET.tostring(ep.to_xml()))
-    session.query(ContractItem).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
+    session.query(model).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -452,4 +452,4 @@ def cache_contract_items(session, args):
 
     # Write out xml
     for ep in to_sync:
-        sync_contract_item(session, args.datadir, ep)
+        sync(session, args.datadir, ep, ContractItem)
