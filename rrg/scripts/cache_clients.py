@@ -33,3 +33,4 @@ def cache_clients():
 
     print('Caching Clients')
     routine(session, args)
+    session.commit()

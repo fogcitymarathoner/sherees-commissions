@@ -33,3 +33,4 @@ def cache_contracts():
 
     print('Caching Contracts')
     routine(session, args)
+    session.commit()

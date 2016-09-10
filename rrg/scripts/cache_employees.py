@@ -33,3 +33,4 @@ def cache_employees():
 
     print('Caching Employees')
     routine(session, args)
+    session.commit()
