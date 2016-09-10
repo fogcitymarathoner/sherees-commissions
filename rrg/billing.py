@@ -63,7 +63,7 @@ def sync_client(session, data_dir, client):
     with open(f, 'w') as fh:
         fh.write(ET.tostring(client.to_xml()))
 
-    session.query(ClientCheck).filter_by(id=client.id).update(
+    session.query(Client).filter_by(id=client.id).update(
         {"last_sync_time": dt.now()})
     print('%s written' % f)
 
