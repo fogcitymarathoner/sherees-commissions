@@ -231,7 +231,9 @@ class Employee(Base):
         ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]', ' ', self.phone)
         ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
+                                                         TIMESTAMP_FORMAT) if self.enddate else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
         return doc
 
 
