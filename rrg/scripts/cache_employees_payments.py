@@ -24,3 +24,4 @@ def cache_employees_payments():
 
     print('Caching Employees Payments')
     routine(session, args)
+    session.commit()
