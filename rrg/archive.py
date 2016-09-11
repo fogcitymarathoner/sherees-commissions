@@ -60,7 +60,7 @@ def employee_attach_collected_contracts(emp_doc, contract_doc_list):
 
 def contracts(args):
     ids = []
-    names = []
+    titles = []
     i = 1
     for root, dirs, files in os.walk(args.datadir):
         if root == args.datadir:
@@ -69,13 +69,13 @@ def contracts(args):
                 if re.search(pat, f):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
-                    name = doc.findall('name')[0].text
+                    title = doc.findall('title')[0].text
                     ids.append(str(i))
-                    names.append(name)
+                    titles.append(title)
                     i += 1
     res_dict_transposed = {
         'id': [i for i in ids],
-        'names': [i for i in names],
+        'titles': [i for i in titles],
     }
     print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))
 
