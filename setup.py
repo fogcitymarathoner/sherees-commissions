@@ -116,6 +116,7 @@ setup(
             'rrg-cache-clients-memos=rrg.scripts.cache_client_memos:cache_client_memos',
             'rrg-cache-employees=rrg.scripts.cache_employees:cache_employees',
             'rrg-cached-employees=rrg.scripts.cached_employees:cached_employees',
+            'rrg-cached-employee=rrg.scripts.cached_employee:cached_employee',
             'rrg-cache-employees-payments=rrg.scripts.cache_employees_payments:cache_employees_payments',
             'rrg-cache-employees-memos=rrg.scripts.cache_employee_memos:cache_employee_memos',
             'rrg-cache-contracts=rrg.scripts.cache_contracts:cache_contracts',
