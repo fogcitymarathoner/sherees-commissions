@@ -953,7 +953,9 @@ class Citem(Base):
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date,
+                                                              TIMESTAMP_FORMAT) if self.created_date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
