@@ -2,20 +2,26 @@ import sys
 from datetime import datetime as dt
 from datetime import timedelta as td
 import logging
-import xml.etree.ElementTree as ET
 from freezegun import freeze_time
+import xml.etree.ElementTree as ET
 
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
 from rrg.models import Client
+from rrg.models import ClientMemo
 from rrg.models import ClientCheck
 from rrg.models import Employee
+from rrg.models import EmployeePayment
+from rrg.models import EmployeeMemo
 from rrg.models import Invoice
 from rrg.models import InvoicePayment
 from rrg.models import Iitem
 from rrg.models import Citem
+from rrg.models import Payroll
 from rrg.models import periods
+from rrg.models import Note
+from rrg.models import NotePayment
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
 from rrg.reminders import semimonths_between_dates
@@ -51,18 +57,24 @@ class Test:
         self.args = Args()
 
         self.session = session_maker(self.args)
+
         self.session.begin_nested()
         with self.session.no_autoflush:
             objects = []
             client_active = Client(name='weekly', active=True, terms=30)
-            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False,
+                                     terms=30)
             objects.append(client_active)
             objects.append(client_inactive)
 
             self.session.bulk_save_objects(objects)
 
             clients = self.session.query(Client).all()
+            cmemo0 = ClientMemo(client_id=clients[0].id, notes='cl1 memo', date=dt.now())
+            cmemo1 = ClientMemo(client_id=clients[1].id, notes='cl2 memo', date=dt.now())
+            objects = [cmemo0, cmemo1]
 
+            self.session.bulk_save_objects(objects)
             objects = []
 
             employee_active = Employee(firstname='firstname', lastname='activelastname', active=True)
@@ -81,6 +93,14 @@ class Test:
             logger.debug('employees')
             for employee in employees:
                 logger.debug(employee)
+
+            ememo0 = EmployeeMemo(employee_id=employees[0].id, notes='emp1 memo', date=dt.now())
+            ememo1 = EmployeeMemo(employee_id=employees[1].id, notes='emp2 memo', date=dt.now())
+            ememo2 = EmployeeMemo(employee_id=employees[2].id, notes='emp3 memo', date=dt.now())
+            ememo3 = EmployeeMemo(employee_id=employees[3].id, notes='emp4 memo', date=dt.now())
+            objects = [ememo0, ememo1, ememo2, ememo3]
+
+            self.session.bulk_save_objects(objects)
 
             objects = []
 
@@ -210,7 +230,7 @@ class Test:
                                          contract_item_id=contract_items[i].id,
                                          percent=61.5))
 
-                self.session.bulk_save_objects(objects)
+            self.session.bulk_save_objects(objects)
 
             # invoices
             weeks = weeks_between_dates(dt(year=2016, month=7, day=4),
@@ -272,21 +292,48 @@ class Test:
                                       start.date(), end.date(),
                                       date=self.payroll_run_date.date())
 
+            invoices = self.session.query(Invoice).all()
+            logger.debug('INVOICES CREATED')
+            pr = Payroll(name='test pr', notes='bogus notes', amount=22.0, date=dt.now())
+            self.session.bulk_save_objects([pr])
+            payrolls = self.session.query(Payroll).all()
+            self.session.bulk_save_objects([ClientCheck(client_id=clients[0].id, amount=100, date=dt.now())])
+            self.session.bulk_save_objects([ClientCheck(client_id=clients[1].id, amount=100, date=dt.now())])
+
+            objects = []
+            for i in invoices:
+                i.invoice_items[0].quantity = 12
+                i.invoice_items[1].quantity = 24
+                logger.debug(i)
+                checks = [r for r in self.session.query(ClientCheck).filter(ClientCheck.client == i.contract.client)]
+                logger.debug('DEBUGCHECKS')
+                logger.debug(checks)
+                objects.append(InvoicePayment(amount=6.0, invoice_id=i.id, check_id=checks[0].id))
+
+            self.session.bulk_save_objects(objects)
+            epay0 = EmployeePayment(employee_id=employees[0].id, amount=1.0, date=dt.now(), invoice_id=invoices[0].id,
+                                    payroll_id=payrolls[0].id)
+            epay1 = EmployeePayment(employee_id=employees[1].id, amount=2.0, date=dt.now(), invoice_id=invoices[1].id,
+                                    payroll_id=payrolls[0].id)
+            objects = [epay0, epay1]
+            self.session.bulk_save_objects(objects)
+
+            note0 = Note(employee_id=employees[0].id, amount=1.0)
+            note1 = Note(employee_id=employees[1].id, amount=2.0)
+            objects = [note0, note1]
+            self.session.bulk_save_objects(objects)
+            notepayment0 = NotePayment(employee_id=employees[0].id, amount=1.0)
+            notepayment1 = NotePayment(employee_id=employees[1].id, amount=2.0)
+            objects = [notepayment0, notepayment1]
+            self.session.bulk_save_objects(objects)
+
             months_between_dates(self.payroll_run_date, self.payroll_run_date)
 
-            current_semimonth(dt(year=self.payroll_run_date.year, month=self.payroll_run_date.month, day=16))
+            current_semimonth(dt(year=self.payroll_run_date.year,
+                                 month=self.payroll_run_date.month, day=16))
 
-            assert not weeks_between_dates(self.payroll_run_date + td(days=1), self.payroll_run_date)
-            i = 0
-            invs = self.session.query(Invoice).all()
-            for inv in invs:
-                objects = []
-                ck = ClientCheck(amount=1, client_id=inv.contract.client.id, number=i, date=dt.now())
-                objects.append(ck)
-                self.session.bulk_save_objects(objects)
-                objects = []
-                ipay = InvoicePayment(amount=1, invoice=inv, check=ck)
-                objects.append(ipay)
+            assert not weeks_between_dates(self.payroll_run_date + td(days=1),
+                                           self.payroll_run_date)
 
     def teardown_class(self):
         logger.debug('Teardown reminders')
@@ -300,90 +347,71 @@ class Test:
         """
         assert sys._called_from_test
 
-    def test_inv_to_xml(self):
+    def test_commissions_calc(self):
         """
-        test xml output of invoice
-        :return:
-        """
-        baseline_string = """<invoice><id>26</id><contract_id>25</contract_id><date>2016-08-08-00-00-00</date><po>None</po><employerexpenserate>None</employerexpenserate><terms>30</terms><timecard>None</timecard><notes>None</notes><period_start>2016-07-11-00-00-00</period_start><period_end>2016-07-17-00-00-00</period_end><posted>None</posted><cleared>None</cleared><voided>None</voided><prcleared>None</prcleared><message>None</message><amount>None</amount><created_date>2016-08-07-00-00-00</created_date><modified_date>2016-08-07-00-00-00</modified_date><created_user_id>None</created_user_id><modified_user_id>None</modified_user_id><due_date>2016-09-07-00-00-00</due_date></invoice>"""
-        base_doc = ET.fromstring(baseline_string)
-        inv = self.session.query(Invoice)[0]
-
-        ele = inv.to_xml()
-        assert base_doc.findall('period_start')[0].text == ele.findall('period_start')[0].text
-        assert base_doc.findall('period_end')[0].text == ele.findall('period_end')[0].text
-        assert 2 == len(ele.findall('invoice-items')[0].findall('invoice-item'))
-        assert 1 == len(ele.findall('invoice-payments')[0].findall('invoice-payment'))
-
-    def test_citem_to_xml(self):
-        """
-        test xml output of commissions item
-        :return:
-        """
-        baseline_string = """<invoices-items-commissions-item><id>8541</id><employee_id>1660</employee_id><invoices_item_id>None</invoices_item_id><commissions_report_id>None</commissions_report_id><commissions_reports_tag_id>None</commissions_reports_tag_id><date>2016-08-21-00-00-00</date><percent>38.5</percent><amount>None</amount><rel_inv_amt>None</rel_inv_amt><rel_inv_line_item_amt>None</rel_inv_line_item_amt><rel_item_amt>None</rel_item_amt><rel_item_quantity>None</rel_item_quantity><rel_item_cost>None</rel_item_cost><rel_item_amt>None</rel_item_amt><cleared>None</cleared><voided>None</voided><date_generated>2016-08-21-09-48-50</date_generated><created_date>2016-08-21-00-00-00</created_date><modified_date>2016-08-21-00-00-00</modified_date><created_user_id>2</created_user_id><modified_user_id>2</modified_user_id></invoices-items-commissions-item>"""
-        base_doc = ET.fromstring(baseline_string)
-        citem = self.session.query(Citem)[0]
-
-        ele = citem.to_xml()
-        logger.debug('test_citem_to_xml citem')
-        logger.debug(citem)
-        logger.debug('test_citem_to_xml citem.to_xml()')
-        logger.debug(ET.tostring(citem.to_xml()))
-        # fixme: add assertions against contract/invoice particulars
-        1 == len(ele.findall('invoices-items-commissions-item'))
-
-    def test_iitem_to_xml(self):
-        """
-        test xml output of invoice item
-        :return:
-        """
-        baseline_string = """<invoice-item><id>1126</id><invoice_id>None</invoice_id><description>Regular</description><amount>10.0</amount><quantity>0.0</quantity><cleared>None</cleared></invoice-item>"""
-        base_doc = ET.fromstring(baseline_string)
-        iitem = self.session.query(Iitem)[0]
-        logger.debug('iitem')
-        logger.debug(iitem)
-        ele = iitem.to_xml()
-        logger.debug('iitem-ele')
-        logger.debug(ET.tostring(iitem.to_xml()))
-        assert base_doc.findall('amount')[0].text == ele.findall('amount')[
-            0].text
-        logger.debug('base_doc.findall("quantity")[0].text')
-        logger.debug(base_doc.findall('quantity')[0].text)
-        logger.debug('ele.findall("quantity")[0]')
-        logger.debug(ele.findall('quantity')[0])
-        logger.debug('count')
-        logger.debug(len(ele.findall('quantity')))
-        logger.debug('ele.findall("quantity")[0].text')
-        logger.debug(ele.findall('quantity')[0].text)
-        assert base_doc.findall('quantity')[0].text == ele.findall('quantity')[
-            0].text
-
-    def test_client_check_to_xml(self):
-        """
-        test xml output of client checks
+        test commissions calculation
         :return:
         """
 
-        check = self.session.query(ClientCheck)[0]
-        logger.debug('check-to-xml')
-        rdoc = check.to_xml()
-        xstr = ET.tostring(rdoc)
-        logger.debug(xstr)
-        baseline = """<client-check><id>218</id><client_id>643</client_id><number>0</number><amount>1.0</amount><notes>None</notes><date>2016-08-08-00-00-00</date></client-check>"""
-        base_doc = ET.fromstring(baseline)
-        assert 1.0 == float(base_doc.findall('amount')[0].text)
-        assert 1.0 == float(rdoc.findall('amount')[0].text)
+        assert 12 == self.session.query(Invoice).count()
+        assert 24 == self.session.query(Iitem).count()
+        assert 48 == self.session.query(Citem).count()
+        assert 12 == self.session.query(Contract).count()
+        assert 4 == self.session.query(Employee).count()
+        assert 2 == self.session.query(Client).count()
+        assert 2 == self.session.query(ClientMemo).count()
+        assert 2 == self.session.query(EmployeePayment).count()
+        assert 4 == self.session.query(EmployeeMemo).count()
+        assert 48 == self.session.query(ContractItemCommItem).count()
+        assert 1 == self.session.query(Payroll).count()
+        assert 2 == self.session.query(Note).count()
+        assert 2 == self.session.query(NotePayment).count()
+        assert 12 == self.session.query(InvoicePayment).count()
 
-    def test_invoice_payment_to_xml(self):
-        """
-        test xml output of invoice payment
-        :return:
-        """
-        ipay = self.session.query(InvoicePayment)[0]
-        logger.debug('ipay-to-xml')
-        rdoc = ipay.to_xml()
-        logger.debug(ET.tostring(rdoc))
-        baseline = """<invoice-payment><id>109</id><invoice_id>3889</invoice_id><check_id>230</check_id><amount>1.0</amount><notes>None</notes></invoice-payment>"""
-        base_doc = ET.fromstring(baseline)
-        assert 1.0 == float(base_doc.findall('amount')[0].text)
-        assert 1.0 == float(rdoc.findall('amount')[0].text)
+        emp = self.session.query(Employee)[0]
+        doc = emp.to_xml()
+        assert 'firstname' == doc.findall('firstname')[0].text
+        assert 1 == len(doc.findall('employee-payments/employee-payment'))
+        assert 1 == len(doc.findall('employee-memos/employee-memo'))
+        assert 4 == len(doc.findall('employee-contracts/contract'))
+        assert 4 == len(doc.findall('employee-contracts/contract/contract-invoices/invoice'))
+        assert 8 == len(doc.findall('employee-contracts/contract/contract-items/contract-item'))
+        assert 8 == len(doc.findall('employee-contracts/contract/contract-invoices/invoice/invoice-items/invoice-item'))
+        assert 8 == len(doc.findall('employee-contracts/contract/contract-invoices/invoice/invoice-items/invoice-item/commissions-items'))
+        assert 16 == len(doc.findall('employee-contracts/contract/contract-invoices/invoice/invoice-items/invoice-item/commissions-items/invoices-items-commissions-item'))
+
+        logger.debug('XMLEMPLOYEE')
+        logger.debug(emp)
+        logger.debug(ET.tostring(emp.to_xml()))
+        inv_ele = doc.findall('employee-contracts/contract/contract-invoices/invoice')[0]
+        inv_item_ele = doc.findall('employee-contracts/contract/contract-invoices/invoice/invoice-items/invoice-item')[0]
+        contract_item_ele = doc.findall('employee-contracts/contract/contract-items/contract-item')[0]
+        comm_item_ele = doc.findall('employee-contracts/contract/contract-invoices/invoice/invoice-items/invoice-item/commissions-items/invoices-items-commissions-item')[0]
+        employerexpenserate = float(inv_ele.findall('employerexpenserate')[0].text)
+        inv_item_amount = float(inv_item_ele.findall('amount')[0].text)
+        inv_item_cost = float(inv_item_ele.findall('cost')[0].text)
+        inv_item_quantity = float(inv_item_ele.findall('quantity')[0].text)
+        con_item_amt = float(contract_item_ele.findall('amt')[0].text)
+        con_item_cost = float(contract_item_ele.findall('cost')[0].text)
+        percent = float(comm_item_ele.findall('percent')[0].text)
+        assert 0.1 == employerexpenserate
+        assert 10 == inv_item_amount
+        assert 5 == inv_item_cost
+        assert 12 == inv_item_quantity
+        assert 10 == con_item_amt
+        assert inv_item_amount == con_item_amt
+        assert 5 == con_item_cost
+        assert 38.5 == percent
+        iamount = inv_item_quantity * inv_item_amount
+        icost = inv_item_quantity * inv_item_cost
+        empexp = employerexpenserate * (iamount - icost)
+        presplit_comm = iamount - icost - empexp
+        comm = presplit_comm * percent/100
+        # 12 * 10
+        assert 120.0 == iamount
+        # 12 * 5
+        assert 60.0 == icost
+        # 60 * .1
+        assert 6.0 == empexp
+        # (120 - 60 - 6)*.385
+        assert 20.79 == comm

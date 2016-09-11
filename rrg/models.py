@@ -216,7 +216,7 @@ class Employee(Base):
         ET.SubElement(doc, 'maritalstatusfed').text = self.maritalstatusfed
         ET.SubElement(doc, 'maritalstatusstate').text = self.maritalstatusstate
         ET.SubElement(doc, 'usworkstatus').text = str(self.usworkstatus)
-        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         ET.SubElement(doc, 'state_id').text = str(self.state_id)
         ET.SubElement(doc, 'salesforce').text = str(self.salesforce)
         ET.SubElement(doc, 'active').text = str(self.active)
@@ -228,20 +228,41 @@ class Employee(Base):
         ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'indust').text = str(self.indust)
         ET.SubElement(doc, 'info').text = str(self.info)
-        ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]', ' ', self.phone)
-        ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]', ' ', self.phone) if self.phone else ''
+        ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT) if self.dob else dt.strftime(dt.now(),
+                                                                                                              TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate,
+                                                           TIMESTAMP_FORMAT) if self.startdate else dt.strftime(
+            dt.now(),
+            TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
                                                          TIMESTAMP_FORMAT) if self.enddate else dt.strftime(
             dt.now(), TIMESTAMP_FORMAT)
 
-        checks = ET.Element('employee-checks')
+        checks = ET.Element('employee-payments')
+        for o in self.checks:
+            checks.append(o.to_xml())
+        doc.append(checks)
         memos = ET.Element('employee-memos')
+        for o in self.memos:
+            memos.append(o.to_xml())
+        doc.append(memos)
         contracts = ET.Element('employee-contracts')
-
+        for o in self.contracts:
+            contracts.append(o.to_xml())
+        doc.append(contracts)
         comm_items = ET.Element('employee-commissions-items')
+        for o in self.comm_items:
+            comm_items.append(o.to_xml())
+        doc.append(comm_items)
         cnotes = ET.Element('employee-commissions-notes')
+        for o in self.cnotes:
+            cnotes.append(o.to_xml())
+        doc.append(cnotes)
         notes_payments = ET.Element('employee-notes-payments')
+        for o in self.notes_payments:
+            notes_payments.append(o.to_xml())
+        doc.append(notes_payments)
 
         return doc
 
@@ -280,6 +301,17 @@ class NotePayment(Base):
             self.check_number, self.date, self.amount,
             self.notes)
 
+    def to_xml(self):
+        doc = ET.Element('notes-payment')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'check_number').text = self.check_number
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT) if self.date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
+        ET.SubElement(doc, 'voided').text = str(self.voided)
+        return doc
 
 class Note(Base):
     __tablename__ = 'notes'
@@ -303,6 +335,20 @@ class Note(Base):
     modified_date = Column(Date, default=default_date, onupdate=default_date)
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
+
+    def to_xml(self):
+        doc = ET.Element('note')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT) if self.date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'commissions_payment_id').text = str(self.commissions_payment_id)
+        ET.SubElement(doc, 'opening').text = str(self.opening)
+        ET.SubElement(doc, 'voided').text = str(self.voided)
+        ET.SubElement(doc, 'cleared').text = str(self.cleared)
+        return doc
 
 
 class CommPayment(Base):
@@ -438,6 +484,16 @@ class ContractItemCommItem(Base):
                    self.id, self.contract_item.contract.title,
                    '%s %s' % (self.employee.firstname, self.employee.lastname))
 
+    def to_xml(self):
+        doc = ET.Element('contract-item')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'employee_firstname').text = self.employee.firstname
+        ET.SubElement(doc, 'employee_lastname').text = self.employee.lastname
+        ET.SubElement(doc, 'contract_item_id').text = str(self.contract_item_id)
+        ET.SubElement(doc, 'percent').text = str(self.percent)
+        return doc
+
 
 class ContractItem(Base):
     __tablename__ = 'contracts_items'
@@ -472,8 +528,13 @@ class ContractItem(Base):
         ET.SubElement(doc, 'contract_id').text = str(self.contract_id)
         ET.SubElement(doc, 'amt').text = str(self.amt)
         ET.SubElement(doc, 'cost').text = str(self.cost)
-        ET.SubElement(doc, 'description').text = re.sub(r'[^\x00-\x7F]', ' ', self.description) if self.description else ''
+        ET.SubElement(doc, 'description').text = re.sub(r'[^\x00-\x7F]', ' ',
+                                                        self.description) if self.description else ''
         ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
+        con_comm_items = ET.Element('contract-commissions-items')
+        for o in self.contract_comm_items:
+            con_comm_items.append(o.to_xml())
+        doc.append(con_comm_items)
         return doc
 
 
@@ -516,14 +577,24 @@ class Contract(Base):
         doc = ET.Element('contract')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'title').text = re.sub(r'[^\x00-\x7F]', ' ', self.title) if self.title else ''
-        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
         ET.SubElement(doc, 'period_id').text = str(self.period_id)
         ET.SubElement(doc, 'active').text = str(self.active)
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
+                                                         TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(),
+                                                                                                            TIMESTAMP_FORMAT)
+        invoices = ET.Element('contract-invoices')
+        for o in self.invoices:
+            invoices.append(o.to_xml())
+        doc.append(invoices)
+        contract_items = ET.Element('contract-items')
+        for o in self.contract_items:
+            contract_items.append(o.to_xml())
+        doc.append(contract_items)
         return doc
 
 
@@ -667,7 +738,7 @@ class Invoice(Base):
         ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'prcleared').text = str(self.prcleared)
         ET.SubElement(doc, 'message').text = str(self.message)
-        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'amount').text = str(self.amount_calc())
         ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
@@ -676,11 +747,20 @@ class Invoice(Base):
         ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
         iitems = ET.SubElement(doc, 'invoice-items')
         for i in self.invoice_items:
-            ET.SubElement(iitems, 'invoice-item').text = str(i.id)
+            iitems.append(i.to_xml())
         ipayments = ET.SubElement(doc, 'invoice-payments')
         for i in self.invoice_payments:
-            ET.SubElement(ipayments, 'invoice-payment').text = str(i.id)
+            ipayments.append(i.to_xml())
+        epayments = ET.SubElement(doc, 'employee-payments')
+        for i in self.employee_payments:
+            epayments.append(i.to_xml())
         return doc
+
+    def amount_calc(self):
+        amount = 0
+        for iitem in self.invoice_items:
+            amount += iitem.amount * iitem.quantity
+        return amount
 
 
 def is_pastdue(inv, date=None):
@@ -768,10 +848,12 @@ class Iitem(Base):
         ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
         ET.SubElement(doc, 'description').text = str(self.description)
         ET.SubElement(doc, 'amount').text = str(self.amount)
-        ET.SubElement(doc, 'cost').text = str(self.amount)
+        ET.SubElement(doc, 'cost').text = str(self.cost)
         ET.SubElement(doc, 'quantity').text = str(self.quantity)
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
-
+        commitems = ET.SubElement(doc, 'commissions-items')
+        for i in self.comm_items:
+            commitems.append(i.to_xml())
         return doc
 
 
@@ -834,6 +916,9 @@ class Citem(Base):
         # fixme: put back after next data migration
         # ET.SubElement(doc, 'invoice_id').text = str(self.invoices_item.invoice_id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'employee_firstname').text = str(self.employee.firstname)
+        ET.SubElement(doc, 'employee_lastname').text = str(self.employee.lastname)
+
         ET.SubElement(doc, 'invoices_item_id').text = str(
             self.invoices_item_id)
         ET.SubElement(doc, 'description').text = '%s-%s %s' % (
