@@ -1,6 +1,6 @@
 import os
 import re
-import tabulate
+from tabulate import tabulate
 import xml.etree.ElementTree as ET
 
 
