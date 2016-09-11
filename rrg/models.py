@@ -247,10 +247,9 @@ class Employee(Base):
         for o in self.memos:
             memos.append(o.to_xml())
         doc.append(memos)
-        contracts = ET.Element('contracts')
-        for o in self.contracts:
-            contracts.append(o.to_xml())
-        doc.append(contracts)
+
+        ET.SubElement(doc, 'contracts')
+
         comm_items = ET.Element('employee-commissions-items')
         for o in self.comm_items:
             comm_items.append(o.to_xml())
@@ -437,10 +436,7 @@ class Client(Base):
         for o in self.memos:
             memos.append(o.to_xml())
         doc.append(memos)
-        contracts = ET.Element('contracts')
-        for o in self.contracts:
-            contracts.append(o.to_xml())
-        doc.append(contracts)
+        ET.SubElement(doc, 'contracts')
         return doc
 
 

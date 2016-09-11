@@ -121,6 +121,7 @@ setup(
             'rrg-cache-employees-memos=rrg.scripts.cache_employee_memos:cache_employee_memos',
             'rrg-cache-contracts=rrg.scripts.cache_contracts:cache_contracts',
             'rrg-cache-contract-items=rrg.scripts.cache_contract_items:cache_contract_items',
+            'rrg-cached-contracts=rrg.scripts.cached_contracts:cached_contracts',
 
             'rrg-comm=rrg.scripts.commissions:comm',
 

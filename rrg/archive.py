@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 
 
 pat = '[0-9]{5}\.[xX][Mm][Ll]$'
+
+
 def employees(args):
     ids = []
     firsts = []
@@ -46,3 +48,41 @@ def employee(args):
                         lastname = doc.findall('lastname')[0].text
                         print ('id="%s", first="%s", last="%s"' % (i, firstname, lastname))
                     i += 1
+
+
+def employee_attach_collected_contracts(emp_doc, contract_doc_list):
+
+    emp_contracts_doc = emp_doc.findall('contracts')[0]
+    for condoc in contract_doc_list:
+        emp_contracts_doc.append(condoc)
+    return emp_doc
+
+
+def contracts(args):
+    ids = []
+    names = []
+    i = 1
+    for root, dirs, files in os.walk(args.datadir):
+        if root == args.datadir:
+            print('root="%s"' % root)
+            for f in files:
+                if re.search(pat, f):
+                    fullpath = os.path.join(root, f)
+                    doc = ET.parse(fullpath).getroot()
+                    name = doc.findall('name')[0].text
+                    ids.append(str(i))
+                    names.append(name)
+                    i += 1
+    res_dict_transposed = {
+        'id': [i for i in ids],
+        'names': [i for i in names],
+    }
+    print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))
+
+
+def client_attach_collected_contracts(cl_doc, contract_doc_list):
+
+    cl_contracts_doc = cl_doc.findall('contracts')[0]
+    for condoc in contract_doc_list:
+        cl_contracts_doc.append(condoc)
+    return cl_doc
