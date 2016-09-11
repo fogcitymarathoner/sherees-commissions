@@ -119,7 +119,7 @@ class EmployeeMemo(Base):
             self.notes)
 
     def to_xml(self):
-        doc = ET.Element('employee-memo')
+        doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
         ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes)
@@ -243,11 +243,11 @@ class Employee(Base):
         for o in self.checks:
             checks.append(o.to_xml())
         doc.append(checks)
-        memos = ET.Element('employee-memos')
+        memos = ET.Element('memos')
         for o in self.memos:
             memos.append(o.to_xml())
         doc.append(memos)
-        contracts = ET.Element('employee-contracts')
+        contracts = ET.Element('contracts')
         for o in self.contracts:
             contracts.append(o.to_xml())
         doc.append(contracts)
@@ -427,6 +427,19 @@ class Client(Base):
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'active').text = str(self.active)
+
+        checks = ET.Element('checks')
+        for o in self.checks:
+            checks.append(o.to_xml())
+        doc.append(checks)
+        memos = ET.Element('memos')
+        for o in self.memos:
+            memos.append(o.to_xml())
+        doc.append(memos)
+        contracts = ET.Element('contracts')
+        for o in self.contracts:
+            contracts.append(o.to_xml())
+        doc.append(contracts)
         return doc
 
 
@@ -451,9 +464,44 @@ class ClientMemo(Base):
             self.id, self.client.name, dt.strftime(self.date, TIMESTAMP_FORMAT), self.notes)
 
     def to_xml(self):
-        doc = ET.Element('client-memo')
+        doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        return doc
+
+
+class ClientCheck(Base):
+    __tablename__ = 'clients_checks'
+
+    id = Column(Integer, primary_key=True)
+
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
+    client = relationship("Client")
+
+    invoice_payments = relationship("InvoicePayment", back_populates="check", cascade="all, delete, delete-orphan")
+    number = Column(String(20))
+    amount = Column(Float)
+    notes = Column(String(100))
+
+    date = Column(Date, nullable=False)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
+
+    def __repr__(self):
+        return "<ClientCheck(id='%s', client='%s', amount='%s', number='%s', date='%s')>" % (
+            self.id, self.client.name, self.amount, self.number, self.date)
+
+    def to_xml(self):
+        doc = ET.Element('check')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'client_id').text = str(self.client_id)
+        ET.SubElement(doc, 'number').text = str(self.number)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
@@ -587,7 +635,7 @@ class Contract(Base):
         ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
                                                          TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(),
                                                                                                             TIMESTAMP_FORMAT)
-        invoices = ET.Element('contract-invoices')
+        invoices = ET.Element('invoices')
         for o in self.invoices:
             invoices.append(o.to_xml())
         doc.append(invoices)
@@ -631,40 +679,6 @@ class InvoicePayment(Base):
         ET.SubElement(doc, 'notes').text = str(self.notes)
         return doc
 
-
-class ClientCheck(Base):
-    __tablename__ = 'clients_checks'
-
-    id = Column(Integer, primary_key=True)
-
-    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
-    client = relationship("Client")
-
-    invoice_payments = relationship("InvoicePayment", back_populates="check", cascade="all, delete, delete-orphan")
-    number = Column(String(20))
-    amount = Column(Float)
-    notes = Column(String(100))
-
-    date = Column(Date, nullable=False)
-    created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
-    created_user_id = Column(Integer)
-    modified_user_id = Column(Integer)
-    last_sync_time = Column(TIMESTAMP)
-
-    def __repr__(self):
-        return "<ClientCheck(id='%s', client='%s', amount='%s', number='%s', date='%s')>" % (
-            self.id, self.client.name, self.amount, self.number, self.date)
-
-    def to_xml(self):
-        doc = ET.Element('client-check')
-        ET.SubElement(doc, 'id').text = str(self.id)
-        ET.SubElement(doc, 'client_id').text = str(self.client_id)
-        ET.SubElement(doc, 'number').text = str(self.number)
-        ET.SubElement(doc, 'amount').text = str(self.amount)
-        ET.SubElement(doc, 'notes').text = str(self.notes)
-        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
-        return doc
 
 
 class Invoice(Base):

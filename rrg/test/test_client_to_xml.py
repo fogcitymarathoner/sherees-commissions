@@ -347,9 +347,9 @@ class Test:
         """
         assert sys._called_from_test
 
-    def test_commissions_calc(self):
+    def test_client_to_xml(self):
         """
-        test commissions calculation
+        test to_xml() of client
         :return:
         """
 
@@ -368,10 +368,12 @@ class Test:
         assert 2 == self.session.query(NotePayment).count()
         assert 12 == self.session.query(InvoicePayment).count()
 
-        emp = self.session.query(Employee)[0]
-        doc = emp.to_xml()
-        assert 'firstname' == doc.findall('firstname')[0].text
-        assert 1 == len(doc.findall('employee-payments/employee-payment'))
+        cl = self.session.query(Client)[0]
+        doc = cl.to_xml()
+        logger.debug('XMLCLIENT')
+        logger.debug(ET.tostring(doc))
+        assert 'weekly' == doc.findall('name')[0].text
+        assert 1 == len(doc.findall('checks/check'))
         assert 1 == len(doc.findall('memos/memo'))
         assert 4 == len(doc.findall('contracts/contract'))
         assert 4 == len(doc.findall('contracts/contract/invoices/invoice'))
@@ -379,39 +381,3 @@ class Test:
         assert 8 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item'))
         assert 8 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items'))
         assert 16 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items/invoices-items-commissions-item'))
-
-        logger.debug('XMLEMPLOYEE')
-        logger.debug(emp)
-        logger.debug(ET.tostring(emp.to_xml()))
-        inv_ele = doc.findall('contracts/contract/invoices/invoice')[0]
-        inv_item_ele = doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item')[0]
-        contract_item_ele = doc.findall('contracts/contract/contract-items/contract-item')[0]
-        comm_item_ele = doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items/invoices-items-commissions-item')[0]
-        employerexpenserate = float(inv_ele.findall('employerexpenserate')[0].text)
-        inv_item_amount = float(inv_item_ele.findall('amount')[0].text)
-        inv_item_cost = float(inv_item_ele.findall('cost')[0].text)
-        inv_item_quantity = float(inv_item_ele.findall('quantity')[0].text)
-        con_item_amt = float(contract_item_ele.findall('amt')[0].text)
-        con_item_cost = float(contract_item_ele.findall('cost')[0].text)
-        percent = float(comm_item_ele.findall('percent')[0].text)
-        assert 0.1 == employerexpenserate
-        assert 10 == inv_item_amount
-        assert 5 == inv_item_cost
-        assert 12 == inv_item_quantity
-        assert 10 == con_item_amt
-        assert inv_item_amount == con_item_amt
-        assert 5 == con_item_cost
-        assert 38.5 == percent
-        iamount = inv_item_quantity * inv_item_amount
-        icost = inv_item_quantity * inv_item_cost
-        empexp = employerexpenserate * (iamount - icost)
-        presplit_comm = iamount - icost - empexp
-        comm = presplit_comm * percent/100
-        # 12 * 10
-        assert 120.0 == iamount
-        # 12 * 5
-        assert 60.0 == icost
-        # 60 * .1
-        assert 6.0 == empexp
-        # (120 - 60 - 6)*.385
-        assert 20.79 == comm
