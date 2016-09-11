@@ -313,6 +313,7 @@ class NotePayment(Base):
         ET.SubElement(doc, 'voided').text = str(self.voided)
         return doc
 
+
 class Note(Base):
     __tablename__ = 'notes'
 
@@ -536,8 +537,10 @@ class ContractItemCommItem(Base):
         doc = ET.Element('contract-item')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'employee_firstname').text = self.employee.firstname if self.employee and self.employee.firstname else ''
-        ET.SubElement(doc, 'employee_lastname').text = self.employee.lastname
+        ET.SubElement(doc,
+                      'employee_firstname').text = self.employee.firstname if self.employee and self.employee.firstname else ''
+        ET.SubElement(doc,
+                      'employee_lastname').text = self.employee.lastname if self.employee and self.employee.lastname else ''
         ET.SubElement(doc, 'contract_item_id').text = str(self.contract_item_id)
         ET.SubElement(doc, 'percent').text = str(self.percent)
         return doc
@@ -678,7 +681,6 @@ class InvoicePayment(Base):
         ET.SubElement(doc, 'amount').text = str(self.amount)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         return doc
-
 
 
 class Invoice(Base):
@@ -929,40 +931,32 @@ class Citem(Base):
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'invoice_id').text = str(self.invoices_item.invoice_id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'employee_firstname').text = str(self.employee.firstname) if self.employee and self.employee.firstname else ''
-        ET.SubElement(doc, 'employee_lastname').text = str(self.employee.lastname)
+        ET.SubElement(doc, 'employee_firstname').text = str(
+            self.employee.firstname) if self.employee and self.employee.firstname else ''
+        ET.SubElement(doc, 'employee_lastname').text = str(
+            self.employee.lastname) if self.employee and self.employee.lastname else ''
 
-        ET.SubElement(doc, 'invoices_item_id').text = str(
-            self.invoices_item_id)
+        ET.SubElement(doc, 'invoices_item_id').text = str(self.invoices_item_id)
         ET.SubElement(doc, 'description').text = '%s-%s %s' % (
             dt.strftime(self.invoices_item.invoice.period_start, YMD_FORMAT),
             dt.strftime(self.invoices_item.invoice.period_end, YMD_FORMAT),
             self.description)
-        ET.SubElement(doc, 'date').text = dt.strftime(self.date,
-                                                      TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'percent').text = str(self.percent)
         ET.SubElement(doc, 'amount').text = str((((iitemamount - wage - empexp) * self.percent) / 100))
         ET.SubElement(doc, 'rel_inv_amt').text = str(self.rel_inv_amt)
-        ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(
-            self.rel_inv_line_item_amt)
+        ET.SubElement(doc, 'rel_inv_line_item_amt').text = str(self.rel_inv_line_item_amt)
         ET.SubElement(doc, 'rel_item_amt').text = str(self.rel_item_amt)
-        ET.SubElement(doc, 'rel_item_quantity').text = str(
-            self.rel_item_quantity)
+        ET.SubElement(doc, 'rel_item_quantity').text = str(self.rel_item_quantity)
         ET.SubElement(doc, 'rel_item_cost').text = str(self.rel_item_cost)
         ET.SubElement(doc, 'rel_item_amt').text = str(self.rel_item_amt)
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         ET.SubElement(doc, 'voided').text = str(self.voided)
-        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(),
-                                                                TIMESTAMP_FORMAT)
-
-        ET.SubElement(doc, 'created_date').text = dt.strftime(
-            self.created_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'modified_date').text = dt.strftime(
-            self.modified_date, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'created_user_id').text = str(
-            self.created_user_id)
-        ET.SubElement(doc, 'modified_user_id').text = str(
-            self.modified_user_id)
+        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
         return doc
 
     @staticmethod
