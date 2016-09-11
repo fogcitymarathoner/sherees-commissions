@@ -536,7 +536,7 @@ class ContractItemCommItem(Base):
         doc = ET.Element('contract-item')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'employee_firstname').text = self.employee.firstname if self.employee.firstname else ''
+        ET.SubElement(doc, 'employee_firstname').text = self.employee.firstname if self.employee and self.employee.firstname else ''
         ET.SubElement(doc, 'employee_lastname').text = self.employee.lastname
         ET.SubElement(doc, 'contract_item_id').text = str(self.contract_item_id)
         ET.SubElement(doc, 'percent').text = str(self.percent)
@@ -927,10 +927,9 @@ class Citem(Base):
         doc = ET.Element('invoices-items-commissions-item')
 
         ET.SubElement(doc, 'id').text = str(self.id)
-        # fixme: put back after next data migration
-        # ET.SubElement(doc, 'invoice_id').text = str(self.invoices_item.invoice_id)
+        ET.SubElement(doc, 'invoice_id').text = str(self.invoices_item.invoice_id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'employee_firstname').text = str(self.employee.firstname) if self.employee.firstname else ''
+        ET.SubElement(doc, 'employee_firstname').text = str(self.employee.firstname) if self.employee and self.employee.firstname else ''
         ET.SubElement(doc, 'employee_lastname').text = str(self.employee.lastname)
 
         ET.SubElement(doc, 'invoices_item_id').text = str(
