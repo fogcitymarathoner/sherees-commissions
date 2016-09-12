@@ -127,53 +127,42 @@ def doc_attach_collected_contracts(doc, contract_doc_list):
     return doc
 
 
-def contract_attach_collected_invoices(contract_doc, inv_doc_list):
+def contract_attach_collected_invoices(inv_doc_list):
     """
     attached contracts invoicers list gathered from disk
     :param contract_doc:
     :param inv_doc_list:
     :return:
     """
-    et_search = contract_doc.findall('invoices')
-    if et_search:
-        isub_ele = et_search[0]
-        isub_ele.clear()
-    else:
-        isub_ele = ET.SubElement(contract_doc, 'invoices')
+    isub_ele = ET.Element('invoices')
 
     for idoc in inv_doc_list:
         logger.debug(ET.tostring(idoc))
         isub_ele.append(idoc)
 
-    return contract_doc
+    return isub_ele
 
 
-def contract_attach_collected_contract_items(contract_doc, citem_doc_list):
+def contract_attach_collected_contract_items(citem_doc_list):
     """
     attached contracts invoicers list gathered from disk
     :param contract_doc:
     :param citem_doc_list:
     :return:
     """
-    et_search = contract_doc.findall('contract-items')
-    if et_search:
-        isub_ele = et_search[0]
-        isub_ele.clear()
-    else:
-        isub_ele = ET.SubElement(contract_doc, 'contract-items')
+    isub_ele = ET.Element('contract-items')
 
     for idoc in citem_doc_list:
         logger.debug(ET.tostring(idoc))
         isub_ele.append(idoc)
 
-    return contract_doc
-
+    return isub_ele
 
 def cached_contracts_collect_invoices_and_items(args):
 
     invdocs = []
     for iroot, idirs, ifiles in os.walk(args.invoices_dir):
-        if iroot == args.invoice_sdir:
+        if iroot == args.invoices_dir:
             print('Scanning %s for invoices' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -183,7 +172,7 @@ def cached_contracts_collect_invoices_and_items(args):
     print('%s invoices found' % len(invdocs))
     citemsdocs = []
     for iroot, idirs, ifiles in os.walk(args.contract_items_dir):
-        if iroot == args.invoicesdir:
+        if iroot == args.contract_items_dir:
             print('Scanning %s for contract items' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -191,7 +180,6 @@ def cached_contracts_collect_invoices_and_items(args):
                     citemdoc = ET.parse(fullpath).getroot()
                     citemsdocs.append(citemdoc)
     print('%s contract items found' % len(citemsdocs))
-
     for root, dirs, files in os.walk(args.datadir):
         if root == args.datadir:
             for f in files:
@@ -199,27 +187,31 @@ def cached_contracts_collect_invoices_and_items(args):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
                     print('Assembling contract "%s"' % doc.findall('title')[0].text)
-                    contract_subele = doc.findall('contracts/contract')
-                    contract_id = contract_subele.findall('id')[0].text
+                    print(ET.tostring(doc))
+
+                    citem_subele = doc.findall('contract-items')
+                    doc.remove(citem_subele[0])
+                    inv_subele = doc.findall('invoices')
+                    doc.remove(inv_subele[0])
+
+                    contract_id = doc.findall('id')[0].text
                     attach_invs = []
                     for inv in invdocs:
                         inv_contract_id = inv.findall('contract_id')[0].text
                         if contract_id == inv_contract_id:
                             attach_invs.append(inv)
                     print('%s invoices found to add' % len(attach_invs))
-                    cdoc = contract_attach_collected_invoices(contract_subele, attach_invs)
-                    _ = ET.SubElement(contract_subele, 'invoices')
-                    _ = cdoc
+                    cdoc = contract_attach_collected_invoices(attach_invs)
+                    doc.append(cdoc)
                     attach_items = []
                     for citem in citemsdocs:
                         citem_contract_id = citem.findall('contract_id')[0].text
                         if contract_id == citem_contract_id:
                             attach_items.append(citem)
                     print('%s contract items to add' % len(attach_items))
-                    cdoc = contract_attach_collected_contract_items(contract_subele, invdocs)
-                    _ = ET.SubElement(contract_subele, 'contract-items')
-                    _ = cdoc
+                    cdoc = contract_attach_collected_contract_items(attach_items)
+                    doc.append(cdoc)
 
                 with open(fullpath, 'w') as fh:
                     fh.write(ET.tostring(doc))
-                print('wrote %s' % f)
+                print('wrote %s' % fullpath)
