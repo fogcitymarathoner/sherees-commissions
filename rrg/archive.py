@@ -72,10 +72,12 @@ def contracts(args):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
                     title = doc.findall('title')[0].text
-                    clients = doc.findall('client')[0].text
-                    employees = doc.findall('employee')[0].text
+                    client = doc.findall('client')[0].text
+                    employee = doc.findall('employee')[0].text
                     ids.append(str(i))
                     titles.append(title)
+                    employees.append(employee)
+                    clients.append(client)
                     i += 1
     res_dict_transposed = {
         'id': [i for i in ids],
