@@ -5,7 +5,7 @@ import logging
 from freezegun import freeze_time
 import xml.etree.ElementTree as ET
 
-from rrg.archive import client_attach_collected_contracts
+from rrg.archive import doc_attach_collected_contracts
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
@@ -399,7 +399,7 @@ class Test:
 
 
         base_cl_doc = doc
-        doc = client_attach_collected_contracts(original_saved_cl, [i for i in base_cl_doc.findall('contracts/contract')])
+        doc = doc_attach_collected_contracts(original_saved_cl, [i for i in base_cl_doc.findall('contracts/contract')])
         assert 'weekly' == doc.findall('name')[0].text
         assert 1 == len(doc.findall('checks/check'))
         assert 1 == len(doc.findall('memos/memo'))

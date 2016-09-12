@@ -5,7 +5,9 @@ import logging
 from freezegun import freeze_time
 import xml.etree.ElementTree as ET
 
-from rrg.archive import employee_attach_collected_contracts
+from rrg.archive import doc_attach_collected_contracts
+from rrg.archive import contract_attach_collected_invoices
+from rrg.archive import contract_attach_collected_contract_items
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
@@ -396,13 +398,64 @@ class Test:
         assert 8 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items'))
         assert 16 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items/invoices-items-commissions-item'))
         base_emp_doc = doc
-        doc = employee_attach_collected_contracts(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract')])
+        doc = doc_attach_collected_contracts(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract')])
 
         assert 'firstname' == doc.findall('firstname')[0].text
         assert 1 == len(doc.findall('employee-payments/employee-payment'))
         assert 1 == len(doc.findall('memos/memo'))
         assert 4 == len(doc.findall('contracts/contract'))
+
+        contract_subele = doc.findall('contracts/contract')[0]
+        cdoc = contract_attach_collected_invoices(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/invoices/invoice')])
+
+        _ = ET.SubElement(contract_subele, 'invoices')
+        _ = cdoc
         assert 4 == len(doc.findall('contracts/contract/invoices/invoice'))
+
+
+        contract_subele = doc.findall('contracts/contract')[0]
+        logger.debug('XMLCONTRACT')
+        logger.debug(ET.tostring(cdoc))
+        cdoc = contract_attach_collected_contract_items(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/contract-items/contract-item')])
+        logger.debug('XMLCONTRACTITEMS')
+        logger.debug(ET.tostring(cdoc))
+        _ = ET.SubElement(contract_subele, 'contract-items')
+        _ = cdoc
+        assert 8 == len(doc.findall('contracts/contract/contract-items/contract-item'))
+        assert 8 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item'))
+        assert 8 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items'))
+        assert 16 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items/invoices-items-commissions-item'))
+
+        # make sure number of contracts do not double
+        _ = doc_attach_collected_contracts(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract')])
+        _ = doc_attach_collected_contracts(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract')])
+        _ = doc_attach_collected_contracts(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract')])
+
+        _ = contract_attach_collected_contract_items(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract/contract-items/contract-item')])
+        _ = contract_attach_collected_contract_items(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract/contract-items/contract-item')])
+        doc = contract_attach_collected_contract_items(original_saved_emp, [i for i in base_emp_doc.findall('contracts/contract/contract-items/contract-item')])
+        assert 'firstname' == doc.findall('firstname')[0].text
+        assert 1 == len(doc.findall('employee-payments/employee-payment'))
+        assert 1 == len(doc.findall('memos/memo'))
+        assert 4 == len(doc.findall('contracts/contract'))
+        contract_subele = doc.findall('contracts/contract')[0]
+        _ = contract_attach_collected_invoices(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/invoices/invoice')])
+        _ = contract_attach_collected_invoices(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/invoices/invoice')])
+        cdoc = contract_attach_collected_invoices(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/invoices/invoice')])
+
+        _ = ET.SubElement(contract_subele, 'invoices')
+        _ = cdoc
+        assert 4 == len(doc.findall('contracts/contract/invoices/invoice'))
+
+        contract_subele = doc.findall('contracts/contract')[0]
+        logger.debug('XMLCONTRACT')
+        logger.debug(ET.tostring(cdoc))
+        _ = contract_attach_collected_contract_items(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/contract-items/contract-item')])
+        _ = contract_attach_collected_contract_items(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/contract-items/contract-item')])
+        cdoc = contract_attach_collected_contract_items(contract_subele, [i for i in base_emp_doc.findall('contracts/contract/contract-items/contract-item')])
+        logger.debug(ET.tostring(cdoc))
+        _ = ET.SubElement(contract_subele, 'contract-items')
+        _ = cdoc
         assert 8 == len(doc.findall('contracts/contract/contract-items/contract-item'))
         assert 8 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item'))
         assert 8 == len(doc.findall('contracts/contract/invoices/invoice/invoice-items/invoice-item/commissions-items'))

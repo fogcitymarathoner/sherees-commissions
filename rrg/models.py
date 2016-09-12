@@ -636,10 +636,7 @@ class Contract(Base):
         ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
                                                          TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(),
                                                                                                             TIMESTAMP_FORMAT)
-        invoices = ET.Element('invoices')
-        for o in self.invoices:
-            invoices.append(o.to_xml())
-        doc.append(invoices)
+        ET.SubElement(doc, 'invoices')
         contract_items = ET.Element('contract-items')
         for o in self.contract_items:
             contract_items.append(o.to_xml())
