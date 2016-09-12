@@ -1,7 +1,7 @@
 import argparse
 from rrg.archive import employee as routine
 
-parser = argparse.ArgumentParser(description='RRG Archived Employees')
+parser = argparse.ArgumentParser(description='RRG Archived Employee')
 
 parser.add_argument('id', type=int, help='id from cached-employees report')
 parser.add_argument(

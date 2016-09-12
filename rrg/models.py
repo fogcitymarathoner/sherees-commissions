@@ -626,7 +626,9 @@ class Contract(Base):
         ET.SubElement(doc, 'title').text = re.sub(r'[^\x00-\x7F]', ' ', self.title) if self.title else ''
         ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
+        ET.SubElement(doc, 'client').text = self.client.name
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        ET.SubElement(doc, 'employee').text = ('%s %s' %(self.employee.firstname, self.employee.lastname))
         ET.SubElement(doc, 'period_id').text = str(self.period_id)
         ET.SubElement(doc, 'active').text = str(self.active)
         ET.SubElement(doc, 'terms').text = str(self.terms)
