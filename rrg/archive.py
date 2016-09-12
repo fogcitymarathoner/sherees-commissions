@@ -173,7 +173,7 @@ def cached_contracts_collect_invoices_and_items(args):
 
     invdocs = []
     for iroot, idirs, ifiles in os.walk(args.invoices_dir):
-        if iroot == args.invoicesdir:
+        if iroot == args.invoice_sdir:
             print('Scanning %s for invoices' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -220,6 +220,6 @@ def cached_contracts_collect_invoices_and_items(args):
                     _ = ET.SubElement(contract_subele, 'contract-items')
                     _ = cdoc
 
-                with open(f, 'w') as fh:
+                with open(fullpath, 'w') as fh:
                     fh.write(ET.tostring(doc))
                 print('wrote %s' % f)
