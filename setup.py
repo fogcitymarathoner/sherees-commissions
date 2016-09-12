@@ -124,6 +124,7 @@ setup(
             'rrg-cached-contracts=rrg.scripts.cached_contracts:cached_contracts',
             'rrg-cached-contract=rrg.scripts.cached_contract:cached_contract',
 
+            'rrg-assemble-contracts=rrg.scripts.assemble_contracts_cache:assemble_contracts_cache',
             'rrg-comm=rrg.scripts.commissions:comm',
 
             'rrg-comm-monthlies=rrg.scripts.commissions_monthly_summaries:monthlies_summary',

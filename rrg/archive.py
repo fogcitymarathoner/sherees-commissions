@@ -219,3 +219,7 @@ def cached_contracts_collect_invoices_and_items(args):
                     cdoc = contract_attach_collected_contract_items(contract_subele, invdocs)
                     _ = ET.SubElement(contract_subele, 'contract-items')
                     _ = cdoc
+
+                with open(f, 'w') as fh:
+                    fh.write(ET.tostring(doc))
+                print('wrote %s' % f)
