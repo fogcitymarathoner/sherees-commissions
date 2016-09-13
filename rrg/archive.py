@@ -56,14 +56,6 @@ def employee(args):
                     i += 1
 
 
-def employee_attach_collected_contracts(emp_doc, contract_doc_list):
-
-    emp_contracts_doc = emp_doc.findall('contracts')[0]
-    for condoc in contract_doc_list:
-        emp_contracts_doc.append(condoc)
-    return emp_doc
-
-
 def contracts(args):
     ids = []
     titles = []
@@ -111,20 +103,12 @@ def contract(args):
                     i += 1
 
 
-def doc_attach_collected_contracts(doc, contract_doc_list):
-    et_search = doc.findall('contracts')
-    if et_search:
-        csub_ele = et_search[0]
-        csub_ele.clear()
+def doc_attach_collected_contracts(contract_doc_list):
+    csub_ele = ET.Element('contracts')
+    for idoc in contract_doc_list:
+        csub_ele.append(idoc)
 
-    else:
-        csub_ele = ET.SubElement(doc, 'invoices')
-
-    for condoc in contract_doc_list:
-        _ = ET.SubElement(csub_ele, 'contract')
-        _ = condoc
-
-    return doc
+    return csub_ele
 
 
 def contract_attach_collected_invoices(inv_doc_list):
@@ -158,6 +142,75 @@ def contract_attach_collected_contract_items(citem_doc_list):
 
     return isub_ele
 
+
+def cached_employees_collect_contracts(args):
+
+    conttractsdocs = []
+    for iroot, idirs, ifiles in os.walk(args.contracts_dir):
+        if iroot == args.invoices_dir:
+            print('Scanning %s for contracts' % iroot)
+            for invf in ifiles:
+                if re.search(pat, invf):
+                    fullpath = os.path.join(iroot, invf)
+                    invdoc = ET.parse(fullpath).getroot()
+                    conttractsdocs.append(invdoc)
+    print('%s contracts found' % len(conttractsdocs))
+
+    for root, dirs, files in os.walk(args.datadir):
+        if root == args.datadir:
+            for f in files:
+                if re.search(pat, f):
+                    fullpath = os.path.join(root, f)
+                    doc = ET.parse(fullpath).getroot()
+                    print('Assembling employee "%s %s"' % (doc.findall('firstname')[0].text, doc.findall('firstname')[0].text))
+
+                    contracts_subele = doc.findall('contracts')
+                    doc.remove(contracts_subele[0])
+                    employee_id = doc.findall('id')[0].text
+                    attach_contracts = []
+                    for inv in conttractsdocs:
+                        con_employee_id = inv.findall('employee_id')[0].text
+                        if employee_id == con_employee_id:
+                            attach_contracts.append(inv)
+                    print('%s contracts found to add' % len(attach_contracts))
+                    cdoc = doc_attach_collected_contracts(attach_contracts)
+                    doc.append(cdoc)
+
+
+def cached_clients_collect_contracts(args):
+
+    conttractsdocs = []
+    for iroot, idirs, ifiles in os.walk(args.contracts_dir):
+        if iroot == args.invoices_dir:
+            print('Scanning %s for contracts' % iroot)
+            for invf in ifiles:
+                if re.search(pat, invf):
+                    fullpath = os.path.join(iroot, invf)
+                    invdoc = ET.parse(fullpath).getroot()
+                    conttractsdocs.append(invdoc)
+    print('%s contracts found' % len(conttractsdocs))
+
+    for root, dirs, files in os.walk(args.datadir):
+        if root == args.datadir:
+            for f in files:
+                if re.search(pat, f):
+                    fullpath = os.path.join(root, f)
+                    doc = ET.parse(fullpath).getroot()
+                    print('Assembling client "%s"' % doc.findall('name')[0].text)
+
+                    contracts_subele = doc.findall('contracts')
+                    doc.remove(contracts_subele[0])
+                    client_id = doc.findall('id')[0].text
+                    attach_contracts = []
+                    for inv in conttractsdocs:
+                        con_client_id = inv.findall('client_id')[0].text
+                        if client_id == con_client_id:
+                            attach_contracts.append(inv)
+                    print('%s contracts found to add' % len(attach_contracts))
+                    cdoc = doc_attach_collected_contracts(attach_contracts)
+                    doc.append(cdoc)
+
+
 def cached_contracts_collect_invoices_and_items(args):
 
     invdocs = []
@@ -187,7 +240,6 @@ def cached_contracts_collect_invoices_and_items(args):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
                     print('Assembling contract "%s"' % doc.findall('title')[0].text)
-                    print(ET.tostring(doc))
 
                     citem_subele = doc.findall('contract-items')
                     doc.remove(citem_subele[0])
