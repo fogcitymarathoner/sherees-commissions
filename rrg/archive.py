@@ -121,7 +121,6 @@ def contract_attach_collected_invoices(inv_doc_list):
     isub_ele = ET.Element('invoices')
 
     for idoc in inv_doc_list:
-        logger.debug(ET.tostring(idoc))
         isub_ele.append(idoc)
 
     return isub_ele
@@ -137,7 +136,6 @@ def contract_attach_collected_contract_items(citem_doc_list):
     isub_ele = ET.Element('contract-items')
 
     for idoc in citem_doc_list:
-        logger.debug(ET.tostring(idoc))
         isub_ele.append(idoc)
 
     return isub_ele
@@ -147,7 +145,7 @@ def cached_employees_collect_contracts(args):
 
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(args.contracts_dir):
-        if iroot == args.invoices_dir:
+        if iroot == args.contracts_dir:
             print('Scanning %s for contracts' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -162,7 +160,7 @@ def cached_employees_collect_contracts(args):
                 if re.search(pat, f):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
-                    print('Assembling employee "%s %s"' % (doc.findall('firstname')[0].text, doc.findall('firstname')[0].text))
+                    print('Assembling employee "%s %s"' % (doc.findall('firstname')[0].text, doc.findall('lastname')[0].text))
 
                     contracts_subele = doc.findall('contracts')
                     doc.remove(contracts_subele[0])
@@ -176,12 +174,16 @@ def cached_employees_collect_contracts(args):
                     cdoc = doc_attach_collected_contracts(attach_contracts)
                     doc.append(cdoc)
 
+                with open(fullpath, 'w') as fh:
+                    fh.write(ET.tostring(doc))
+                print('wrote %s' % fullpath)
+
 
 def cached_clients_collect_contracts(args):
 
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(args.contracts_dir):
-        if iroot == args.invoices_dir:
+        if iroot == args.contracts_dir:
             print('Scanning %s for contracts' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -209,6 +211,10 @@ def cached_clients_collect_contracts(args):
                     print('%s contracts found to add' % len(attach_contracts))
                     cdoc = doc_attach_collected_contracts(attach_contracts)
                     doc.append(cdoc)
+
+                with open(fullpath, 'w') as fh:
+                    fh.write(ET.tostring(doc))
+                print('wrote %s' % fullpath)
 
 
 def cached_contracts_collect_invoices_and_items(args):
