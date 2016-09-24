@@ -3,7 +3,13 @@ import re
 from tabulate import tabulate
 import xml.etree.ElementTree as ET
 import logging
+
 from rrg.billing import employee_payment_fullpath
+from rrg.helpers import xml_timestamp_to_mdy
+from rrg.helpers import emp_xml_doc_to_dict
+from rrg.helpers import emp_memo_xml_doc_to_dict
+from rrg.helpers import emp_contract_xml_doc_to_dict
+from rrg.helpers import emp_payment_xml_doc_to_dict
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -41,54 +47,44 @@ def employees(args):
 
 def employee(args):
     i = 1
+    emp_dict = {
+        'index': None,
+        'id': None,
+        'firstname': None,
+        'lastname': None,
+        'street1': None,
+        'street2': None,
+        'city': None,
+        'state': None,
+        'zip': None,
+        'startdate': None,
+        'enddate': None,
+        'dob': None,
+        'contracts': [],
+        'memos': [],
+        'payments': [],
+    }
     for root, dirs, files in os.walk(args.datadir):
         if root == args.datadir:
-            print('root="%s"' % root)
             for f in files:
                 if re.search(pat, f):
                     if i == args.id:
-                        fullpath = os.path.join(root, f)
-                        doc = ET.parse(fullpath).getroot()
-                        firstname = doc.findall('firstname')[0].text
-                        lastname = doc.findall('lastname')[0].text
-                        street1 = doc.findall('street1')[0].text
-                        street2 = doc.findall('street2')[0].text
-                        city = doc.findall('city')[0].text
-                        state = doc.findall('state')[0].text
-                        zip = doc.findall('zip')[0].text
-                        dob = doc.findall('dob')[0].text
-                        print ('id="%s", first="%s", last="%s"' % (i, firstname, lastname))
-                        print ('street1="%s"' % street1)
-                        print ('street2="%s"' % street2)
-                        print ('city="%s", state="%s", zip="%s"' % (city, state, zip))
-                        print ('dob="%s"' % dob)
-                        print('Memos')
+                        doc = ET.parse(os.path.join(root, f)).getroot()
+                        emp_dict = emp_xml_doc_to_dict(i, doc, emp_dict)
                         for eles in doc.findall('memos'):
                             for ele in eles.findall('memo'):
-                                print(
-                                    'id="%s", date="%s", title="%s"' % (
-                                        ele.findall('id')[0].text,
-                                        ele.findall('date')[0].text,
-                                        ele.findall('notes')[0].text))
-                        print('Contracts')
+                                emp_dict['memos'].append(emp_memo_xml_doc_to_dict(ele))
                         for eles in doc.findall('contracts'):
                             for ele in eles.findall('contract'):
-                                print(
-                                    'id="%s", title="%s"' % (
-                                        ele.findall('id')[0].text, ele.findall('title')[0].text))
-                        print('Payments')
+                                emp_dict['contracts'].append(emp_contract_xml_doc_to_dict(ele))
                         for eles in doc.findall('employee-payments'):
                             for ele in eles.findall('employee-payment'):
                                 _ = employee_payment_fullpath(args.datadir, ele[0].text)
                                 doc = ET.parse(_).getroot()
-                                id = doc.findall('id')[0].text
-                                date = doc.findall('date')[0].text
-                                check_number = doc.findall('ref')[0].text
-                                amount = doc.findall('amount')[0].text
-                                print(
-                                    'id="%s", date="%s", check_number="%s", amount="%s"' % (
-                                        id, date, check_number, amount))
+                                emp_dict['payments'].append(emp_payment_xml_doc_to_dict(doc))
+                        break
                     i += 1
+    return emp_dict
 
 
 def contracts(args):
@@ -177,7 +173,6 @@ def contract_attach_collected_contract_items(citem_doc_list):
 
 
 def cached_employees_collect_contracts(args):
-
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(args.contracts_dir):
         if iroot == args.contracts_dir:
@@ -195,7 +190,8 @@ def cached_employees_collect_contracts(args):
                 if re.search(pat, f):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
-                    print('Assembling employee "%s %s"' % (doc.findall('firstname')[0].text, doc.findall('lastname')[0].text))
+                    print(
+                    'Assembling employee "%s %s"' % (doc.findall('firstname')[0].text, doc.findall('lastname')[0].text))
 
                     contracts_subele = doc.findall('contracts')
                     doc.remove(contracts_subele[0])
@@ -215,7 +211,6 @@ def cached_employees_collect_contracts(args):
 
 
 def cached_clients_collect_contracts(args):
-
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(args.contracts_dir):
         if iroot == args.contracts_dir:
@@ -254,7 +249,6 @@ def cached_clients_collect_contracts(args):
 
 
 def cached_contracts_collect_invoices_and_items(args):
-
     invdocs = []
     for iroot, idirs, ifiles in os.walk(args.invoices_dir):
         if iroot == args.invoices_dir:

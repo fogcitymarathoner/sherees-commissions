@@ -1,5 +1,6 @@
 import argparse
-from rrg.archive import employee as routine
+from rrg.archive import employee
+from rrg.renderers import format_employee
 
 parser = argparse.ArgumentParser(description='RRG Archived Employee')
 
@@ -19,4 +20,4 @@ def cached_employee():
     args = parser.parse_args()
 
     print('Archived Employee in %s' % args.datadir)
-    routine(args)
+    print format_employee(employee(args))
