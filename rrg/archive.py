@@ -52,7 +52,29 @@ def employee(args):
                         doc = ET.parse(fullpath).getroot()
                         firstname = doc.findall('firstname')[0].text
                         lastname = doc.findall('lastname')[0].text
+                        street1 = doc.findall('street1')[0].text
+                        street2 = doc.findall('street2')[0].text
+                        city = doc.findall('city')[0].text
+                        state = doc.findall('state')[0].text
+                        zip = doc.findall('zip')[0].text
+                        dob = doc.findall('dob')[0].text
                         print ('id="%s", first="%s", last="%s"' % (i, firstname, lastname))
+                        print ('street1="%s"' % street1)
+                        print ('street2="%s"' % street2)
+                        print ('city="%s", state="%s", zip="%s"' % (city, state, zip))
+                        print ('dob="%s"' % dob)
+                        print('Memos')
+                        for eles in doc.findall('memos'):
+                            for ele in eles.findall('memo'):
+                                print(
+                                    'id="%s", title="%s"' % (
+                                        ele.findall('id')[0].text, ele.findall('notes')[0].text))
+                        print('Contracts')
+                        for eles in doc.findall('contracts'):
+                            for ele in eles.findall('contract'):
+                                print(
+                                    'id="%s", title="%s"' % (
+                                        ele.findall('id')[0].text, ele.findall('title')[0].text))
                     i += 1
 
 
@@ -192,6 +214,7 @@ def cached_clients_collect_contracts(args):
                     conttractsdocs.append(invdoc)
     print('%s contracts found' % len(conttractsdocs))
 
+    # loop through clients, update contracts subdoc
     for root, dirs, files in os.walk(args.datadir):
         if root == args.datadir:
             for f in files:

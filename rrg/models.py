@@ -202,7 +202,8 @@ class Employee(Base):
         ET.SubElement(doc, 'nickname').text = self.nickname
         ET.SubElement(doc, 'street1').text = self.street1
         ET.SubElement(doc, 'street2').text = self.street2
-        ET.SubElement(doc, 'state_id').text = str(self.state_id)
+        ET.SubElement(doc, 'city').text = self.city
+        ET.SubElement(doc, 'state').text = str(self.state.name)
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
         ET.SubElement(doc, 'bankaccountnumber_crypto').text = self.bankaccountnumber_crypto
