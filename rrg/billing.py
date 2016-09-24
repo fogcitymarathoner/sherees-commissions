@@ -32,6 +32,10 @@ def full_non_dated_xml_path(data_dir, obj):
     return os.path.join(data_dir, '%s.xml' % str(obj.id).zfill(5))
 
 
+def employee_payment_fullpath(data_dir, employee_payment_id):
+    return os.path.join(data_dir, 'payments', '%s.xml' % str(employee_payment_id).zfill(5))
+
+
 def sync(session, data_dir, ep, model):
     """
     writes xml file for contract

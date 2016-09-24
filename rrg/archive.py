@@ -3,7 +3,7 @@ import re
 from tabulate import tabulate
 import xml.etree.ElementTree as ET
 import logging
-from rrg.billing import full_path_employee_payment
+from rrg.billing import employee_payment_fullpath
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -79,15 +79,16 @@ def employee(args):
                         print('Payments')
                         for eles in doc.findall('employee-payments'):
                             for ele in eles.findall('employee-payment'):
-                                _ = full_path_employee_payment(args.datadir, ele[0].text)
+                                _ = employee_payment_fullpath(args.datadir, ele[0].text)
                                 doc = ET.parse(_).getroot()
                                 id = doc.findall('id')[0].text
                                 date = doc.findall('date')[0].text
-                                check_number = doc.findall('check_number')[0].text
+                                check_number = doc.findall('ref')[0].text
                                 amount = doc.findall('amount')[0].text
                                 print(
                                     'id="%s", date="%s", check_number="%s", amount="%s"' % (
                                         id, date, check_number, amount))
+                    i += 1
 
 
 def contracts(args):
