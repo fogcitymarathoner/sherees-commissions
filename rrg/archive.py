@@ -3,7 +3,7 @@ import re
 from tabulate import tabulate
 import xml.etree.ElementTree as ET
 import logging
-
+from rrg.billing import full_path_employee_payment
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -45,7 +45,6 @@ def employee(args):
         if root == args.datadir:
             print('root="%s"' % root)
             for f in files:
-
                 if re.search(pat, f):
                     if i == args.id:
                         fullpath = os.path.join(root, f)
@@ -67,15 +66,28 @@ def employee(args):
                         for eles in doc.findall('memos'):
                             for ele in eles.findall('memo'):
                                 print(
-                                    'id="%s", title="%s"' % (
-                                        ele.findall('id')[0].text, ele.findall('notes')[0].text))
+                                    'id="%s", date="%s", title="%s"' % (
+                                        ele.findall('id')[0].text,
+                                        ele.findall('date')[0].text,
+                                        ele.findall('notes')[0].text))
                         print('Contracts')
                         for eles in doc.findall('contracts'):
                             for ele in eles.findall('contract'):
                                 print(
                                     'id="%s", title="%s"' % (
                                         ele.findall('id')[0].text, ele.findall('title')[0].text))
-                    i += 1
+                        print('Payments')
+                        for eles in doc.findall('employee-payments'):
+                            for ele in eles.findall('employee-payment'):
+                                _ = full_path_employee_payment(args.datadir, ele[0].text)
+                                doc = ET.parse(_).getroot()
+                                id = doc.findall('id')[0].text
+                                date = doc.findall('date')[0].text
+                                check_number = doc.findall('check_number')[0].text
+                                amount = doc.findall('amount')[0].text
+                                print(
+                                    'id="%s", date="%s", check_number="%s", amount="%s"' % (
+                                        id, date, check_number, amount))
 
 
 def contracts(args):

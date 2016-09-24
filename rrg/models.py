@@ -58,7 +58,6 @@ Base = declarative_base()
 
 class EmployeePayment(Base):
     __tablename__ = 'employees_payments'
-
     id = Column(Integer, primary_key=True)
 
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
@@ -71,7 +70,7 @@ class EmployeePayment(Base):
     payroll = relationship("Payroll")
 
     notes = Column(String(100))
-
+    ref = Column(String(20))
     amount = Column(Float)
     date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
@@ -81,7 +80,8 @@ class EmployeePayment(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<EmployeePayment(id='%s', firstname='%s', lastname='%s', invoice_id='%s', start='%s', end='%s', date='%s', amount='%s')>" % (
+        return "<EmployeePayment(id='%s', firstname='%s', lastname='%s', invoice_id='%s', " \
+               "start='%s', end='%s', date='%s', amount='%s')>" % (
             self.id, self.employee.firstname, self.employee.lastname, self.invoice_id, self.invoice.period_start,
             self.invoice.period_end, self.date, self.amount)
 
@@ -92,6 +92,7 @@ class EmployeePayment(Base):
         ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
         ET.SubElement(doc, 'payroll_id').text = str(self.payroll_id)
         ET.SubElement(doc, 'notes').text = self.notes
+        ET.SubElement(doc, 'ref').text = self.ref
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'amount').text = str(self.amount)
         return doc
@@ -364,6 +365,7 @@ class CommPayment(Base):
     check_number = Column(String(10))
     cleared = Column(Boolean)
     voided = Column(Boolean)
+
     # fixme: add last_sync_time
 
     def __repr__(self):
@@ -629,7 +631,7 @@ class Contract(Base):
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
         ET.SubElement(doc, 'client').text = self.client.name
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'employee').text = ('%s %s' %(self.employee.firstname, self.employee.lastname))
+        ET.SubElement(doc, 'employee').text = ('%s %s' % (self.employee.firstname, self.employee.lastname))
         ET.SubElement(doc, 'period_id').text = str(self.period_id)
         ET.SubElement(doc, 'active').text = str(self.active)
         ET.SubElement(doc, 'terms').text = str(self.terms)
