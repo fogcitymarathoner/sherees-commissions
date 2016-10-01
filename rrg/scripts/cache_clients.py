@@ -2,14 +2,12 @@ import argparse
 from rrg.billing import cache_non_date_parsed as routine
 from rrg.models import session_maker
 from rrg.utils import clients_dir
+from rrg.models import Client
 
 parser = argparse.ArgumentParser(description='RRG Clients')
 
 parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
-
+    '--datadir', required=True, help='datadir dir', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
 parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
