@@ -1,14 +1,15 @@
 import argparse
 from rrg.billing import cache_non_date_parsed as routine
-from rrg.models import Contract
+from rrg.models import ClientManager
 from rrg.models import session_maker
-from rrg.utils import contracts_dir
+from rrg.utils import clients_managers_dir
 
-parser = argparse.ArgumentParser(description='RRG Cache Contracts')
+parser = argparse.ArgumentParser(description='RRG Cache Clients Managers')
 
+parser.add_argument('project', help='project name', choices=['rrg', 'biz'])
 parser.add_argument(
     '--datadir', required=True,
-    help='datadir dir',
+    help='datadir dir with client memos',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
@@ -18,14 +19,14 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 
-def cache_contracts():
+def cache_client_managers():
     """
-    replaces cake cache_clients
-    :param data_dir:
-    :return:
+    replaces cake cache clients memos
     """
     args = parser.parse_args()
+
     session = session_maker(args)
-    print('Caching Contracts %s into %s' % (args.db, contracts_dir(args.datadir)))
-    routine(session, contracts_dir(args.datadir), Contract)
+
+    print('Caching Clients-Managers %s into %s' % (args.db, clients_managers_dir(args.datadir)))
+    routine(session, clients_managers_dir(args.datadir), ClientManager)
     session.commit()

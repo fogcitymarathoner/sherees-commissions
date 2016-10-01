@@ -13,7 +13,7 @@ from s3_mysql_backup import mkdirs
 
 from rrg.billing import full_dated_obj_xml_path
 from rrg.billing import full_non_dated_xml_path
-from rrg.billing import full_dated_comm_item_xml_path
+from rrg.billing import verify_dirs_ready
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment
@@ -23,8 +23,10 @@ from rrg.models import Invoice
 from rrg.models import Iitem
 from rrg.queries import sheree_notes_payments
 from rrg.queries import sherees_notes
-
 from rrg.utils import directory_date_dictionary
+from rrg.utils import commissions_items_dir
+from rrg.utils import commissions_item_dir
+from rrg.utils import transactions_invoices_dir
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
@@ -43,7 +45,8 @@ def sheree_total_monies_owed(session, args):
     for cm in comm_months(end=dt.now()):
         args.month = cm['month']
         args.year = cm['year']
-        total, res = year_month_statement(session, args)
+        total, res = employee_year_month_statement(
+            session, args.employee, args.datadir, args.year, args.month, args.cache)
         total_commissions += total
 
     sherees_paychecks_due, iitems, total_payroll = remaining_payroll(session)
@@ -151,7 +154,8 @@ def sherees_commissions_report(session, args):
             report += monthly_statement_ym_header % (cm['month'], cm['year'])
             args.month = cm['month']
             args.year = cm['year']
-            total, res = year_month_statement(session, args)
+            total, res = employee_year_month_statement(session, args.employee, args.datadir, args.year, args.month,
+                                                       args.cache)
             balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),
@@ -194,14 +198,14 @@ def sherees_commissions_report(session, args):
     return report
 
 
-def sherees_commissions_transactions_year_month(session, args):
-    return sherees_comm_payments_year_month(session, args), \
-           sorted(sherees_comm_items_year_month(session, args),
+def employee_commissions_transactions_year_month(session, employee, datadir, year, month, cache):
+    return employee_comm_payments_year_month(session, employee, datadir, year, month, cache), \
+           sorted(employee_comm_items_year_month(session, employee, datadir, year, month),
                   key=lambda ci: dt.strptime(ci.findall('date')[0].text,
                                              TIMESTAMP_FORMAT))
 
 
-def sherees_comm_items_year_month(session, args):
+def employee_comm_items_year_month(session, employee, datadir, year, month):
     """
     reads comm items from xml forest
     Args:
@@ -212,13 +216,13 @@ def sherees_comm_items_year_month(session, args):
 
     """
     xml_comm_items = []
-    dir = sherees_comm_path_year_month(session, args)
+    dir = employee_comm_path_year_month(session, employee, datadir, year, month)
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
 
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
             if re.search(
-                    'transactions/invoices/invoice_items/commissions_items/[0-9]{4}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/'
+                    'transactions/invoices/invoice_items/commissions_items/[0-9]{5}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/'
                     '[0-9]{5}\.xml$',
                     filename):
                 xml_comm_items.append(Citem.from_xml(filename))
@@ -226,32 +230,30 @@ def sherees_comm_items_year_month(session, args):
     return xml_comm_items
 
 
-def sherees_comm_payments_year_month(session, args):
-    m = int(args.month)
-    y = int(args.year)
+def employee_comm_payments_year_month(session, employee, datadir, year, month, cache):
+    m = int(month)
+    y = int(year)
     if m < 12:
         nexty = y
         nextm = m + 1
     else:
         nexty = int(y) + 1
         nextm = 1
-
-    if not args.cache:
+    if not cache:
         return session.query(CommPayment) \
-            .filter(CommPayment.employee == sa_sheree(session)) \
+            .filter(CommPayment.employee == employee) \
             .filter(CommPayment.date >= '%s-%s-01' % (y, m)) \
             .filter(CommPayment.date < '%s-%s-01' % (nexty, nextm)) \
             .filter(CommPayment.voided == False) \
-            .order_by(CommPayment.date)
+            .order_by(CommPayment.date).all()
     else:
         cps = []
-        dirname = os.path.join(args.datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments',
+        dirname = os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments',
                                str(y),
                                str(m).zfill(2))
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             for fn in fileList:
                 fullname = os.path.join(dirName, fn)
-
                 doc = CommPayment.from_xml(fullname)
                 amount = float(doc.findall('amount')[0].text)
                 check_number = doc.findall('check_number')[0].text
@@ -268,8 +270,7 @@ def sa_sheree(session):
     return sheree's sa object
     """
     return \
-        session.query(Employee).filter_by(firstname='sheree', salesforce=True)[
-            0]
+        session.query(Employee).filter_by(firstname='sheree', salesforce=True)[0]
 
 
 start = dt(year=2009, month=6, day=1)
@@ -299,7 +300,7 @@ def comm_months(start=start, end=end):
     return year_months
 
 
-def sherees_comm_path_year_month(session, args):
+def employee_comm_path_year_month(session, employee, datadir, year, month):
     """
     path to comms directory per year per month
     Args:
@@ -309,28 +310,23 @@ def sherees_comm_path_year_month(session, args):
     Returns:
 
     """
-    sheree = sa_sheree(session)
-    return os.path.join(args.datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items', str(sheree.id),
-                        str(args.year),
-                        str(args.month).zfill(2))
+    return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items', str(employee.id),
+                        str(year), str(month).zfill(2))
 
 
-def db_date_dictionary_comm_item(session, args):
+def db_date_dictionary_comm_item(session, datadir):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
     :param data_dir:
     :return:
     """
-
     citem_dict = {}
     rel_dir_set = set()
     citems = session.query(Citem).order_by(Citem.id)
-
     for comm_item in citems:
-        f, rel_dir = full_dated_comm_item_xml_path(args.datadir, comm_item)
-        rel_dir_set.add(rel_dir)
+        f, _ = full_dated_obj_xml_path(commissions_item_dir(datadir, comm_item), comm_item)
+        rel_dir_set.add(os.path.dirname(f.replace(datadir, '')[1:len(f.replace(datadir, ''))]))
         citem_dict[f] = comm_item.last_sync_time
-
     return citem_dict, citems, rel_dir_set
 
 
@@ -364,12 +360,10 @@ def sync_comm_item(session, data_dir, comm_item):
     """
     writes xml file for commissions item
     """
-    f, rel_dir = full_dated_comm_item_xml_path(data_dir, comm_item)
+    f = os.path.join(data_dir, '%s.xml' % str(comm_item.id).zfill(5))
     with open(f, 'w') as fh:
         fh.write(ET.tostring(comm_item.to_xml()))
-
-    session.query(Citem).filter_by(id=comm_item.id).update(
-        {"last_sync_time": dt.now()})
+    session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
 
@@ -394,23 +388,21 @@ def verify_comm_dirs_ready(data_dir, rel_dir_set):
         mkdirs(dest)
 
 
-def cache_comm_items(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
+def cache_comm_items(session, datadir):
     # Make query, assemble lists
-    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(
-        session, args)
-
-    #
-    # Make sure destination directories exist
-    #
-    verify_comm_dirs_ready(args.datadir, rel_dir_set)
+    disk_dict = directory_date_dictionary(commissions_items_dir(datadir))
+    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, commissions_items_dir(datadir))
     to_sync = []
     for comm_item in citems:
+        #
+        # Make sure destination directory if it doesn't exist
+        #
+        comm_item_dir = commissions_item_dir(datadir, comm_item)
         if comm_item.amount > 0:
-            file = full_dated_comm_item_xml_path(args.datadir, comm_item)
+            verify_dirs_ready(comm_item_dir, [comm_item_dir])
+            file = os.path.join(comm_item_dir, '%s.xml' % str(comm_item.id).zfill(5))
             # add to sync list if comm item not on disk
-            if file[0] not in disk_dict:
+            if file not in disk_dict:
                 to_sync.append(comm_item)
             else:
                 # check the rest of the business rules for syncing
@@ -419,27 +411,26 @@ def cache_comm_items(session, args):
                     to_sync.append(comm_item)
                 if comm_item.modified_date > comm_item.last_sync_time:
                     to_sync.append(comm_item)
-
     # Write out xml
     for comm_item in to_sync:
-        sync_comm_item(session, args.datadir, comm_item)
+        sync_comm_item(session, commissions_item_dir(datadir, comm_item), comm_item)
 
 
-def cache_comm_payments(session, args):
+def cache_comm_payments(session, datadir, cache):
     for cm in comm_months(end=dt.now()):
-        args.month = cm['month']
-        args.year = cm['year']
-        payments, commissions = \
-            sherees_commissions_transactions_year_month(session, args)
-
-        for pay in payments:
-            if pay.amount > 0:
-                filename = full_dated_obj_xml_path(args.datadir, pay)
-                if not os.path.isdir(os.path.dirname(filename[0])):
-                    mkdirs(os.path.dirname(filename[0]))
-                with open(filename[0], 'w') as fh:
-                    fh.write(ET.tostring(pay.to_xml()))
-                print('%s written' % filename[0])
+        month = cm['month']
+        year = cm['year']
+        for employee in session.query(Employee).filter(Employee.salesforce == 1, Employee.active == 1):
+            payments, commissions = \
+                employee_commissions_transactions_year_month(session, employee, datadir, year, month, cache)
+            for pay in payments:
+                if pay.amount > 0:
+                    filename = full_non_dated_xml_path(datadir, pay)
+                    if not os.path.isdir(os.path.dirname(filename)):
+                        mkdirs(os.path.dirname(filename))
+                    with open(filename, 'w') as fh:
+                        fh.write(ET.tostring(pay.to_xml()))
+                    print('%s written' % filename)
 
 
 def comm_item_xml_to_dict(citem):
@@ -466,16 +457,23 @@ def comm_item_xml_to_sa(citem):
                  employee_id=ci_dict['employee_id'], voided=ci_dict['voided'])
 
 
-def year_month_statement(session, args):
+def employee_year_month_statement(session, employee, datadir, year, month, cache):
+    """
+    returns employee/salespersons commissison for particular year/month either from db or xml tree
+    :param session:
+    :param employee:
+    :param datadir:
+    :param year:
+    :param month:
+    :param cache:
+    :return:
+    """
     sum = 0
     res = []
-
-    payments, commissions = \
-        sherees_commissions_transactions_year_month(session, args)
+    payments, commissions = employee_commissions_transactions_year_month(session, employee, datadir, year, month, cache)
     for payment in payments:
         res.append({
-            'id': payment.check_number, 'date': payment.date,
-            'description': payment.description,
+            'id': payment.check_number, 'date': payment.date, 'description': payment.description,
             'amount': -payment.amount, 'employee_id': payment.employee_id})
         sum -= payment.amount
     for citem in commissions:
@@ -489,7 +487,6 @@ def year_month_statement(session, args):
                 'employee_id': ci.employee_id,
             })
             sum += ci.amount
-
     return sum, res
 
 
@@ -628,7 +625,7 @@ def invoice_to_xml(inv):
 
 
 def cache_invoice(session, args, inv):
-    f, rel_dir = full_dated_obj_xml_path(args.datadir, inv)
+    f, rel_dir = full_non_dated_xml_path(transactions_invoices_dir(args.datadir), inv)
     full_path = os.path.join(args.datadir, rel_dir)
     if not os.path.isdir(full_path):
         os.makedirs(full_path)
@@ -649,19 +646,14 @@ def cache_invoices_items(session, args):
             f = full_non_dated_xml_path(args.datadir, iitem)
             with open(f, 'w') as fh:
                 fh.write(iitem_xml_pretty_str(iitem))
-
             print('%s written' % f)
-
     iex = iitem_exclude(session, args)
-
     doc = ET.Element('excluded-invoice-items')
     for ix in iex:
         ET.SubElement(doc, 'hash').text = str(ix)
-
     ex_inv_filename = os.path.join(args.datadir, 'excludes.xml')
     with open(ex_inv_filename, 'w') as fh:
         fh.write(ET.tostring(doc))
-
     print('%s written' % ex_inv_filename)
 
 
@@ -687,17 +679,16 @@ def invoices_items(session):
                                 iitem.invoice.contract.employee.lastname,
                                 iitem.description)
                         })
-
     return iitems
 
 
 def cached_comm_items(session, args):
     citems = []
     for cm in comm_months(end=dt.now()):
-
         args.month = cm['month']
         args.year = cm['year']
-        total, res = year_month_statement(session, args)
+        total, res = employee_year_month_statement(session, args.employee, args.datadir, args.year, args.month,
+                                                   args.cache)
         for ci in res:
             try:
                 if ci.description not in citems and ci.description.lower == 'overtime':
@@ -710,7 +701,6 @@ def cached_comm_items(session, args):
 def iitem_exclude(session, args):
     iitems = invoices_items(session)
     citems = cached_comm_items(session, args)
-
     ex = {}
     for i in iitems:
         if i not in citems:
@@ -748,7 +738,7 @@ def invoice_report_month_year(args):
             iitemdocs_parsed = []
             for iitem_id_ele in iitemsdoc[0].findall('invoice-item'):
                 iitemf = os.path.join(inv_items_dir,
-                                      str(iitem_id_ele.text).zfill(5) + '.xml')
+                                      str(iitem_id_ele.text).zfill(6) + '.xml')
                 iitemdoc = ET.parse(iitemf).getroot()
                 iitemdocs_parsed.append(iitemdoc)
                 quantity = float(iitemdoc.findall('quantity')[0].text)
@@ -781,7 +771,7 @@ def invoice_report_month_year(args):
                         else:
                             res += '\n\hspace{20mm}%s cost: \char36 %.2f quantity: %s amount: \char36 %.2f' \
                                    ' \\newline \n' % (
-                                description, cost, quantity, amount)
+                                       description, cost, quantity, amount)
 
     return res
 
@@ -818,10 +808,10 @@ def inv_report(session, args):
 
 
 def delete_old_voided_invoices(session, args):
-
-    vinvs = session.query(Invoice).filter(and_(Invoice.voided == 1, Invoice.period_end < dt.now() - td(days=args.days_back)))
+    vinvs = session.query(Invoice).filter(
+        and_(Invoice.voided == 1, Invoice.period_end < dt.now() - td(days=args.days_back)))
     for inv in vinvs:
         pass
         # fixme: reinstate with commitems migration
-        #cache_invoice(session, args, inv)
-        #session.delete(inv)
+        # cache_invoice(session, args, inv)
+        # session.delete(inv)

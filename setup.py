@@ -114,6 +114,7 @@ setup(
             'rrg-cache-clients-checks=rrg.scripts.cache_clients_checks:cache_checks',
             'rrg-cache-clients=rrg.scripts.cache_clients:cache_clients',
             'rrg-cache-clients-memos=rrg.scripts.cache_client_memos:cache_client_memos',
+            'rrg-cache-clients-managers=rrg.scripts.cache_clients_managers:cache_client_managers',
             'rrg-cache-employees=rrg.scripts.cache_employees:cache_employees',
             'rrg-cached-employees=rrg.scripts.cached_employees:cached_employees',
             'rrg-cached-employee=rrg.scripts.cached_employee:cached_employee',

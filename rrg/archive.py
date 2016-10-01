@@ -4,12 +4,12 @@ from tabulate import tabulate
 import xml.etree.ElementTree as ET
 import logging
 
-from rrg.billing import employee_payment_fullpath
-from rrg.helpers import xml_timestamp_to_mdy
+from rrg.billing import full_non_dated_xml_id_path
 from rrg.helpers import emp_xml_doc_to_dict
 from rrg.helpers import emp_memo_xml_doc_to_dict
 from rrg.helpers import emp_contract_xml_doc_to_dict
 from rrg.helpers import emp_payment_xml_doc_to_dict
+from rrg.utils import employees_payments_dir
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -79,7 +79,7 @@ def employee(args):
                                 emp_dict['contracts'].append(emp_contract_xml_doc_to_dict(ele))
                         for eles in doc.findall('employee-payments'):
                             for ele in eles.findall('employee-payment'):
-                                _ = employee_payment_fullpath(args.datadir, ele[0].text)
+                                _ = full_non_dated_xml_id_path(employees_payments_dir(args.datadir), ele[0].text)
                                 doc = ET.parse(_).getroot()
                                 emp_dict['payments'].append(emp_payment_xml_doc_to_dict(doc))
                         break

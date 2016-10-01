@@ -1,6 +1,8 @@
 import argparse
-from rrg.billing import cache_employees_payments as routine
+from rrg.billing import cache_non_date_parsed as routine
+from rrg.models import EmployeePayment
 from rrg.models import session_maker
+from rrg.utils import employees_payments_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Employees Payments')
 
@@ -22,6 +24,6 @@ def cache_employees_payments():
     args = parser.parse_args()
     session = session_maker(args)
 
-    print('Caching Employees-Payments %s into %s' % (args.db, args.datadir))
-    routine(session, args)
+    print('Caching Employees-Payments %s into %s' % (args.db, employees_payments_dir(args.datadir)))
+    routine(session, employees_payments_dir(args.datadir), EmployeePayment)
     session.commit()

@@ -10,12 +10,24 @@ from rrg.models import Iitem
 from rrg.models import Client
 from rrg.models import ClientCheck
 from rrg.models import ClientMemo
+from rrg.models import ClientManager
 from rrg.models import Employee
 from rrg.models import EmployeeMemo
 from rrg.models import EmployeePayment
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.utils import directory_date_dictionary
+from rrg.utils import transactions_invoices_dir
+from rrg.utils import clients_dir
+from rrg.utils import clients_managers_dir
+from rrg.utils import clients_memos_dir
+from rrg.utils import clients_checks_dir
+from rrg.utils import employees_dir
+from rrg.utils import commissions_payment_dir
+from rrg.utils import contracts_items_dir
+from rrg.utils import contracts_dir
+from rrg.utils import employees_memos_dir
+from rrg.utils import employees_payments_dir
 
 
 def full_dated_obj_xml_path(data_dir, obj):
@@ -23,17 +35,12 @@ def full_dated_obj_xml_path(data_dir, obj):
     return os.path.join(data_dir, rel_dir, '%s.xml' % str(obj.id).zfill(5)), rel_dir
 
 
-def full_dated_comm_item_xml_path(data_dir, obj):
-    rel_dir = os.path.join(str(obj.employee_id), str(obj.date.year), str(obj.date.month).zfill(2))
-    return os.path.join(data_dir, rel_dir, '%s.xml' % str(obj.id).zfill(5)), rel_dir
-
-
 def full_non_dated_xml_path(data_dir, obj):
     return os.path.join(data_dir, '%s.xml' % str(obj.id).zfill(5))
 
 
-def employee_payment_fullpath(data_dir, employee_payment_id):
-    return os.path.join(data_dir, 'payments', '%s.xml' % str(employee_payment_id).zfill(5))
+def full_non_dated_xml_id_path(data_dir, id):
+    return os.path.join(data_dir, '%s.xml' % str(id).zfill(5))
 
 
 def sync(session, data_dir, ep, model):
@@ -47,18 +54,18 @@ def sync(session, data_dir, ep, model):
     print('%s written' % f)
 
 
-def db_date_dictionary_model(session, args, model):
+def db_date_dictionary_model(session, model, destination_dir):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
     :param data_dir:
     :return:
     """
     em_dict = {}
-    contract_items = session.query(model)
-    for e in contract_items:
-        f = full_non_dated_xml_path(args.datadir, e)
+    m_items = session.query(model)
+    for e in m_items:
+        f = full_non_dated_xml_path(destination_dir, e)
         em_dict[f] = e.last_sync_time
-    return em_dict, contract_items
+    return em_dict, m_items
 
 
 def verify_dirs_ready(data_dir, rel_dir_set):
@@ -70,272 +77,28 @@ def verify_dirs_ready(data_dir, rel_dir_set):
         mkdirs(dest)
 
 
-def cache_invoices(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
+def cache_non_date_parsed(session, datadir, model):
+    disk_dict = directory_date_dictionary(datadir)
     # Make query, assemble lists
-    date_dict, invoices = db_date_dictionary_model(session, args, Invoice)
-
+    date_dict, items = db_date_dictionary_model(session, model, datadir)
     #
     # Make sure destination directories exist
     #
-    verify_dirs_ready(args.datadir, [args.datadir])
-
+    verify_dirs_ready(datadir, [datadir])
     to_sync = []
-    for inv in invoices:
-        file = full_non_dated_xml_path(args.datadir, inv)
+    for item in items:
+        file = full_non_dated_xml_path(datadir, item)
         # add to sync list if invoice not on disk
         if file not in disk_dict:
-            to_sync.append(inv)
+            to_sync.append(item)
         else:
             # check the rest of the business rules for syncing
             # no time stamps, timestamps out of sync
-            if inv.last_sync_time is None or inv.modified_date is None:
-                to_sync.append(inv)
+            if item.last_sync_time is None or item.modified_date is None:
+                to_sync.append(item)
                 continue
-            if inv.modified_date > inv.last_sync_time:
-                to_sync.append(inv)
-
+            if item.modified_date > item.last_sync_time:
+                to_sync.append(item)
     # Write out xml
-    for comm_item in to_sync:
-        sync(session, args.datadir, comm_item, Invoice)
-
-
-def cache_invoices_items(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, inv_items = db_date_dictionary_model(session, args, Iitem)
-
-    to_sync = []
-    for inv_item in inv_items:
-        file = full_non_dated_xml_path(args.datadir, inv_item)
-        # add to sync list if invoice not on disk
-        if file not in disk_dict:
-            to_sync.append(inv_item)
-        else:
-            # check the rest of the business rules for syncing
-            # no time stamps, timestamps out of sync
-            if inv_item.last_sync_time is None or inv_item.modified_date is None:
-                to_sync.append(inv_item)
-                continue
-            if inv_item.modified_date > inv_item.last_sync_time:
-                to_sync.append(inv_item)
-
-    # Write out xml
-    for comm_item in to_sync:
-        sync(session, args.datadir, comm_item, Iitem)
-
-
-def cache_clients_checks(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, client_checks = db_date_dictionary_model(session, args, ClientCheck)
-
-    to_sync = []
-    for check in client_checks:
-        file = full_non_dated_xml_path(args.datadir, check)
-        # add to sync list if invoice not on disk
-        if file not in disk_dict:
-            to_sync.append(check)
-        else:
-            # check the rest of the business rules for syncing
-            # no time stamps, timestamps out of sync
-            if check.last_sync_time is None or check.modified_date is None:
-                to_sync.append(check)
-                continue
-            if check.modified_date > check.last_sync_time:
-                to_sync.append(check)
-
-    # Write out xml
-    for comm_item in to_sync:
-        sync(session, args.datadir, comm_item, ClientCheck)
-
-
-def cache_clients(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, clients = db_date_dictionary_model(session, args, Client)
-
-    to_sync = []
-    for client in clients:
-        file = full_non_dated_xml_path(args.datadir, client)
-        # add to sync list if invoice not on disk
-        if file not in disk_dict:
-            to_sync.append(client)
-        else:
-            # check the rest of the business rules for syncing
-            # no time stamps, timestamps out of sync
-            if client.last_sync_time is None or client.modified_date is None:
-                to_sync.append(client)
-                continue
-            if client.modified_date > client.last_sync_time:
-                to_sync.append(client)
-
-    # Write out xml
-    for comm_item in to_sync:
-        sync(session, args.datadir, comm_item, Client)
-
-
-def cache_clients_memos(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, client_memos = db_date_dictionary_model(session, args, ClientMemo)
-
-    to_sync = []
-    for check in client_memos:
-        file = full_non_dated_xml_path(args.datadir, check)
-        # add to sync list if invoice not on disk
-        if file not in disk_dict:
-            to_sync.append(check)
-        else:
-            # check the rest of the business rules for syncing
-            # no time stamps, timestamps out of sync
-            if check.last_sync_time is None or check.modified_date is None:
-                to_sync.append(check)
-                continue
-            if check.modified_date > check.last_sync_time:
-                to_sync.append(check)
-
-    # Write out xml
-    for comm_item in to_sync:
-        sync(session, args.datadir, comm_item, ClientMemo)
-
-
-def cache_invoices_payments(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, invoices_payments = db_date_dictionary_model(session, args, InvoicePayment)
-
-    to_sync = []
-    for ipay in invoices_payments:
-        file = full_non_dated_xml_path(args.datadir, ipay)
-        # add to sync list if invoice not on disk
-        if file not in disk_dict:
-            to_sync.append(ipay)
-        else:
-            if ipay.modified_date > ipay.last_sync_time:
-                to_sync.append(ipay)
-
-    # Write out xml
-    for comm_item in to_sync:
-        sync(session, args.datadir, comm_item, InvoicePayment)
-
-
-def cache_employees(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, employees = db_date_dictionary_model(session, args, Employee)
-
-    to_sync = []
-    for e in employees:
-        filename = full_non_dated_xml_path(args.datadir, e)
-        # add to sync list if invoice not on disk
-        if filename not in disk_dict:
-            to_sync.append(e)
-        else:
-            if not e.modified_date or not e.last_sync_time:
-                to_sync.append(e)
-            elif e.modified_date > e.last_sync_time:
-                to_sync.append(e)
-
-    # Write out xml
-    for emp in to_sync:
-        sync(session, args.datadir, emp, Employee)
-
-
-def cache_employees_payments(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, employees_payments = db_date_dictionary_model(session, args, EmployeePayment)
-
-    to_sync = []
-    for ep in employees_payments:
-        filename = full_non_dated_xml_path(args.datadir, ep)
-        # add to sync list if invoice not on disk
-        if filename not in disk_dict:
-            to_sync.append(ep)
-        else:
-            if not ep.modified_date or not ep.last_sync_time:
-                to_sync.append(ep)
-            elif ep.modified_date > dt.date(ep.last_sync_time):
-                to_sync.append(ep)
-
-    # Write out xml
-    for ep in to_sync:
-        sync(session, args.datadir, ep, EmployeePayment)
-
-
-def cache_employees_memos(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, employees_memos = db_date_dictionary_model(session, args, EmployeeMemo)
-
-    to_sync = []
-    for ep in employees_memos:
-        filename = full_non_dated_xml_path(args.datadir, ep)
-        # add to sync list if invoice not on disk
-        if filename not in disk_dict:
-            to_sync.append(ep)
-        else:
-            if not ep.modified_date or not ep.last_sync_time:
-                to_sync.append(ep)
-            elif ep.modified_date > ep.last_sync_time:
-                to_sync.append(ep)
-
-    # Write out xml
-    for ep in to_sync:
-        sync(session, args.datadir, ep, EmployeeMemo)
-
-
-def cache_contracts(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, contracts = db_date_dictionary_model(session, args, Contract)
-
-    to_sync = []
-    for ep in contracts:
-        filename = full_non_dated_xml_path(args.datadir, ep)
-        # add to sync list if invoice not on disk
-        if filename not in disk_dict:
-            to_sync.append(ep)
-        else:
-            if not ep.modified_date or not ep.last_sync_time:
-                to_sync.append(ep)
-            elif ep.modified_date > ep.last_sync_time:
-                to_sync.append(ep)
-
-    # Write out xml
-    for ep in to_sync:
-        sync(session, args.datadir, ep, Contract)
-
-
-def cache_contract_items(session, args):
-    disk_dict = directory_date_dictionary(args.datadir)
-
-    # Make query, assemble lists
-    date_dict, contract_items = db_date_dictionary_model(session, args, ContractItem)
-
-    to_sync = []
-    for ep in contract_items:
-        filename = full_non_dated_xml_path(args.datadir, ep)
-        # add to sync list if invoice not on disk
-        if filename not in disk_dict:
-            to_sync.append(ep)
-        else:
-            if not ep.modified_date or not ep.last_sync_time:
-                to_sync.append(ep)
-            elif ep.modified_date > ep.last_sync_time:
-                to_sync.append(ep)
-
-    # Write out xml
-    for ep in to_sync:
-        sync(session, args.datadir, ep, ContractItem)
+    for item in to_sync:
+        sync(session, datadir, item, model)
