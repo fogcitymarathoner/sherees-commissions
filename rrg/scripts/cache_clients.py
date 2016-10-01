@@ -25,7 +25,6 @@ def cache_clients():
     """
     args = parser.parse_args()
     session = session_maker(args)
-
     print('Caching Clients %s into %s' % (args.db, clients_dir(args.datadir)))
-    routine(session, args.datadir)
+    routine(session, args.datadir, Client)
     session.commit()
