@@ -6,12 +6,9 @@ from rrg.utils import transactions_invoices_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Invoices')
 
-parser.add_argument('project', help='project name',
-                    choices=['rrg', 'biz'])
+parser.add_argument('project', help='project name', choices=['rrg', 'biz'])
 parser.add_argument(
-    '--datadir', required=True, help='datadir dir with invoices',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
-
+    '--datadir', required=True, help='datadir dir with invoices', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
 parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
 parser.add_argument('--db', required=True, help='d', default='rrg')
@@ -26,5 +23,5 @@ def cache_invoices():
     args = parser.parse_args()
     session = session_maker(args)
     print('Caching Invoices %s into %s' % (args.db, transactions_invoices_dir(args.datadir)))
-    cache_routine(session, args.datadir, Invoice)
+    cache_routine(session, transactions_invoices_dir(args.datadir), Invoice)
     session.commit()
