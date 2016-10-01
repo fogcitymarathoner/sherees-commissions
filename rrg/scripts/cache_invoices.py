@@ -1,6 +1,7 @@
 import argparse
 from rrg.billing import cache_non_date_parsed as cache_routine
 from rrg.models import session_maker
+from rrg.models import Invoice
 from rrg.utils import transactions_invoices_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Invoices')
@@ -25,5 +26,5 @@ def cache_invoices():
     args = parser.parse_args()
     session = session_maker(args)
     print('Caching Invoices %s into %s' % (args.db, transactions_invoices_dir(args.datadir)))
-    cache_routine(session, args.datadir)
+    cache_routine(session, args.datadir, Invoice)
     session.commit()
