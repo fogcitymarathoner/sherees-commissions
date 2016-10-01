@@ -10,6 +10,11 @@ from rrg.helpers import emp_memo_xml_doc_to_dict
 from rrg.helpers import emp_contract_xml_doc_to_dict
 from rrg.helpers import emp_payment_xml_doc_to_dict
 from rrg.utils import employees_payments_dir
+from rrg.utils import clients_dir
+from rrg.utils import transactions_invoices_dir
+from rrg.utils import contracts_items_dir
+from rrg.utils import contracts_dir
+from rrg.utils import employees_dir
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -172,10 +177,12 @@ def contract_attach_collected_contract_items(citem_doc_list):
     return isub_ele
 
 
-def cached_employees_collect_contracts(args):
+def cached_employees_collect_contracts(datadir):
+    employees_directory = employees_dir(datadir)
+    contracts_directory = contracts_dir(datadir)
     conttractsdocs = []
-    for iroot, idirs, ifiles in os.walk(args.contracts_dir):
-        if iroot == args.contracts_dir:
+    for iroot, idirs, ifiles in os.walk(contracts_directory):
+        if iroot == contracts_directory:
             print('Scanning %s for contracts' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -183,9 +190,8 @@ def cached_employees_collect_contracts(args):
                     invdoc = ET.parse(fullpath).getroot()
                     conttractsdocs.append(invdoc)
     print('%s contracts found' % len(conttractsdocs))
-
-    for root, dirs, files in os.walk(args.datadir):
-        if root == args.datadir:
+    for root, dirs, files in os.walk(employees_directory):
+        if root == employees_directory:
             for f in files:
                 if re.search(pat, f):
                     fullpath = os.path.join(root, f)
@@ -210,9 +216,11 @@ def cached_employees_collect_contracts(args):
                 print('wrote %s' % fullpath)
 
 
-def cached_clients_collect_contracts(args):
+def cached_clients_collect_contracts(datadir):
+    contracts_directory = contracts_dir(datadir)
+    clients_dirirectory = clients_dir(datadir)
     conttractsdocs = []
-    for iroot, idirs, ifiles in os.walk(args.contracts_dir):
+    for iroot, idirs, ifiles in os.walk(contracts_directory):
         if iroot == args.contracts_dir:
             print('Scanning %s for contracts' % iroot)
             for invf in ifiles:
@@ -221,16 +229,14 @@ def cached_clients_collect_contracts(args):
                     invdoc = ET.parse(fullpath).getroot()
                     conttractsdocs.append(invdoc)
     print('%s contracts found' % len(conttractsdocs))
-
     # loop through clients, update contracts subdoc
-    for root, dirs, files in os.walk(args.datadir):
-        if root == args.datadir:
+    for root, dirs, files in os.walk(clients_dirirectory):
+        if root == clients_dirirectory:
             for f in files:
                 if re.search(pat, f):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
                     print('Assembling client "%s"' % doc.findall('name')[0].text)
-
                     contracts_subele = doc.findall('contracts')
                     doc.remove(contracts_subele[0])
                     client_id = doc.findall('id')[0].text
@@ -242,16 +248,18 @@ def cached_clients_collect_contracts(args):
                     print('%s contracts found to add' % len(attach_contracts))
                     cdoc = doc_attach_collected_contracts(attach_contracts)
                     doc.append(cdoc)
-
                 with open(fullpath, 'w') as fh:
                     fh.write(ET.tostring(doc))
                 print('wrote %s' % fullpath)
 
 
-def cached_contracts_collect_invoices_and_items(args):
+def cached_contracts_collect_invoices_and_items(datadir):
+    invoices_directory = transactions_invoices_dir(datadir)
+    contract_items_directory = contracts_items_dir(datadir)
+    contracts_directory = contracts_dir(datadir)
     invdocs = []
-    for iroot, idirs, ifiles in os.walk(args.invoices_dir):
-        if iroot == args.invoices_dir:
+    for iroot, idirs, ifiles in os.walk(invoices_directory):
+        if iroot == invoices_directory:
             print('Scanning %s for invoices' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -260,8 +268,8 @@ def cached_contracts_collect_invoices_and_items(args):
                     invdocs.append(invdoc)
     print('%s invoices found' % len(invdocs))
     citemsdocs = []
-    for iroot, idirs, ifiles in os.walk(args.contract_items_dir):
-        if iroot == args.contract_items_dir:
+    for iroot, idirs, ifiles in os.walk(contract_items_directory):
+        if iroot == contract_items_directory:
             print('Scanning %s for contract items' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
@@ -269,8 +277,8 @@ def cached_contracts_collect_invoices_and_items(args):
                     citemdoc = ET.parse(fullpath).getroot()
                     citemsdocs.append(citemdoc)
     print('%s contract items found' % len(citemsdocs))
-    for root, dirs, files in os.walk(args.datadir):
-        if root == args.datadir:
+    for root, dirs, files in os.walk(contracts_directory):
+        if root == contracts_directory:
             for f in files:
                 if re.search(pat, f):
                     fullpath = os.path.join(root, f)

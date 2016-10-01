@@ -1,17 +1,9 @@
 import argparse
 from rrg.archive import cached_employees_collect_contracts as routine
-
+from rrg.utils import employees_dir
 parser = argparse.ArgumentParser(description='RRG Assemble Employees Cache')
-
 parser.add_argument(
-    '--datadir', required=True,
-    help='employees dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/employees/')
-
-parser.add_argument(
-    '--contracts-dir', required=True,
-    help='contracts dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/contracts/')
+    '--datadir', required=True, help='data root directory', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
 def assemble_employees_cache():
@@ -21,6 +13,5 @@ def assemble_employees_cache():
     :return:
     """
     args = parser.parse_args()
-
-    print('Assembling Employees in %s' % args.datadir)
-    routine(args)
+    print('Assembling Employees in %s' % employees_dir(args.datadir))
+    routine(args.datadir)
