@@ -221,7 +221,7 @@ def cached_clients_collect_contracts(datadir):
     clients_dirirectory = clients_dir(datadir)
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(contracts_directory):
-        if iroot == args.contracts_dir:
+        if iroot == contracts_directory:
             print('Scanning %s for contracts' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):

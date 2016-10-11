@@ -5,8 +5,7 @@ from rrg.utils import commissions_items_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Commissions Items')
 
-parser.add_argument('project', help='project name',
-                    choices=['rrg', 'biz'])
+parser.add_argument('project', help='project name', choices=['rrg', 'biz'])
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with commissions items',

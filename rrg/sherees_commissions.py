@@ -517,24 +517,20 @@ def remaining_payroll(session):
 def payroll_due_report(session, args):
     """
     """
-
     sherees_paychecks_due, iitems, total = remaining_payroll(session)
     res = dict(id=[], date=[], description=[], amount=[])
     res['id'] = [i.id for i in sherees_paychecks_due]
     res['date'] = [i.date for i in sherees_paychecks_due]
     res['description'] = [i.period_start for i in sherees_paychecks_due]
-
     for pc in sherees_paychecks_due:
         pay = 0
         for i in pc.invoice_items:
             pay += i.quantity * i.cost
         res['amount'].append(pay)
-
     res['id'].append('')
     res['date'].append('')
     res['description'].append('Total Due')
     res['amount'].append(total)
-
     if args.format == 'plain':
         return tabulate(res, headers='keys', tablefmt='plain')
     elif args.format == 'latex':
@@ -545,8 +541,7 @@ def payroll_due_report(session, args):
 
 
 def sherees_contracts_of_interest(session):
-    contract_citems = session.query(ContractItemCommItem). \
-        filter(ContractItemCommItem.employee_id == 1025)
+    contract_citems = session.query(ContractItemCommItem).filter(ContractItemCommItem.employee_id == 1025)
     contracts = []
     for ci in contract_citems:
         if ci.contract_item.contract not in contracts:
