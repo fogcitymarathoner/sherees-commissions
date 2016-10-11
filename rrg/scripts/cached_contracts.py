@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser(description='RRG Archived Contracts')
 
 parser.add_argument(
     '--datadir', required=True,
-    help='datadir dir with ar.xml',
+    help='datadir root',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
@@ -16,6 +16,5 @@ def cached_contracts():
     :return:
     """
     args = parser.parse_args()
-
     print('Archived Contracts in %s' % args.datadir)
-    routine(args)
+    routine(args.datadir)

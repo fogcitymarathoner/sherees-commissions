@@ -19,4 +19,4 @@ def cached_contract():
     args = parser.parse_args()
 
     print('Archived Contract in %s' % args.datadir)
-    routine(args)
+    routine(args,datadir, args.id)
