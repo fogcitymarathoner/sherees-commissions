@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description='RRG Archived Employees')
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/employees/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
 def cached_employees():
@@ -18,4 +18,4 @@ def cached_employees():
     args = parser.parse_args()
 
     print('Archived Employees in %s' % args.datadir)
-    routine(args)
+    routine(args.datadir)

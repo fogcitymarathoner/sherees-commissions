@@ -24,13 +24,14 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 pat = '[0-9]{5}\.[xX][Mm][Ll]$'
 
 
-def employees(args):
+def employees(datadir):
+    employees_directory = employees_dir(datadir)
     ids = []
     firsts = []
     lasts = []
     i = 1
-    for root, dirs, files in os.walk(args.datadir):
-        if root == args.datadir:
+    for root, dirs, files in os.walk(employees_directory):
+        if root == employees_directory:
             print('root="%s"' % root)
             for f in files:
                 if re.search(pat, f):
