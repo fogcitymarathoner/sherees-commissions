@@ -92,14 +92,15 @@ def employee(args):
     return emp_dict
 
 
-def contracts(args):
+def contracts(datadir):
+    contracts_directory = contracts_dir(datadir)
     ids = []
     titles = []
     clients = []
     employees = []
     i = 1
-    for root, dirs, files in os.walk(args.datadir):
-        if root == args.datadir:
+    for root, dirs, files in os.walk(contracts_directory):
+        if root == contracts_directory:
             print('root="%s"' % root)
             for f in files:
                 if re.search(pat, f):
@@ -122,14 +123,15 @@ def contracts(args):
     print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))
 
 
-def contract(args):
+def contract(datadir, id):
+    contracts_directory = contracts_dir(datadir)
     i = 1
-    for root, dirs, files in os.walk(args.datadir):
-        if root == args.datadir:
+    for root, dirs, files in os.walk(contracts_directory):
+        if root == contracts_directory:
             print('root="%s"' % root)
             for f in files:
                 if re.search(pat, f):
-                    if i == args.id:
+                    if i == id:
                         fullpath = os.path.join(root, f)
                         doc = ET.parse(fullpath).getroot()
                         title = doc.findall('title')[0].text
@@ -197,7 +199,8 @@ def cached_employees_collect_contracts(datadir):
                     fullpath = os.path.join(root, f)
                     doc = ET.parse(fullpath).getroot()
                     print(
-                    'Assembling employee "%s %s"' % (doc.findall('firstname')[0].text, doc.findall('lastname')[0].text))
+                        'Assembling employee "%s %s"' % (
+                        doc.findall('firstname')[0].text, doc.findall('lastname')[0].text))
 
                     contracts_subele = doc.findall('contracts')
                     doc.remove(contracts_subele[0])

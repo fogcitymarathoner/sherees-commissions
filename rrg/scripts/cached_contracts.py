@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description='RRG Archived Contracts')
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/contracts/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
 def cached_contracts():
