@@ -52,6 +52,7 @@ def emp_xml_doc_to_dict(i, doc, emp_dict):
     emp_dict['startdate'] = xml_timestamp_to_mdy(doc, 'startdate')
     emp_dict['enddate'] = xml_timestamp_to_mdy(doc, 'enddate')
     emp_dict['dob'] = xml_timestamp_to_mdy(doc, 'dob')
+    emp_dict['salesforce'] = doc.findall('salesforce')[0].text
     return emp_dict
 
 

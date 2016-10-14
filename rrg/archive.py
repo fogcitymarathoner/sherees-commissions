@@ -66,6 +66,7 @@ def employee(id, datadir):
         'zip': None,
         'startdate': None,
         'enddate': None,
+        'salesforce': False,
         'dob': None,
         'contracts': [],
         'memos': [],

@@ -32,7 +32,7 @@ def monthly_detail():
     print(monthy_statement_ym_header % (args.year, args.month))
     employee_dict = archived_employee(args.id, args.datadir)
     if employee_dict['salesforce']:
-        employee = session.query(Employee).filter(Employee.id == employee_dict['id'])
+        employee = session.query(Employee).filter(Employee.id == employee_dict['id']).first()
         total, res = employee_year_month_statement(session, employee, args.datadir, args.year, args.month, args.cache)
         print('Total %s ' % total)
         for i in res:
