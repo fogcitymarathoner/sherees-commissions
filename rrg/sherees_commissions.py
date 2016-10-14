@@ -422,7 +422,7 @@ def cache_comm_payments(session, datadir, cache):
                 employee_commissions_transactions_year_month(session, employee, datadir, year, month, cache)
             for pay in payments:
                 if pay.amount > 0:
-                    filename = full_non_dated_xml_path(datadir, pay)
+                    filename = full_dated_obj_xml_path(datadir, pay)
                     if not os.path.isdir(os.path.dirname(filename)):
                         mkdirs(os.path.dirname(filename))
                     with open(filename, 'w') as fh:
