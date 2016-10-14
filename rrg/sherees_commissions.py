@@ -149,7 +149,7 @@ def sherees_commissions_report(session, args):
         quit()
     balance = 0
     report = str()
-    employee = session.query(Employee).filter(Employee.id == 1024).first()
+    employee = session.query(Employee).filter(Employee.id == 1025).first()
     if args.format == 'plain':
         for cm in comm_months(end=dt.now()):
             report += monthly_statement_ym_header % (cm['month'], cm['year'])
