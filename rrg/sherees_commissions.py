@@ -540,7 +540,7 @@ def payroll_due_report(session, args):
 
 
 def sherees_contracts_of_interest(session):
-    contract_citems = session.query(ContractItemCommItem).filter(ContractItemCommItem.employee_id == 1025)
+    contract_citems = session.query(ContractItemCommItem).filter(ContractItemCommItem.employee_id == 1024)
     contracts = []
     for ci in contract_citems:
         if ci.contract_item.contract not in contracts:
