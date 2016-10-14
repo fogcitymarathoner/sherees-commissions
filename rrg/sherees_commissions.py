@@ -201,8 +201,7 @@ def sherees_commissions_report(session, args):
 def employee_commissions_transactions_year_month(session, employee, datadir, year, month, cache):
     return employee_comm_payments_year_month(session, employee, datadir, year, month, cache), \
            sorted(employee_comm_items_year_month(session, employee, datadir, year, month),
-                  key=lambda ci: dt.strptime(ci.findall('date')[0].text,
-                                             TIMESTAMP_FORMAT))
+                  key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
 
 
 def employee_comm_items_year_month(session, employee, datadir, year, month):
@@ -248,9 +247,8 @@ def employee_comm_payments_year_month(session, employee, datadir, year, month, c
             .order_by(CommPayment.date).all()
     else:
         cps = []
-        dirname = os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments',
-                               str(y),
-                               str(m).zfill(2))
+        dirname = os.path.join(
+            datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments', str(y), str(m).zfill(2))
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             for fn in fileList:
                 fullname = os.path.join(dirName, fn)
