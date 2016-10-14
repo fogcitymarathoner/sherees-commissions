@@ -202,7 +202,7 @@ def sherees_commissions_report(session, args):
 
 def employee_commissions_transactions_year_month(session, employee, datadir, year, month, cache):
     return employee_comm_payments_year_month(session, employee, datadir, year, month, cache), \
-           sorted(employee_comm_items_year_month(session, employee, datadir, year, month),
+           sorted(employee_comm_items_year_month(employee, datadir, year, month),
                   key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
 
 
