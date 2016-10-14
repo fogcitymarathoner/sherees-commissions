@@ -2,7 +2,7 @@ import argparse
 from rrg.sherees_commissions import employee_year_month_statement
 from rrg.models import session_maker
 from rrg.models import Employee
-from rrg.archive import employee
+from rrg.archive import employee as archived_employee
 from rrg.utils import monthy_statement_ym_header
 
 parser = argparse.ArgumentParser(description='RRG Sales Person Monthly Commissions Reports')
@@ -30,7 +30,7 @@ def monthly_detail():
     args = parser.parse_args()
     session = session_maker(args)
     print(monthy_statement_ym_header % (args.year, args.month))
-    employee_dict = employee(args.id, args.datadir)
+    employee_dict = archived_employee(args.id, args.datadir)
     if employee_dict['salesforce']:
         employee = session.query(Employee).filter(Employee.id == employee_dict['id'])
         total, res = employee_year_month_statement(session, employee, args.datadir, args.year, args.month, args.cache)
