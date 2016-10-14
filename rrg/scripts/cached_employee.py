@@ -5,9 +5,7 @@ from rrg.renderers import format_employee
 parser = argparse.ArgumentParser(description='RRG Archived Employee')
 
 parser.add_argument('id', type=int, help='id from cached-employees report')
-parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir with ar.xml',
+parser.add_argument('--datadir', required=True, help='datadir dir with ar.xml',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
