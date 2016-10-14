@@ -86,7 +86,7 @@ def employee(id, datadir):
                                 emp_dict['contracts'].append(emp_contract_xml_doc_to_dict(ele))
                         for eles in doc.findall('employee-payments'):
                             for ele in eles.findall('employee-payment'):
-                                _ = full_non_dated_xml_id_path(employees_payments_dir(args.datadir), ele[0].text)
+                                _ = full_non_dated_xml_id_path(employees_payments_dir(datadir), ele[0].text)
                                 doc = ET.parse(_).getroot()
                                 emp_dict['payments'].append(emp_payment_xml_doc_to_dict(doc))
                         break
