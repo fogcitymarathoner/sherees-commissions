@@ -1,10 +1,8 @@
-from rrg.models import session_maker
-
 from datetime import datetime as dt
 import argparse
-
 from tabulate import tabulate
 
+from rrg.models import session_maker
 from rrg.sherees_commissions import employee_year_month_statement
 from rrg.sherees_commissions import comm_months
 from rrg.utils import monthy_statement_ym_header

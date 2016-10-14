@@ -51,7 +51,8 @@ def employees(datadir):
     print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))
 
 
-def employee(args):
+def employee(id, datadir):
+    employees_directory = employees_dir(datadir)
     i = 1
     emp_dict = {
         'index': None,
@@ -70,11 +71,11 @@ def employee(args):
         'memos': [],
         'payments': [],
     }
-    for root, dirs, files in os.walk(args.datadir):
-        if root == args.datadir:
+    for root, dirs, files in os.walk(employees_directory):
+        if root == employees_directory:
             for f in files:
                 if re.search(pat, f):
-                    if i == args.id:
+                    if i == id:
                         doc = ET.parse(os.path.join(root, f)).getroot()
                         emp_dict = emp_xml_doc_to_dict(i, doc, emp_dict)
                         for eles in doc.findall('memos'):

@@ -8,7 +8,7 @@ parser.add_argument('id', type=int, help='id from cached-employees report')
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/employees/')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
 def cached_employee():
@@ -18,6 +18,6 @@ def cached_employee():
     :return:
     """
     args = parser.parse_args()
-
     print('Archived Employee in %s' % args.datadir)
-    print format_employee(employee(args))
+    employee_dict = employee(args.id, args.datadir)
+    print format_employee(employee_dict)
