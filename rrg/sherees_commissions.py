@@ -443,7 +443,7 @@ def comm_item_xml_to_dict(citem):
         'description': citem.findall('description')[0].text,
         'amount': round(float(citem.findall('amount')[0].text)),
         'employee_id': citem.findall('employee_id')[0].text,
-        'voided': int(citem.findall('voided')[0].text)
+        'voided': True if citem.findall('voided')[0].text == 'True' else False
     }
 
 
