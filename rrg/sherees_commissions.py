@@ -206,7 +206,7 @@ def employee_commissions_transactions_year_month(session, employee, datadir, yea
                   key=lambda ci: dt.strptime(ci.findall('date')[0].text, TIMESTAMP_FORMAT))
 
 
-def employee_comm_items_year_month(session, employee, datadir, year, month):
+def employee_comm_items_year_month(employee, datadir, year, month):
     """
     reads comm items from xml forest
     Args:
