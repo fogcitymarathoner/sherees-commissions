@@ -217,7 +217,6 @@ def employee_comm_items_year_month(session, employee, datadir, year, month):
     xml_comm_items = []
     dir = employee_comm_path_year_month(session, employee, datadir, year, month)
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
-
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
             if re.search(
@@ -225,7 +224,6 @@ def employee_comm_items_year_month(session, employee, datadir, year, month):
                     '[0-9]{5}\.xml$',
                     filename):
                 xml_comm_items.append(Citem.from_xml(filename))
-
     return xml_comm_items
 
 

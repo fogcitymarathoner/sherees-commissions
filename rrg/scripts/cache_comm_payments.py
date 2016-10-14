@@ -18,12 +18,12 @@ parser.add_argument('--cache', dest='cache', action='store_true')
 parser.add_argument('--no-cache', dest='cache', action='store_false')
 parser.set_defaults(cache=True)
 
+
 def cache_comm_payments():
     """
     replaces cake cache commissions payments
     """
     args = parser.parse_args()
-
     session = session_maker(args)
     if args.project == 'rrg':
         print('Caching Commission Payments')
