@@ -1,9 +1,7 @@
 import argparse
-from rrg.sherees_commissions import year_month_statement
+from rrg.sherees_commissions import employee_year_month_statement
 from rrg.models import session_maker
-
-monthy_statement_ym_header = '%s/%s - ###################################' \
-                             '######################'
+from rrg.utils import monthy_statement_ym_header
 
 parser = argparse.ArgumentParser(description='RRG Sherees Monthly '
                                              'Commissions Reports')
@@ -35,10 +33,9 @@ ledger_line_format = '%s %s %s %s'
 
 def monthly_detail():
     args = parser.parse_args()
-
     session = session_maker(args)
     print(monthy_statement_ym_header % (args.year, args.month))
-    total, res = year_month_statement(session, args)
+    total, res = employee_year_month_statement(session, args)
     print('Total %s ' % total)
     for i in res:
         print(ledger_line_format % (

@@ -176,7 +176,7 @@ def sherees_commissions_report(session, args):
             report += '\n\subsection{%s/%s}\n' % (cm['year'], cm['month'])
             args.month = cm['month']
             args.year = cm['year']
-            total, res = year_month_statement(session, args)
+            total, res = employee_year_month_statement(session, args)
             balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),

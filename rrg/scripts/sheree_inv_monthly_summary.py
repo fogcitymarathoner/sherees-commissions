@@ -1,10 +1,8 @@
 import argparse
 from rrg.sherees_commissions import invoice_report_month_year
+from rrg.utils import monthy_statement_ym_header
 
-monthy_statement_ym_header = '%s/%s - ###################################' \
-                             '######################'
-parser = argparse.ArgumentParser(description='RRG Sherees Monthly '
-                                             'Invoices Reports')
+parser = argparse.ArgumentParser(description='RRG Sherees Monthly Invoices Reports')
 parser.add_argument('year', type=int, help='commissions year')
 parser.add_argument('month', type=int, help='commissions month')
 

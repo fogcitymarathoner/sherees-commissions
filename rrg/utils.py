@@ -8,6 +8,9 @@ from rrg.models import Base
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 
 
+monthy_statement_ym_header = '%s/%s - #########################################################'
+
+
 def clear_out_bad_contracts():
     """
     removed contracts from the database that have either employee_id or
