@@ -215,7 +215,7 @@ def employee_comm_items_year_month(session, employee, datadir, year, month):
 
     """
     xml_comm_items = []
-    dir = employee_comm_path_year_month(session, employee, datadir, year, month)
+    dir = employee_comm_path_year_month(employee, datadir, year, month)
     for dirName, subdirList, fileList in os.walk(dir, topdown=False):
         for fname in fileList:
             filename = os.path.join(dir, dirName, fname)
@@ -296,7 +296,7 @@ def comm_months(start=start, end=end):
     return year_months
 
 
-def employee_comm_path_year_month(session, employee, datadir, year, month):
+def employee_comm_path_year_month(employee, datadir, year, month):
     """
     path to comms directory per year per month
     Args:
@@ -306,8 +306,9 @@ def employee_comm_path_year_month(session, employee, datadir, year, month):
     Returns:
 
     """
-    return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items', str(employee.id),
-                        str(year), str(month).zfill(2))
+    return os.path.join(
+        datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items',
+        str(employee.id).zfill(5), str(year), str(month).zfill(2))
 
 
 def db_date_dictionary_comm_item(session, datadir):
