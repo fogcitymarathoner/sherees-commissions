@@ -149,13 +149,14 @@ def sherees_commissions_report(session, args):
         quit()
     balance = 0
     report = str()
+    employee = session.query(Employee).filter(Employee.id == 1024).first()
     if args.format == 'plain':
         for cm in comm_months(end=dt.now()):
             report += monthly_statement_ym_header % (cm['month'], cm['year'])
             args.month = cm['month']
             args.year = cm['year']
             total, res = employee_year_month_statement(
-                session, args.employee, args.datadir, args.year, args.month, args.cache)
+                session, employee, args.datadir, args.year, args.month, args.cache)
             balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),
@@ -177,7 +178,7 @@ def sherees_commissions_report(session, args):
             args.month = cm['month']
             args.year = cm['year']
             total, res = employee_year_month_statement(
-                session, args.employee, args.datadir, args.year, args.month, args.cache)
+                session, employee, args.datadir, args.year, args.month, args.cache)
             balance += total
             res_dict_transposed = {
                 'id': map(lambda x: x['id'], res),
