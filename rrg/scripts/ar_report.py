@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 
 from rrg.helpers import read_inv_xml_file
 from rrg.models import invoice_archives
+from rrg.utils import clients_ar_xml_file
 
 parser = argparse.ArgumentParser(description='RRG Accounts Receivable Reports')
 parser.add_argument('type', help='report type',
@@ -23,8 +24,8 @@ def ar_report():
     args = parser.parse_args()
 
     print('Generating %s Report' % args.type)
-    infile = os.path.join(args.datadir, 'ar.xml')
-
+    infile = clients_ar_xml_file(args.datadir)
+    print('Parsing %s' % infile)
     if os.path.isfile(infile):
         tree = ET.parse(infile)
         root = tree.getroot()
