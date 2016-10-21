@@ -134,6 +134,7 @@ setup(
 
             'rrg-get-last-db-backup=rrg.scripts.get_last_backup:get_last_db_backup',
             'rrg-backup-db=rrg.scripts.backup_db:backup_db',
+            'rrg-backup-dir=rrg.scripts.backup_dir:backup_dir',
 
             'rrg-notes=rrg.scripts.notes_report:notes',
             'rrg-reminders=rrg.scripts.reminders:reminders',
