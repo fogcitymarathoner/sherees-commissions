@@ -10,6 +10,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Date
+from sqlalchemy import DateTime
 from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import TEXT
@@ -17,6 +18,7 @@ from sqlalchemy import Float
 from sqlalchemy.orm import relationship
 from sqlalchemy import TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
@@ -56,9 +58,18 @@ Base = declarative_base()
 # sherees_commissions
 
 
+
+
+def commissions_calculation(inv_item_quantity, inv_item_amount, inv_item_cost, employerexpenserate, percent):
+    iamount = inv_item_quantity * inv_item_amount
+    icost = inv_item_quantity * inv_item_cost
+    empexp = employerexpenserate * icost
+    presplit_comm = iamount - icost - empexp
+    return presplit_comm * percent / 100
+
+
 class EmployeePayment(Base):
     __tablename__ = 'employees_payments'
-
     id = Column(Integer, primary_key=True)
 
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
@@ -71,19 +82,20 @@ class EmployeePayment(Base):
     payroll = relationship("Payroll")
 
     notes = Column(String(100))
-
+    ref = Column(String(20))
     amount = Column(Float)
     date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<EmployeePayment(id='%s', firstname='%s', lastname='%s', invoice_id='%s', start='%s', end='%s', date='%s', amount='%s')>" % (
-            self.id, self.employee.firstname, self.employee.lastname, self.invoice_id, self.invoice.period_start,
-            self.invoice.period_end, self.date, self.amount)
+        return "<EmployeePayment(id='%s', firstname='%s', lastname='%s', invoice_id='%s', " \
+               "start='%s', end='%s', date='%s', amount='%s')>" % (
+                   self.id, self.employee.firstname, self.employee.lastname, self.invoice_id, self.invoice.period_start,
+                   self.invoice.period_end, self.date, self.amount)
 
     def to_xml(self):
         doc = ET.Element('employee-payment')
@@ -92,6 +104,7 @@ class EmployeePayment(Base):
         ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
         ET.SubElement(doc, 'payroll_id').text = str(self.payroll_id)
         ET.SubElement(doc, 'notes').text = self.notes
+        ET.SubElement(doc, 'ref').text = self.ref
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'amount').text = str(self.amount)
         return doc
@@ -108,7 +121,7 @@ class EmployeeMemo(Base):
     notes = Column(String(100))
     date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -168,7 +181,7 @@ class Employee(Base):
     usworkstatus = Column(Integer)
     notes = Column(TEXT)
     tcard = Column(Boolean)
-    voided = Column(Boolean)
+    voided = Column(Boolean, default=False)
     w4 = Column(Boolean)
     de34 = Column(Boolean)
     i9 = Column(Boolean)
@@ -179,12 +192,12 @@ class Employee(Base):
     dob = Column(Date)
     salesforce = Column(Boolean)
 
-    voided = Column(Boolean)
+    voided = Column(Boolean, default=False)
 
     startdate = Column(Date)
     enddate = Column(Date)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -202,7 +215,8 @@ class Employee(Base):
         ET.SubElement(doc, 'nickname').text = self.nickname
         ET.SubElement(doc, 'street1').text = self.street1
         ET.SubElement(doc, 'street2').text = self.street2
-        ET.SubElement(doc, 'state_id').text = str(self.state_id)
+        ET.SubElement(doc, 'city').text = self.city
+        ET.SubElement(doc, 'state').text = str(self.state.name)
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
         ET.SubElement(doc, 'bankaccountnumber_crypto').text = self.bankaccountnumber_crypto
@@ -288,9 +302,9 @@ class NotePayment(Base):
     date = Column(Date, index=True)
     amount = Column(Float)
     notes = Column(String(100))
-    voided = Column(Boolean)
+    voided = Column(Boolean, default=False)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
@@ -329,10 +343,10 @@ class Note(Base):
     amount = Column(Float)
     notes = Column(String(100))
     opening = Column(Boolean)
-    voided = Column(Boolean)
-    cleared = Column(Boolean)
+    voided = Column(Boolean, default=False)
+    cleared = Column(Boolean, default=False)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
@@ -357,12 +371,13 @@ class CommPayment(Base):
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer, ForeignKey('employees.id'))
     employee = relationship("Employee")
-    date = Column(Date, index=True)
+    date = Column(Date, index=True, default=default_date, nullable=False)
     amount = Column(Float)
     description = Column(TEXT)
     check_number = Column(String(10))
-    cleared = Column(Boolean)
-    voided = Column(Boolean)
+    cleared = Column(Boolean, default=False)
+    voided = Column(Boolean, default=False)
+
     # fixme: add last_sync_time
 
     def __repr__(self):
@@ -375,9 +390,12 @@ class CommPayment(Base):
     def to_xml(self):
         doc = ET.Element('commissions-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee.id)
         ET.SubElement(doc, 'amount').text = str(self.amount)
         ET.SubElement(doc, 'check_number').text = str(self.check_number)
         ET.SubElement(doc, 'description').text = str(self.description)
+        ET.SubElement(doc, 'cleared').text = str(self.cleared)
+        ET.SubElement(doc, 'voided').text = str(self.voided)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
 
@@ -407,9 +425,9 @@ class Client(Base):
     active = Column(Boolean)
     terms = Column(Integer, nullable=False)
     hq = Column(Boolean)
-    modified_date = Column(Date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user = Column(Integer)
     last_sync_time = Column(Date)
 
@@ -451,7 +469,7 @@ class ClientMemo(Base):
     notes = Column(String(100))
     date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -466,6 +484,45 @@ class ClientMemo(Base):
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        return doc
+
+
+class ClientManager(Base):
+    __tablename__ = 'clients_managers'
+
+    id = Column(Integer, primary_key=True)
+
+    client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
+    client = relationship("Client")
+
+    firstname = Column(String(50))
+    lastname = Column(String(50))
+    phone1 = Column(String(50))
+    phone2 = Column(String(50))
+    phone1type = Column(String(50))
+    phone2type = Column(String(50))
+    title = Column(String(50))
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
+
+    def __repr__(self):
+        return "<ClientManager(id='%s', client='%s', firstname='%s', lastname='%s')>" % (
+            self.id, self.client.name, self.firstname, self.lastname)
+
+    def to_xml(self):
+        doc = ET.Element('manager')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'client_id').text = str(self.client_id)
+        ET.SubElement(doc, 'title').text = self.title
+        ET.SubElement(doc, 'firstname').text = self.title
+        ET.SubElement(doc, 'lastname').text = self.title
+        ET.SubElement(doc, 'phone1').text = self.title
+        ET.SubElement(doc, 'phone2').text = self.title
+        ET.SubElement(doc, 'phone1type').text = self.title
+        ET.SubElement(doc, 'phone2type').text = self.title
         return doc
 
 
@@ -484,7 +541,7 @@ class ClientCheck(Base):
 
     date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -518,9 +575,9 @@ class ContractItemCommItem(Base):
     contract_item = relationship("ContractItem")
 
     percent = Column(Float)
-    modified_date = Column(Date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
 
     def __repr__(self):
@@ -530,7 +587,7 @@ class ContractItemCommItem(Base):
                    '%s %s' % (self.employee.firstname, self.employee.lastname))
 
     def to_xml(self):
-        doc = ET.Element('contract-item')
+        doc = ET.Element('contract-commissions-item')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
         ET.SubElement(doc,
@@ -560,7 +617,7 @@ class ContractItem(Base):
 
     notes = Column(TEXT)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
     last_sync_time = Column(Date)
@@ -605,7 +662,7 @@ class Contract(Base):
     startdate = Column(Date)
     enddate = Column(Date)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -628,7 +685,7 @@ class Contract(Base):
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
         ET.SubElement(doc, 'client').text = self.client.name
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc, 'employee').text = ('%s %s' %(self.employee.firstname, self.employee.lastname))
+        ET.SubElement(doc, 'employee').text = ('%s %s' % (self.employee.firstname, self.employee.lastname))
         ET.SubElement(doc, 'period_id').text = str(self.period_id)
         ET.SubElement(doc, 'active').text = str(self.active)
         ET.SubElement(doc, 'terms').text = str(self.terms)
@@ -659,7 +716,7 @@ class InvoicePayment(Base):
     notes = Column(String(100))
 
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -702,23 +759,23 @@ class Invoice(Base):
     period_end = Column(Date, nullable=False)
 
     posted = Column(Boolean)
-    cleared = Column(Boolean)
+    cleared = Column(Boolean, default=False)
     cleared_date = Column(Date)
-    prcleared = Column(Boolean)
+    prcleared = Column(Boolean, default=False)
     timecard_receipt_sent = Column(Boolean)
     message = Column(TEXT)
 
     amount = Column(Float)
-    voided = Column(Boolean)
+    voided = Column(Boolean, default=False)
 
     token = Column(String(64))
     view_count = Column(Integer)
     mock = Column(Boolean)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
-    last_sync_time = Column(TIMESTAMP)
+    last_sync_time = Column(DateTime)
 
     def __repr__(self):
         return "<Invoice(id='%s', client='%s', contract='%s', amount='%s', worker='%s'" \
@@ -772,6 +829,17 @@ class Invoice(Base):
         for iitem in self.invoice_items:
             amount += iitem.amount * iitem.quantity
         return amount
+
+    def update_commissions(self):
+        employerexpenserate = self.employerexpenserate
+        for invoice_item in self.invoice_items:
+            inv_item_amount = invoice_item.amount
+            inv_item_cost = invoice_item.cost
+            inv_item_quantity = invoice_item.quantity
+            for commissions_item in invoice_item.comm_items:
+                percent = commissions_item.percent
+                commissions_item.amount = commissions_calculation(inv_item_quantity, inv_item_amount, inv_item_cost,
+                                                                  employerexpenserate, percent)
 
 
 def is_pastdue(inv, date=None):
@@ -838,11 +906,11 @@ class Iitem(Base):
     quantity = Column(Float)
     cost = Column(Float)
     ordering = Column(Integer)
-    cleared = Column(Boolean)
+    cleared = Column(Boolean, default=False)
     comm_items = relationship("Citem", back_populates="invoices_item", cascade="all, delete, delete-orphan")
 
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer)
     modified_user_id = Column(Integer)
     last_sync_time = Column(TIMESTAMP)
@@ -892,10 +960,10 @@ class Citem(Base):
     rel_item_amt = Column(Float)
     rel_item_quantity = Column(Float)
     rel_item_cost = Column(Float)
-    cleared = Column(Float)
-    voided = Column(Float)
+    cleared = Column(Boolean, default=False)
+    voided = Column(Boolean, default=False)
     created_date = Column(Date, default=default_date)
-    modified_date = Column(Date, default=default_date, onupdate=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer, default=2)
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)

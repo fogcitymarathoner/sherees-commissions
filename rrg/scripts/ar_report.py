@@ -1,9 +1,10 @@
 import os
 import argparse
-
 import xml.etree.ElementTree as ET
+
 from rrg.helpers import read_inv_xml_file
 from rrg.models import invoice_archives
+from rrg.utils import clients_ar_xml_file
 
 parser = argparse.ArgumentParser(description='RRG Accounts Receivable Reports')
 parser.add_argument('type', help='report type',
@@ -11,8 +12,7 @@ parser.add_argument('type', help='report type',
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/'
-            'transactions/invoices/"')
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
 def ar_report():
@@ -24,8 +24,8 @@ def ar_report():
     args = parser.parse_args()
 
     print('Generating %s Report' % args.type)
-    infile = os.path.join(args.datadir, 'ar.xml')
-
+    infile = clients_ar_xml_file(args.datadir)
+    print('Parsing %s' % infile)
     if os.path.isfile(infile):
         tree = ET.parse(infile)
         root = tree.getroot()

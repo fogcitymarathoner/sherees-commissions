@@ -10,6 +10,10 @@ from rrg.models import Invoice
 from rrg.models import is_pastdue
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
+from rrg.billing import verify_dirs_ready
+from rrg.utils import transactions_invoices_dir
+from rrg.utils import clients_ar_xml_file
+from rrg.utils import clients_checks_dir
 
 parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
 parser.add_argument('reminders', metavar='N', type=int, nargs='+',
@@ -46,23 +50,22 @@ def open_invoices_client(client, all_invs):
     return open_invoices
 
 
-def cache_clients_ar(session, args):
-
-    outfile = os.path.join(args.datadir, 'ar.xml')
-    all_invs = session.query(Invoice).order_by(Invoice.date)
-
+def cache_clients_ar(session, datadir):
+    #
+    # Make sure destination directories exist
+    #
+    verify_dirs_ready(clients_checks_dir(datadir), [clients_checks_dir(datadir)])
+    all_invs = session.query(Invoice)
     doc = ET.Element('invoices')
     all = ET.SubElement(doc, 'all')
     open = ET.SubElement(doc, 'open')
     pastdue = ET.SubElement(doc, 'pastdue')
     cleared = ET.SubElement(doc, 'cleared')
-
     for i in all_invs:
         if not i.voided:
             id = ET.SubElement(all, 'invoice')
             id.text = str(i.id)
             if not i.cleared:
-
                 id = ET.SubElement(open, 'invoice')
                 id.text = str(i.id)
                 if i.date:
@@ -72,8 +75,6 @@ def cache_clients_ar(session, args):
             else:
                 id = ET.SubElement(cleared, 'invoice')
                 id.text = str(i.id)
-
     tree = ET.ElementTree(doc)
-    tree.write(outfile)
-
-    print('Wrote to %s' % outfile)
+    tree.write(clients_ar_xml_file(datadir))
+    print('Wrote to %s' % clients_ar_xml_file(datadir))

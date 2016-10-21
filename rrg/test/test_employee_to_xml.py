@@ -25,6 +25,7 @@ from rrg.models import Payroll
 from rrg.models import periods
 from rrg.models import Note
 from rrg.models import NotePayment
+from rrg.models import State
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
 from rrg.reminders import semimonths_between_dates
@@ -64,9 +65,14 @@ class Test:
         self.session.begin_nested()
         with self.session.no_autoflush:
             objects = []
+            state = State(name='California')
+            objects.append(state)
+
+            self.session.bulk_save_objects(objects)
+            states = self.session.query(State).all()
+            objects = []
             client_active = Client(name='weekly', active=True, terms=30)
-            client_inactive = Client(name='weekly-inactive', active=False,
-                                     terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
             objects.append(client_active)
             objects.append(client_inactive)
 
@@ -80,10 +86,10 @@ class Test:
             self.session.bulk_save_objects(objects)
             objects = []
 
-            employee_active = Employee(firstname='firstname', lastname='activelastname', active=True)
-            employee_inactive = Employee(firstname='firstname', lastname='inactivelastname', active=False)
-            employee_sales_person1 = Employee(firstname='sales', lastname='person1', active=True)
-            employee_sales_person2 = Employee(firstname='sales', lastname='person2', active=True)
+            employee_active = Employee(firstname='firstname', lastname='activelastname', active=True, state_id=states[0].id)
+            employee_inactive = Employee(firstname='firstname', lastname='inactivelastname', active=False, state_id=states[0].id)
+            employee_sales_person1 = Employee(firstname='sales', lastname='person1', active=True, state_id=states[0].id)
+            employee_sales_person2 = Employee(firstname='sales', lastname='person2', active=True, state_id=states[0].id)
 
             objects.append(employee_active)
             objects.append(employee_inactive)
