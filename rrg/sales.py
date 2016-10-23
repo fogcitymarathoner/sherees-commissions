@@ -10,7 +10,7 @@ def salespersons_notes_payments(session, salesperson):
         .order_by(NotePayment.date)
 
 
-def salespersons_notes_payments(session, salesperson):
+def salespersons_notes(session, salesperson):
     return session.query(Note).filter(
         and_(Note.employee_id == salesperson.id, Note.voided == False)).order_by(Note.date)
 
