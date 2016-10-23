@@ -5,8 +5,6 @@ from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import periods
 from rrg.sales import salespersons_notes_payments
-from rrg.models import Note
-from rrg.sherees_commissions import sa_sheree
 
 periods = {
     'week': 1,
