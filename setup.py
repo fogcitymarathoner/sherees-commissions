@@ -137,7 +137,7 @@ setup(
             'rrg-backup-db=rrg.scripts.backup_db:backup_db',
             'rrg-backup-dir=rrg.scripts.backup_dir:backup_dir',
 
-            'rrg-notes=rrg.scripts.notes_report:notes',
+            'rrg-sherees-notes-db=rrg.scripts.notes_report:notes',
             'rrg-reminders=rrg.scripts.reminders:reminders',
             'rrg-sherees-payroll=rrg.scripts.sherees_payroll:sherees_payroll',
             'rrg-invoices-monthly='

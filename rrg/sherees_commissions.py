@@ -73,19 +73,20 @@ def sheree_total_monies_owed(session, args):
     return out
 
 
-def sherees_notes_report(session, args):
+def sherees_notes_report_db(session, format):
     """
     returns sherees notes report as a subsection
     :param session:
     :param args:
     :return:
     """
-    if args.format not in ['plain', 'latex']:
+    if format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
 
-    notes_payments = sheree_notes_payments(session)
-    notes = sherees_notes(session)
+    sheree = sa_sheree(session)
+    notes_payments = sheree_notes_payments(session, sheree)
+    notes = sherees_notes(session, sheree)
 
     combined = []
     for np in notes_payments:
@@ -118,9 +119,9 @@ def sherees_notes_report(session, args):
         total += float(res_dict_transposed['balance'][i])
         res_dict_transposed['balance'][i] = "%.2f" % round(total, 2)
 
-    if args.format == 'plain':
+    if format == 'plain':
         return tabulate(res_dict_transposed, headers='keys', tablefmt='plain')
-    elif args.format == 'latex':
+    elif format == 'latex':
         report = ''
         report += '\n\section{Notes}\n'
         report += tabulate(res_dict_transposed, headers='keys',
