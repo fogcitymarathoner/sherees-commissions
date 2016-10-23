@@ -5,6 +5,7 @@ from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import periods
 from rrg.sales import salespersons_notes_payments
+from rrg.sales import salespersons_notes
 
 periods = {
     'week': 1,
@@ -35,4 +36,4 @@ def sheree_notes_payments(session, sheree):
 
 
 def sherees_notes(session, sheree):
-    return salespersons_notes_payments(session, sheree)
+    return salespersons_notes(session, sheree)
