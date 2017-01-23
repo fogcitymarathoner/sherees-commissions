@@ -139,6 +139,7 @@ setup(
 
             'rrg-sherees-notes-db=rrg.scripts.notes_report:notes',
             'rrg-reminders=rrg.scripts.reminders:reminders',
+            'rrg-timecards=rrg.scripts.timecards:timecards',
             'rrg-sherees-payroll=rrg.scripts.sherees_payroll:sherees_payroll',
             'rrg-invoices-monthly='
             'rrg.scripts.invoices_monthly:invoices_monthly',

@@ -131,8 +131,6 @@ def forget_reminder(session, reminder_period_start, payroll_run_date, t_set,
 
     contract, start, end = reminders_tbs[args.number - 1]
     new_inv = create_invoice_for_period(session, contract, start, end)
-    new_inv.voided = True
-
 
 def timecards_set(session, args):
     timecards_set = set()
@@ -184,7 +182,7 @@ def create_invoice_for_period(session, contract, period_start, period_end, date=
     new_inv = Invoice(contract_id=contract.id, period_start=period_start,
                       period_end=period_end, date=date,
                       employerexpenserate=.10, terms=contract.terms, 
-                      timecard=False, posted=False, prcleared=False,
+                      posted=False, prcleared=False,
                       cleared=False, timecard_receipt_sent=False,
                       message='Thank you for your business!', amount=0,
                       voided=False)
