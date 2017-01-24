@@ -32,4 +32,8 @@ def timecards(session):
     """
     return session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
 
+def void_timecard(session, args):
+    timecards = session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
+    timecard_to_void = timecards[args.number-1]
+    timecard_to_void.voided = True
 

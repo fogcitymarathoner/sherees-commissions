@@ -154,6 +154,7 @@ setup(
             'rrg-sherees-inv-monthly=rrg.scripts.sheree_inv_monthly_summary:monthly_detail',
 
             'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder',
+            'rrg-void-timecard=rrg.scripts.void_timecard:void_timecard',
             'rrg-recover-joomla-files=rrg.scripts.recover_joomla_documents:recover_joomla_documents',
             'rrg-delete-old-voided-invoices=rrg.scripts.delete_old_voided_inv:delete_old_voided_invoices',
             'rrg-delete-zero-invoice-items=rrg.scripts.delete_old_zero_iitems:delete_zero_invoice_items'
