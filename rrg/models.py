@@ -841,6 +841,24 @@ class Invoice(Base):
                 commissions_item.amount = commissions_calculation(inv_item_quantity, inv_item_amount, inv_item_cost,
                                                                   employerexpenserate, percent)
 
+    @staticmethod
+    def from_xml(xml_file_name):
+        """
+        returns DOM of Invoice from file
+        """
+        return ET.parse(xml_file_name).getroot()
+
+    def update_from_xml_doc(self, inv_doc):
+        self.date = inv_doc.findall('date')[0].text
+        self.notes = inv_doc.findall('notes')[0].text
+        self.message = inv_doc.findall('message')[0].text
+        if inv_doc.findall('posted')[0].text == 'False':
+            self.posted = False
+        elif inv_doc.findall('posted')[0].text == 'True':
+            self.posted = True
+        self.period_start = inv_doc.findall('period_start')[0].text
+        self.period_end = inv_doc.findall('period_end')[0].text
+
 
 def is_pastdue(inv, date=None):
     """
@@ -934,6 +952,10 @@ class Iitem(Base):
         for i in self.comm_items:
             commitems.append(i.to_xml())
         return doc
+
+                                      
+    def update_from_xml_doc(self, iitem_ele):
+        self.quantity = iitem_ele.findall('quantity')[0].text
 
 
 class Citem(Base):

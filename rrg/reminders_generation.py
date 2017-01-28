@@ -124,6 +124,9 @@ def reminders(session, reminder_period_start, payroll_run_date, t_set, args):
 
 def reminder_to_timecard(session, reminder_period_start, payroll_run_date, t_set,
                     args):
+    """
+    A new invoice is a timecard if voided False and timecard true
+    """
     # create voided invoice for args.number'th reminder from reminders
 
     reminders_tbs = reminders(session, reminder_period_start, payroll_run_date,
@@ -132,7 +135,8 @@ def reminder_to_timecard(session, reminder_period_start, payroll_run_date, t_set
     contract, start, end = reminders_tbs[args.number - 1]
     new_inv = create_invoice_for_period(session, contract, start, end)
     new_inv.voided = False
-
+    new_inv.mock = False
+    new_inv.timecard = True
 
 def forget_reminder(session, reminder_period_start, payroll_run_date, t_set,
                     args):

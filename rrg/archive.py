@@ -27,6 +27,7 @@ pat = '[0-9]{5}\.[xX][Mm][Ll]$'
 def employees(datadir):
     employees_directory = employees_dir(datadir)
     ids = []
+    sql_ids = []
     firsts = []
     lasts = []
     i = 1
@@ -40,11 +41,13 @@ def employees(datadir):
                     firstname = doc.findall('firstname')[0].text
                     lastname = doc.findall('lastname')[0].text
                     ids.append(str(i))
+                    sql_ids.append(int(doc.findall('id')[0].text))
                     firsts.append(firstname)
                     lasts.append(lastname)
                     i += 1
     res_dict_transposed = {
         'id': [i for i in ids],
+        'sqlid': [i for i in sql_ids],
         'first': [i for i in firsts],
         'last': [i for i in lasts],
     }
@@ -68,8 +71,7 @@ def employee(id, datadir):
         'enddate': None,
         'salesforce': False,
         'dob': None,
-        'contracts': [],
-        'memos': [],
+        'contracts': [], 'memos': [],
         'payments': [],
     }
     for root, dirs, files in os.walk(employees_directory):
