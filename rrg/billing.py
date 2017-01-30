@@ -43,13 +43,13 @@ def full_non_dated_xml_id_path(data_dir, id):
     return os.path.join(data_dir, '%s.xml' % str(id).zfill(5))
 
 
-def sync(session, data_dir, ep, model):
+def sync(session, data_dir, ep, model, crypter):
     """
     writes xml file for contract
     """
     f = full_non_dated_xml_path(data_dir, ep)
     with open(f, 'w') as fh:
-        fh.write(ET.tostring(ep.to_xml()))
+        fh.write(ET.tostring(ep.to_xml(crypter)))
     session.query(model).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
@@ -77,7 +77,7 @@ def verify_dirs_ready(data_dir, rel_dir_set):
         mkdirs(dest)
 
 
-def cache_non_date_parsed(session, datadir, model):
+def cache_non_date_parsed(session, datadir, model, crypter):
     disk_dict = directory_date_dictionary(datadir)
     # Make query, assemble lists
     date_dict, items = db_date_dictionary_model(session, model, datadir)
@@ -101,4 +101,4 @@ def cache_non_date_parsed(session, datadir, model):
                 to_sync.append(item)
     # Write out xml
     for item in to_sync:
-        sync(session, datadir, item, model)
+        sync(session, datadir, item, model, crypter)
