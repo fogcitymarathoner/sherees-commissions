@@ -206,7 +206,7 @@ class Employee(Base):
         return "<Employee(id='%s', firstname='%s', lastname='%s')>" % (
             self.id, self.firstname, self.lastname)
 
-    def to_xml(self):
+    def to_xml(self, crypter):
         doc = ET.Element('employee')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'firstname').text = self.firstname
@@ -218,10 +218,10 @@ class Employee(Base):
         ET.SubElement(doc, 'city').text = self.city
         ET.SubElement(doc, 'state').text = str(self.state.name)
         ET.SubElement(doc, 'zip').text = self.zip
-        ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
-        ET.SubElement(doc, 'bankaccountnumber_crypto').text = self.bankaccountnumber_crypto
+        ET.SubElement(doc, 'ssn_crypto').text = crypter.Decrypt(self.ssn_crypto)
+        ET.SubElement(doc, 'bankaccountnumber_crypto').text = crypter.Decrypt(self.bankaccountnumber_crypto)
         ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
-        ET.SubElement(doc, 'bankroutingnumber_crypto').text = self.bankroutingnumber_crypto
+        ET.SubElement(doc, 'bankroutingnumber_crypto').text = crypter.Decrypt(self.bankroutingnumber_crypto)
         ET.SubElement(doc, 'directdeposit').text = str(self.directdeposit)
         ET.SubElement(doc, 'allowancefederal').text = str(self.allowancefederal)
         ET.SubElement(doc, 'allowancestate').text = str(self.allowancestate)
@@ -279,6 +279,28 @@ class Employee(Base):
 
         return doc
 
+    @staticmethod                                                                                                              
+    def from_xml(xml_file_name):                                                                                               
+        """                                                                                                                    
+        returns DOM of comm item from file                                                                                     
+        """                                                                                                                    
+        return ET.parse(xml_file_name).getroot() 
+
+    def update_from_xml_doc(self, emp_doc, crypter):                                                                                    
+        self.firstname = emp_doc.findall('firstname')[0].text                                                                            
+        self.lastname = emp_doc.findall('lastname')[0].text                                                                          
+        if emp_doc.findall('ssn_crypto')[0].text:
+            self.ssn_crypto = crypter.Encrypt(emp_doc.findall('ssn_crypto')[0].text) 
+        else:
+            self.ssn_crypto = crypter.Encrypt('N/A')
+        if emp_doc.findall('bankaccountnumber_crypto')[0].text:
+            self.bankaccountnumber_crypto = crypter.Encrypt(emp_doc.findall('bankaccountnumber_crypto')[0].text) 
+        else:
+            self.bankaccountnumber_crypto = crypter.Encrypt('N/A')
+        if emp_doc.findall('bankroutingnumber_crypto')[0].text:
+            self.bankroutingnumber_crypto = crypter.Encrypt(emp_doc.findall('bankroutingnumber_crypto')[0].text) 
+        else:
+            self.bankroutingnumber_crypto = crypter.Encrypt('N/A')
 
 def delete_employee(session, delemp):
     """

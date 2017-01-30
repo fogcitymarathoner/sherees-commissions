@@ -140,6 +140,7 @@ setup(
             'rrg-sherees-notes-db=rrg.scripts.notes_report:notes',
             'rrg-reminders=rrg.scripts.reminders:reminders',
             'rrg-timecards=rrg.scripts.timecards:timecards',
+            'rrg-employees=rrg.scripts.employees:employees',
             'rrg-open_invoices=rrg.scripts.open_invoices:open_invoices',
             'rrg-sherees-payroll=rrg.scripts.sherees_payroll:sherees_payroll',
             'rrg-invoices-monthly='
@@ -159,6 +160,7 @@ setup(
             'rrg-reminder-to-timecard=rrg.scripts.reminder_to_timecard:reminder_to_timecard',
             'rrg-view-timecard=rrg.scripts.view_timecard:view_timecard',
             'rrg-edit-timecard=rrg.scripts.edit_timecard:edit_timecard',
+            'rrg-edit-employee=rrg.scripts.edit_employee:edit_employee',
             'rrg-edit-open_invoice=rrg.scripts.edit_open_invoice:edit_open_invoice',
             'rrg-recover-joomla-files=rrg.scripts.recover_joomla_documents:recover_joomla_documents',
             'rrg-delete-old-voided-invoices=rrg.scripts.delete_old_voided_inv:delete_old_voided_invoices',
