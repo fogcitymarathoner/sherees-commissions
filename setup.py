@@ -74,7 +74,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['s3_mysql_backup', 'sqlalchemy',
-                      'tabulate', 'mysql-python', 'python-keyczar'],
+                      'tabulate', 'mysql-python', 'python-keyczar', 'flask'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
@@ -157,6 +157,7 @@ setup(
 
             'rrg-forget-reminder=rrg.scripts.forget_reminder:forget_numbered_reminder',
             'rrg-void-timecard=rrg.scripts.void_timecard:void_timecard',
+            'rrg-workers-comp-report=rrg.scripts.workers_comp_report:workers_comp_report',
             'rrg-reminder-to-timecard=rrg.scripts.reminder_to_timecard:reminder_to_timecard',
             'rrg-view-timecard=rrg.scripts.view_timecard:view_timecard',
             'rrg-edit-timecard=rrg.scripts.edit_timecard:edit_timecard',
