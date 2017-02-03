@@ -1,15 +1,17 @@
 import os
 import argparse
-from rrg.billing import cache_non_date_parsed as routine
-from rrg.models import ContractItem
-from rrg.models import session_maker
 
-parser = argparse.ArgumentParser(description='RRG Cache Contract Items')
+from rrg.archive import cache_objs
+from rrg.models import session_maker
+from rrg.models import Expense
+
+parser = argparse.ArgumentParser(description='RRG Employees')
 
 parser.add_argument(
     '--datadir', required=True,
     help='datadir dir',
     default='/php-apps/cake.rocketsredglare.com/rrg/data/')
+
 
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
@@ -18,15 +20,16 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 
-def cache_contract_items():
+def cache_expenses():
     """
-    cache contract items
+    replaces cake cache_expenses
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
     session = session_maker(args)
 
-    print('Caching Contract Items %s into %s' % (args.db, os.path.join(args.datadir, 'contracts', 'contract_items')))
-    routine(session, os.path.join(args.datadir, 'contracts', 'contract_items'), ContractItem)
+    print('Caching Expenses %s into %s' % (args.db, os.path.join(args.datadir, 'expenses')))
+    expenses = session.query(Expense).all()
+    cache_objs(expenses)
     session.commit()

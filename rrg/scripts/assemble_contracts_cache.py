@@ -1,6 +1,6 @@
+import os
 import argparse
 from rrg.archive import cached_contracts_collect_invoices_and_items as routine
-from rrg.utils import contracts_dir
 
 parser = argparse.ArgumentParser(description='RRG Assemble Contracts Cache')
 parser.add_argument(
@@ -14,5 +14,5 @@ def assemble_contracts_cache():
     :return:
     """
     args = parser.parse_args()
-    print('Assembling Contracts in %s' % contracts_dir(args.datadir))
+    print('Assembling Contracts in %s' % os.path.join(args.datadir, 'contracts'))
     routine(args.datadir)

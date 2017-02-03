@@ -1,7 +1,7 @@
+import os
 import argparse
 from rrg.billing import cache_non_date_parsed as routine
 from rrg.models import session_maker
-from rrg.utils import clients_dir
 from rrg.models import Client
 
 parser = argparse.ArgumentParser(description='RRG Clients')
@@ -23,6 +23,6 @@ def cache_clients():
     """
     args = parser.parse_args()
     session = session_maker(args)
-    print('Caching Clients %s into %s' % (args.db, clients_dir(args.datadir)))
-    routine(session, clients_dir(args.datadir), Client)
+    print('Caching Clients %s into %s' % (args.db, os.path.join(args.datadir, 'clients')))
+    routine(session, os.path.join(args.datadir, 'clients'), Client)
     session.commit()

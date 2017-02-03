@@ -10,8 +10,6 @@ from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
 from rrg.models import Client
 from rrg.models import Employee
-from rrg.models import Invoice
-from rrg.models import Citem
 from rrg.models import periods
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
@@ -21,7 +19,6 @@ from rrg.reminders import current_semimonth
 from rrg.reminders_generation import create_invoice_for_period
 from rrg.sherees_commissions import sherees_contracts_of_interest
 from rrg.sherees_commissions import sherees_invoices_of_interest
-from rrg.sherees_commissions import invoice_to_xml
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
@@ -301,7 +298,7 @@ DEBUG:test:<Employee(id='1640', firstname='sales', lastname='person2')>
         for i in invs:
             logger.debug('inv of inst')
             logger.debug(i)
-            ixml = invoice_to_xml(i)
+            ixml = i.to_xml()
             ixml_str = ET.tostring(ixml)
             logger.debug(ixml_str)
             root = ET.fromstring(ixml_str)

@@ -1,8 +1,8 @@
+import os
 import argparse
 from rrg.billing import cache_non_date_parsed as routine
 from rrg.models import Contract
 from rrg.models import session_maker
-from rrg.utils import contracts_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Contracts')
 
@@ -26,6 +26,6 @@ def cache_contracts():
     """
     args = parser.parse_args()
     session = session_maker(args)
-    print('Caching Contracts %s into %s' % (args.db, contracts_dir(args.datadir)))
-    routine(session, contracts_dir(args.datadir), Contract)
+    print('Caching Contracts %s into %s' % (args.db, os.path.join(args.datadir, 'contracts')))
+    routine(session, os.path.join(args.datadir, 'contracts'), Contract)
     session.commit()

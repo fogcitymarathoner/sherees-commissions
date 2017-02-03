@@ -1,10 +1,10 @@
+import os
 import argparse
 from keyczar import keyczar
 
 from rrg.billing import cache_non_date_parsed as cache_routine
 from rrg.models import session_maker
 from rrg.models import Employee
-from rrg.utils import employees_dir
 
 parser = argparse.ArgumentParser(description='RRG Employees')
 
@@ -35,6 +35,6 @@ def cache_employees():
     session = session_maker(args)
     crypter = keyczar.Crypter.Read(args.keyczardir)
 
-    print('Caching Employees %s into %s' % (args.db, employees_dir(args.datadir)))
-    cache_routine(session, employees_dir(args.datadir), Employee, crypter)
+    print('Caching Employees %s into %s' % (args.db, os.path.join(args.datadir, 'employees')))
+    cache_routine(session, os.path.join(args.datadir, 'employees'), Employee, crypter)
     session.commit()

@@ -1,20 +1,15 @@
 import os
 import re
+from datetime import datetime as dt
 from tabulate import tabulate
 import xml.etree.ElementTree as ET
 import logging
 
-from rrg.billing import full_non_dated_xml_id_path
 from rrg.helpers import emp_xml_doc_to_dict
 from rrg.helpers import emp_memo_xml_doc_to_dict
 from rrg.helpers import emp_contract_xml_doc_to_dict
 from rrg.helpers import emp_payment_xml_doc_to_dict
-from rrg.utils import employees_payments_dir
-from rrg.utils import clients_dir
 from rrg.utils import transactions_invoices_dir
-from rrg.utils import contracts_items_dir
-from rrg.utils import contracts_dir
-from rrg.utils import employees_dir
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -24,8 +19,94 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 pat = '[0-9]{5}\.[xX][Mm][Ll]$'
 
 
+def obj_dir(datadir, obj):
+    """
+    central place to generate archive directories
+    :param datadir:
+    :param obj:
+    :return:
+    """
+    if type(obj) == 'rrg.models.Invoice':
+        return os.path.join(datadir, 'transactions', 'invoices')
+    elif type(obj) == 'rrg.models.Iitem':
+        return os.path.join(transactions_invoices_dir(datadir), 'invoice_items')
+    elif type(obj) == 'rrg.models.InvoicePayment':
+        return os.path.join(transactions_invoices_dir(datadir), 'invoice_payments')
+    elif type(obj) == 'rrg.models.Client':
+        return os.path.join(datadir, 'clients')
+    elif type(obj) == 'rrg.models.ClientManager':
+        return os.path.join(os.path.join(datadir, 'clients'), 'managers')
+    elif type(obj) == 'rrg.models.ClientCheck':
+        return os.path.join(datadir, 'transactions', 'checks')
+    elif type(obj) == 'rrg.models.ClientMemo':
+        return os.path.join(os.path.join(datadir, 'clients'), 'memos')
+    elif type(obj) == 'rrg.models.Employee':
+        return os.path.join(datadir, 'employees')
+    elif type(obj) == 'rrg.models.EmployeeMemo':
+        return os.path.join(datadir, 'employees', 'memos')
+    elif type(obj) == 'rrg.models.EmployeePayment':
+        return os.path.join(datadir, 'employees', 'payments')
+    elif type(obj) == 'rrg.models.Contract':
+        return os.path.join(datadir, 'contracts')
+    elif type(obj) == 'rrg.models.ContractItem':
+        return os.path.join(datadir, 'contracts', 'contract_items')
+    elif type(obj) == 'rrg.models.Citem':
+        return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
+    elif type(obj) == 'rrg.models.CommPayment':
+        return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments')
+    elif type(obj) == 'rrg.models.Expense':
+        return os.path.join(datadir, 'expenses')
+    elif type(obj) == 'rrg.models.Payroll':
+        return os.path.join(datadir, 'payrolls')
+    elif type(obj) == 'rrg.models.State':
+        return os.path.join(datadir, 'states')
+    elif type(obj) == 'rrg.models.Vendor':
+        return os.path.join(datadir, 'vendors')
+
+
+def full_non_dated_xml_id_path(data_dir, id):
+    """
+    generate xml path #####.xml from arbitrary object
+    :param data_dir:
+    :param id:
+    :return:
+    """
+    return os.path.join(data_dir, '%s.xml' % str(id).zfill(5))
+
+
+def full_non_dated_xml_obj_path(data_dir, obj):
+    """
+    generate xml path #####.xml from arbitrary object
+    :param data_dir:
+    :param obj:
+    :return:
+    """
+    return os.path.join(data_dir, '%s.xml' % str(obj.id).zfill(5))
+
+
+def full_dated_obj_xml_path(data_dir, obj):
+    """
+    generate xml path /year/month/primary_key.xml
+    :param data_dir:
+    :param obj:
+    :return:
+    used for commissions invoice items
+    """
+    rel_dir = os.path.join(str(obj.date.year), str(obj.date.month).zfill(2))
+    return os.path.join(data_dir, rel_dir, '%s.xml' % str(obj.id).zfill(5)), rel_dir
+
+
+def employee_dated_object_reldir(obj):
+    return os.path.sep + os.path.join(str(obj.employee_id).zfill(5),
+                                      str(obj.date.year),
+                                      str(obj.date.month).zfill(2))
 def employees(datadir):
-    employees_directory = employees_dir(datadir)
+    """
+    return tabulated list of archived employees
+    :param datadir:
+    :return:
+    """
+    employees_directory = os.path.join(datadir, 'employees')
     ids = []
     sql_ids = []
     firsts = []
@@ -55,7 +136,7 @@ def employees(datadir):
 
 
 def employee(id, datadir):
-    employees_directory = employees_dir(datadir)
+    employees_directory = os.path.join(datadir, 'employees')
     i = 1
     emp_dict = {
         'index': None,
@@ -89,7 +170,7 @@ def employee(id, datadir):
                                 emp_dict['contracts'].append(emp_contract_xml_doc_to_dict(ele))
                         for eles in doc.findall('employee-payments'):
                             for ele in eles.findall('employee-payment'):
-                                _ = full_non_dated_xml_id_path(employees_payments_dir(datadir), ele[0].text)
+                                _ = full_non_dated_xml_id_path(os.path.join(datadir, 'employees', 'payments'), ele[0].text)
                                 doc = ET.parse(_).getroot()
                                 emp_dict['payments'].append(emp_payment_xml_doc_to_dict(doc))
                         break
@@ -98,7 +179,7 @@ def employee(id, datadir):
 
 
 def contracts(datadir):
-    contracts_directory = contracts_dir(datadir)
+    contracts_directory = os.path.join(datadir, 'contracts')
     ids = []
     titles = []
     clients = []
@@ -129,7 +210,7 @@ def contracts(datadir):
 
 
 def contract(datadir, id):
-    contracts_directory = contracts_dir(datadir)
+    contracts_directory = os.path.join(datadir, 'contracts')
     i = 1
     for root, dirs, files in os.walk(contracts_directory):
         if root == contracts_directory:
@@ -185,8 +266,8 @@ def contract_attach_collected_contract_items(citem_doc_list):
 
 
 def cached_employees_collect_contracts(datadir):
-    employees_directory = employees_dir(datadir)
-    contracts_directory = contracts_dir(datadir)
+    employees_directory = os.path.join(datadir, 'employees')
+    contracts_directory = os.path.join(datadir, 'contracts')
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(contracts_directory):
         if iroot == contracts_directory:
@@ -225,8 +306,8 @@ def cached_employees_collect_contracts(datadir):
 
 
 def cached_clients_collect_contracts(datadir):
-    contracts_directory = contracts_dir(datadir)
-    clients_dirirectory = clients_dir(datadir)
+    contracts_directory = os.path.join(datadir, 'contracts')
+    clients_directory = os.path.join(datadir, 'clients')
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(contracts_directory):
         if iroot == contracts_directory:
@@ -238,8 +319,8 @@ def cached_clients_collect_contracts(datadir):
                     conttractsdocs.append(invdoc)
     print('%s contracts found' % len(conttractsdocs))
     # loop through clients, update contracts subdoc
-    for root, dirs, files in os.walk(clients_dirirectory):
-        if root == clients_dirirectory:
+    for root, dirs, files in os.walk(clients_directory):
+        if root == clients_directory:
             for f in files:
                 if re.search(pat, f):
                     fullpath = os.path.join(root, f)
@@ -263,8 +344,8 @@ def cached_clients_collect_contracts(datadir):
 
 def cached_contracts_collect_invoices_and_items(datadir):
     invoices_directory = transactions_invoices_dir(datadir)
-    contract_items_directory = contracts_items_dir(datadir)
-    contracts_directory = contracts_dir(datadir)
+    contract_items_directory = os.path.join(datadir, 'contracts', 'contract_items')
+    contracts_directory = os.path.join(datadir, 'contracts')
     invdocs = []
     for iroot, idirs, ifiles in os.walk(invoices_directory):
         if iroot == invoices_directory:
@@ -319,3 +400,25 @@ def cached_contracts_collect_invoices_and_items(datadir):
                 with open(fullpath, 'w') as fh:
                     fh.write(ET.tostring(doc))
                 print('wrote %s' % fullpath)
+
+
+def cache_obj(obj, full_path):
+    if not os.path.isdir(full_path):
+        os.makedirs(full_path)
+    with open(full_path, 'w') as fh:
+        fh.write(ET.tostring(obj.to_xml()))
+    obj.update({"last_sync_time": dt.now()})
+    print('%s written' % full_path)
+
+
+def cache_objs(objs):
+    for obj in objs:
+
+        full_path = full_non_dated_xml_obj_path(obj_dir(obj), obj)
+        if os.path.isfile(full_path):
+            if obj.last_sync_time is None or obj.modified_date is None:
+                cache_obj(obj, full_path)
+            elif obj.modified_date > obj.last_sync_time:
+                cache_obj(obj, full_path)
+        else:
+            cache_obj(obj, full_path)

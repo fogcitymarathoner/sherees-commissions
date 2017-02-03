@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime as dt
+from datetime import timedelta as td
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from tabulate import tabulate
@@ -11,8 +12,8 @@ from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import YMD_FORMAT
 from s3_mysql_backup import mkdirs
 
-from rrg.billing import full_dated_obj_xml_path
-from rrg.billing import full_non_dated_xml_path
+from rrg.archive import full_dated_obj_xml_path
+from rrg.archive import full_non_dated_xml_obj_path
 from rrg.billing import verify_dirs_ready
 from rrg.models import Employee
 from rrg.models import Citem
@@ -600,45 +601,26 @@ def iitem_xml_pretty_str(iitem):
     return prettify(ET.tostring(xele))
 
 
-def invoice_to_xml(inv):
-    doc = ET.Element('invoice')
-
-    ET.SubElement(doc, 'id').text = str(inv.id)
-    ET.SubElement(doc, 'date').text = dt.strftime(inv.date, TIMESTAMP_FORMAT)
-    ET.SubElement(doc, 'notes').text = str(inv.notes)
-    ET.SubElement(doc, 'period_start').text = dt.strftime(inv.period_start,
-                                                          TIMESTAMP_FORMAT)
-    ET.SubElement(doc, 'period_end').text = dt.strftime(inv.period_end,
-                                                        TIMESTAMP_FORMAT)
-    ET.SubElement(doc, 'employee').text = '%s %s' % (
-        inv.contract.employee.firstname, inv.contract.employee.lastname)
-    items = ET.SubElement(doc, 'invoice-items')
-    for ii in inv.invoice_items:
-        ET.SubElement(items, 'invoice-item').text = str(ii.id)
-    ET.SubElement(doc, 'voided').text = str(inv.voided)
-    return doc
-
-
-def cache_invoice(session, args, inv):
-    f, rel_dir = full_non_dated_xml_path(transactions_invoices_dir(args.datadir), inv)
+def cache_invoice(args, inv):
+    f, rel_dir = full_non_dated_xml_obj_path(transactions_invoices_dir(args.datadir), inv)
     full_path = os.path.join(args.datadir, rel_dir)
     if not os.path.isdir(full_path):
         os.makedirs(full_path)
     with open(f, 'w') as fh:
-        fh.write(ET.tostring(invoice_to_xml(inv)))
+        fh.write(ET.tostring(inv.to_xml()))
 
     print('%s written' % f)
 
 
 def cache_invoices(session, args):
     for inv in sherees_invoices_of_interest(session):
-        cache_invoice(session, args, inv)
+        cache_invoice(args, inv)
 
 
 def cache_invoices_items(session, args):
     for inv in sherees_invoices_of_interest(session):
         for iitem in inv.invoice_items:
-            f = full_non_dated_xml_path(args.datadir, iitem)
+            f = full_non_dated_xml_obj_path(args.datadir, iitem)
             with open(f, 'w') as fh:
                 fh.write(iitem_xml_pretty_str(iitem))
             print('%s written' % f)
@@ -803,10 +785,13 @@ def inv_report(session, args):
 
 
 def delete_old_voided_invoices(session, args):
+    """
+    voided invoices serve as reminders to ignore in the past 90 days
+    :param session:
+    :param args:
+    :return:
+    """
     vinvs = session.query(Invoice).filter(
         and_(Invoice.voided == 1, Invoice.period_end < dt.now() - td(days=args.days_back)))
     for inv in vinvs:
-        pass
-        # fixme: reinstate with commitems migration
-        # cache_invoice(session, args, inv)
-        # session.delete(inv)
+        session.delete(inv)

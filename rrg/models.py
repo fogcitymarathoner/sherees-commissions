@@ -58,8 +58,6 @@ Base = declarative_base()
 # sherees_commissions
 
 
-
-
 def commissions_calculation(inv_item_quantity, inv_item_amount, inv_item_cost, employerexpenserate, percent):
     iamount = inv_item_quantity * inv_item_amount
     icost = inv_item_quantity * inv_item_cost
@@ -162,8 +160,10 @@ class Employee(Base):
     street1 = Column(String(40))
     street2 = Column(String(40))
     city = Column(String(20))
+
     state_id = Column(Integer, ForeignKey('states.id'))
     state = relationship("State")
+
     zip = Column(String(10))
     ssn_crypto = Column(String(255))
     bankaccountnumber_crypto = Column(String(255))
@@ -279,28 +279,29 @@ class Employee(Base):
 
         return doc
 
-    @staticmethod                                                                                                              
-    def from_xml(xml_file_name):                                                                                               
+    @staticmethod
+    def from_xml(xml_file_name):
         """                                                                                                                    
         returns DOM of comm item from file                                                                                     
-        """                                                                                                                    
-        return ET.parse(xml_file_name).getroot() 
+        """
+        return ET.parse(xml_file_name).getroot()
 
-    def update_from_xml_doc(self, emp_doc, crypter):                                                                                    
-        self.firstname = emp_doc.findall('firstname')[0].text                                                                            
-        self.lastname = emp_doc.findall('lastname')[0].text                                                                          
+    def update_from_xml_doc(self, emp_doc, crypter):
+        self.firstname = emp_doc.findall('firstname')[0].text
+        self.lastname = emp_doc.findall('lastname')[0].text
         if emp_doc.findall('ssn_crypto')[0].text:
-            self.ssn_crypto = crypter.Encrypt(emp_doc.findall('ssn_crypto')[0].text) 
+            self.ssn_crypto = crypter.Encrypt(emp_doc.findall('ssn_crypto')[0].text)
         else:
             self.ssn_crypto = crypter.Encrypt('N/A')
         if emp_doc.findall('bankaccountnumber_crypto')[0].text:
-            self.bankaccountnumber_crypto = crypter.Encrypt(emp_doc.findall('bankaccountnumber_crypto')[0].text) 
+            self.bankaccountnumber_crypto = crypter.Encrypt(emp_doc.findall('bankaccountnumber_crypto')[0].text)
         else:
             self.bankaccountnumber_crypto = crypter.Encrypt('N/A')
         if emp_doc.findall('bankroutingnumber_crypto')[0].text:
-            self.bankroutingnumber_crypto = crypter.Encrypt(emp_doc.findall('bankroutingnumber_crypto')[0].text) 
+            self.bankroutingnumber_crypto = crypter.Encrypt(emp_doc.findall('bankroutingnumber_crypto')[0].text)
         else:
             self.bankroutingnumber_crypto = crypter.Encrypt('N/A')
+
 
 def delete_employee(session, delemp):
     """
@@ -442,7 +443,9 @@ class Client(Base):
     street1 = Column(String(50))
     street2 = Column(String(50))
     city = Column(String(50))
-    state_id = Column(Integer)
+
+    state_id = Column(Integer, ForeignKey('states.id'))
+    state = relationship("State")
     zip = Column(String(50))
     active = Column(Boolean)
     terms = Column(Integer, nullable=False)
@@ -975,7 +978,6 @@ class Iitem(Base):
             commitems.append(i.to_xml())
         return doc
 
-                                      
     def update_from_xml_doc(self, iitem_ele):
         self.quantity = iitem_ele.findall('quantity')[0].text
 
@@ -1087,3 +1089,146 @@ class Payroll(Base):
     notes = Column(TEXT, nullable=False)
     amount = Column(Float, nullable=False)
     date = Column(Date, index=True, nullable=False, default=default_date, onupdate=default_date)
+
+    def to_xml(self):
+        doc = ET.Element('payroll')
+
+        ET.SubElement(doc, 'id').text = str(self.id)
+
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+
+        return doc
+
+
+class ExpenseCategory(Base):
+    __tablename__ = 'expenses_categories'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(22))
+
+    def to_xml(self):
+        doc = ET.Element('expense-category')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'name').text = str(self.name)
+        return doc
+
+
+class Expense(Base):
+    __tablename__ = 'expenses'
+
+    id = Column(Integer, primary_key=True)
+
+    amount = Column(Float)
+
+    category_id = Column(Integer, ForeignKey('expenses_categories.id'), nullable=False)
+    category = relationship("ExpenseCategory")
+
+    employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
+    employee = relationship("Employee")
+
+    cleared = Column(Boolean, default=False)
+    date = Column(Date, index=True, default=default_date)
+
+    description = Column(String(45))
+    notes = Column(String(200))
+
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_user_id = Column(Integer, default=2)
+    modified_user_id = Column(Integer, default=2)
+    last_sync_time = Column(TIMESTAMP)
+
+    def to_xml(self):
+        doc = ET.Element('expense')
+
+        ET.SubElement(doc, 'id').text = str(self.id)
+
+        ET.SubElement(doc, 'amount').text = str(self.amount)
+
+        ET.SubElement(doc, 'category_id').text = str(self.category_id)
+        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+
+        ET.SubElement(doc, 'cleared').text = str(self.cleared)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'description').text = str(self.description)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date,
+                                                              TIMESTAMP_FORMAT) if self.created_date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date,
+                                                               TIMESTAMP_FORMAT) if self.modified_date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
+        return doc
+
+
+class Vendor(Base):
+    __tablename__ = 'vendors'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(40))
+    purpose = Column(String(60))
+    street1 = Column(String(30))
+    street2 = Column(String(30))
+    city = Column(String(20))
+
+    state_id = Column(Integer, ForeignKey('states.id'))
+    state = relationship("State")
+
+    zip = Column(String(50))
+    active = Column(Boolean)
+
+    ssn = Column(String(11))
+
+    apfirstname = Column(String(31))
+    aplastname = Column(String(11))
+
+    apphonetype1 = Column(Integer)
+    apphone1 = Column(String(32))
+    apphonetype2 = Column(Integer)
+    apphone2 = Column(String(32))
+    accountnumber = Column(String(65))
+    notes = Column(String(183))
+    secretbits = Column(TEXT)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(DateTime)
+
+    def to_xml(self):
+        doc = ET.Element('vendor')
+        ET.SubElement(doc, 'id').text = str(self.id)
+
+        ET.SubElement(doc, 'name').text = self.name
+        ET.SubElement(doc, 'purpose').text = self.purpose
+
+        ET.SubElement(doc, 'street1').text = self.street1
+        ET.SubElement(doc, 'street2').text = self.street2
+        ET.SubElement(doc, 'city').text = self.city
+        ET.SubElement(doc, 'state').text = str(self.state.name)
+        ET.SubElement(doc, 'zip').text = self.zip
+        ET.SubElement(doc, 'active').text = str(self.active)
+        ET.SubElement(doc, 'ssn').text = str(self.ssn)
+        ET.SubElement(doc, 'apfirstname').text = str(self.apfirstname)
+        ET.SubElement(doc, 'aplastname').text = str(self.aplastname)
+        ET.SubElement(doc, 'apphonetype1').text = str(self.apphonetype1)
+        ET.SubElement(doc, 'apphone1').text = str(self.apphone1)
+        ET.SubElement(doc, 'apphonetype2').text = str(self.apphonetype2)
+        ET.SubElement(doc, 'apphone2').text = str(self.apphone2)
+        ET.SubElement(doc, 'accountnumber').text = str(self.accountnumber)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'secretbits').text = str(self.secretbits)
+
+        ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date,
+                                                              TIMESTAMP_FORMAT) if self.created_date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date,
+                                                               TIMESTAMP_FORMAT) if self.modified_date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
+        ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
+        return doc

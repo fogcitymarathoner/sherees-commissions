@@ -25,7 +25,7 @@ from rrg.reminders import biweeks_between_dates
 from rrg.reminders import semimonths_between_dates
 from rrg.reminders import months_between_dates
 from rrg.reminders_generation import create_invoice_for_period
-from rrg.billing import full_dated_obj_xml_path
+from rrg.archive import full_dated_obj_xml_path
 from rrg.utils import commissions_item_dir
 from rrg.utils import commissions_items_dir
 from rrg.models import session_maker

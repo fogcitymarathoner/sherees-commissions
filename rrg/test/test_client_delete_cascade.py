@@ -17,7 +17,6 @@ from rrg.models import Iitem
 from rrg.models import Citem
 from rrg.models import Payroll
 from rrg.models import periods
-from rrg.models import delete_employee
 from rrg.reminders import weeks_between_dates
 from rrg.reminders import biweeks_between_dates
 from rrg.reminders import semimonths_between_dates
@@ -58,8 +57,7 @@ class Test:
         with self.session.no_autoflush:
             objects = []
             client_active = Client(name='weekly', active=True, terms=30)
-            client_inactive = Client(name='weekly-inactive', active=False,
-                                     terms=30)
+            client_inactive = Client(name='weekly-inactive', active=False, terms=30)
             objects.append(client_active)
             objects.append(client_inactive)
 

@@ -11,7 +11,6 @@ from rrg.models import is_pastdue
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
 from rrg.billing import verify_dirs_ready
-from rrg.utils import transactions_invoices_dir
 from rrg.utils import clients_ar_xml_file
 from rrg.utils import clients_checks_dir
 
