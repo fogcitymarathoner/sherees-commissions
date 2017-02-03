@@ -1,9 +1,9 @@
+import os
 import argparse
 from keyczar import keyczar
 from rrg.billing import cache_non_date_parsed as cache_routine
 from rrg.models import session_maker
 from rrg.models import Invoice
-from rrg.utils import transactions_invoices_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Invoices')
 
@@ -29,6 +29,6 @@ def cache_invoices():
     args = parser.parse_args()
     session = session_maker(args)
     crypter = keyczar.Crypter.Read(args.keyczardir)
-    print('Caching Invoices %s into %s' % (args.db, transactions_invoices_dir(args.datadir)))
-    cache_routine(session, transactions_invoices_dir(args.datadir), Invoice, crypter)
+    print('Caching Invoices %s into %s' % (args.db, os.path.join(args.datadir, 'transactions', 'invoices')))
+    cache_routine(session, os.path.join(args.datadir, 'transactions', 'invoices'), Invoice, crypter)
     session.commit()

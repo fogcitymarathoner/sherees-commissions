@@ -55,16 +55,12 @@ def directory_date_dictionary(data_dir):
         f in dirFileList}
 
 
-def transactions_invoices_dir(datadir):
-    return os.path.join(datadir, 'transactions', 'invoices')
-
-
 def transactions_invoice_items_dir(datadir):
-    return os.path.join(transactions_invoices_dir(datadir), 'invoice_items')
+    return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_items')
 
 
 def transactions_invoice_payments_dir(datadir):
-    return os.path.join(transactions_invoices_dir(datadir), 'invoice_payments')
+    return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_payments')
 
 
 def clients_open_invoices_dir(datadir):
@@ -76,7 +72,7 @@ def clients_statements_dir(datadir):
 
 
 def clients_ar_xml_file(datadir):
-    return os.path.join(transactions_invoices_dir(datadir), 'ar.xml')
+    return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'ar.xml')
 
 
 def commissions_item_dir(datadir, comm_item):

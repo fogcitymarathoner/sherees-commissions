@@ -9,7 +9,6 @@ from rrg.helpers import emp_xml_doc_to_dict
 from rrg.helpers import emp_memo_xml_doc_to_dict
 from rrg.helpers import emp_contract_xml_doc_to_dict
 from rrg.helpers import emp_payment_xml_doc_to_dict
-from rrg.utils import transactions_invoices_dir
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -29,9 +28,9 @@ def obj_dir(datadir, obj):
     if type(obj) == 'rrg.models.Invoice':
         return os.path.join(datadir, 'transactions', 'invoices')
     elif type(obj) == 'rrg.models.Iitem':
-        return os.path.join(transactions_invoices_dir(datadir), 'invoice_items')
+        return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_items')
     elif type(obj) == 'rrg.models.InvoicePayment':
-        return os.path.join(transactions_invoices_dir(datadir), 'invoice_payments')
+        return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_payments')
     elif type(obj) == 'rrg.models.Client':
         return os.path.join(datadir, 'clients')
     elif type(obj) == 'rrg.models.ClientManager':
@@ -343,7 +342,7 @@ def cached_clients_collect_contracts(datadir):
 
 
 def cached_contracts_collect_invoices_and_items(datadir):
-    invoices_directory = transactions_invoices_dir(datadir)
+    invoices_directory = os.path.join(datadir, 'transactions', 'invoices')
     contract_items_directory = os.path.join(datadir, 'contracts', 'contract_items')
     contracts_directory = os.path.join(datadir, 'contracts')
     invdocs = []

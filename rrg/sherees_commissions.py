@@ -27,7 +27,6 @@ from rrg.queries import sherees_notes
 from rrg.utils import directory_date_dictionary
 from rrg.utils import commissions_items_dir
 from rrg.utils import commissions_item_dir
-from rrg.utils import transactions_invoices_dir
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
@@ -602,7 +601,7 @@ def iitem_xml_pretty_str(iitem):
 
 
 def cache_invoice(args, inv):
-    f, rel_dir = full_non_dated_xml_obj_path(transactions_invoices_dir(args.datadir), inv)
+    f, rel_dir = full_non_dated_xml_obj_path(os.path.join(datadir, 'transactions', 'invoices'), inv)
     full_path = os.path.join(args.datadir, rel_dir)
     if not os.path.isdir(full_path):
         os.makedirs(full_path)
