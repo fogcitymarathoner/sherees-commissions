@@ -1,9 +1,9 @@
+import os
 import argparse
 from keyczar import keyczar
 from rrg.billing import cache_non_date_parsed as routine
 from rrg.models import ClientCheck
 from rrg.models import session_maker
-from rrg.utils import clients_checks_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Clients Checks')
 
@@ -34,6 +34,6 @@ def cache_checks():
     session = session_maker(args)
     crypter = keyczar.Crypter.Read(args.keyczardir)
 
-    print('Caching Clients-Checks %s into %s' % (args.db, clients_checks_dir(args.datadir)))
-    routine(session, clients_checks_dir(args.datadir), ClientCheck, crypter)
+    print('Caching Clients-Checks %s into %s' % (args.db, os.path.join(args.datadir, 'transactions', 'checks')))
+    routine(session, os.path.join(args.datadir, 'transactions', 'checks'), ClientCheck, crypter)
     session.commit()

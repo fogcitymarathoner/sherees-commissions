@@ -12,7 +12,6 @@ from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
 from rrg.billing import verify_dirs_ready
 from rrg.utils import clients_ar_xml_file
-from rrg.utils import clients_checks_dir
 
 parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
 parser.add_argument('reminders', metavar='N', type=int, nargs='+',
@@ -53,7 +52,7 @@ def cache_clients_ar(session, datadir):
     #
     # Make sure destination directories exist
     #
-    verify_dirs_ready(clients_checks_dir(datadir), [clients_checks_dir(datadir)])
+    verify_dirs_ready(os.path.join(datadir, 'transactions', 'checks'), [os.path.join(datadir, 'transactions', 'checks')])
     all_invs = session.query(Invoice)
     doc = ET.Element('invoices')
     all = ET.SubElement(doc, 'all')
