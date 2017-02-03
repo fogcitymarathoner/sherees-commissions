@@ -1,7 +1,7 @@
+import os
 import argparse
 from rrg.sherees_commissions import cache_comm_items as cache_commissions_items
 from rrg.models import session_maker
-from rrg.utils import commissions_items_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Commissions Items')
 
@@ -26,7 +26,7 @@ def cache_comm_items():
 
     session = session_maker(args)
     if args.project == 'rrg':
-        print('Caching Commission Items into %s' % commissions_items_dir(args.datadir))
+        print('Caching Commission Items into %s' % os.path.join(args.datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items'))
         cache_commissions_items(session, args.datadir)
     else:
         print('Project not "rrg" skipping Caching Commission Items')

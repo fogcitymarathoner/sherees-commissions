@@ -25,7 +25,6 @@ from rrg.models import Iitem
 from rrg.queries import sheree_notes_payments
 from rrg.queries import sherees_notes
 from rrg.utils import directory_date_dictionary
-from rrg.utils import commissions_items_dir
 from rrg.utils import commissions_item_dir
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
@@ -390,8 +389,8 @@ def verify_comm_dirs_ready(data_dir, rel_dir_set):
 
 def cache_comm_items(session, datadir):
     # Make query, assemble lists
-    disk_dict = directory_date_dictionary(commissions_items_dir(datadir))
-    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, commissions_items_dir(datadir))
+    disk_dict = directory_date_dictionary(os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items'))
+    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items'))
     to_sync = []
     for comm_item in citems:
         #

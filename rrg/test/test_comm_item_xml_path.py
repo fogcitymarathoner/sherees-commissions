@@ -27,7 +27,6 @@ from rrg.reminders import months_between_dates
 from rrg.reminders_generation import create_invoice_for_period
 from rrg.archive import full_dated_obj_xml_path
 from rrg.utils import commissions_item_dir
-from rrg.utils import commissions_items_dir
 from rrg.models import session_maker
 
 
@@ -348,7 +347,7 @@ class Test:
         datadir = os.path.join('a', 'b', 'c')
         citems = self.session.query(Citem).all()
         logger.debug('commissions_items_dir(datadir)')
-        logger.debug(commissions_items_dir(datadir))
+        logger.debug(os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items'))
         logger.debug('commissions_item_dir(datadir)')
         logger.debug(commissions_item_dir(datadir, citems[0]))
         path, _ = full_dated_obj_xml_path(commissions_item_dir(datadir, citems[0]), citems[0])
