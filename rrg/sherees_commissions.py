@@ -26,7 +26,8 @@ from rrg.models import Iitem
 from rrg.queries import sheree_notes_payments
 from rrg.queries import sherees_notes
 from rrg.utils import directory_date_dictionary
-from rrg.utils import commissions_item_dir
+from rrg.utils import commissions_item_reldir
+from rrg.utils import commissions_item_fullpathname
 
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'
 
@@ -324,13 +325,7 @@ def db_date_dictionary_comm_item(session, datadir):
     rel_dir_set = set()
     citems = session.query(Citem).order_by(Citem.id)
     for comm_item in citems:
-        # redundant
-        rel_dir = employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
-        xfilename = os.path.join('%s.xml' % str(comm_item.id).zfill(5))
-
-        f = os.path.join(datadir, rel_dir, xfilename)
-        # redundant
-        rel_dir_set.add(rel_dir)
+        rel_dir_set.add(commissions_item_reldir(comm_item))
         citem_dict[f] = comm_item.last_sync_time
     return citem_dict, citems, rel_dir_set
 
@@ -397,23 +392,16 @@ def cache_comm_items(session, datadir):
     base_dir = os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
     disk_dict = directory_date_dictionary(base_dir)
     date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, base_dir)
-    
+
     verify_dirs_ready(date_dict)
     to_sync = []
     for comm_item in citems:
         #
         # Make sure destination directory if it doesn't exist
         #
-        comm_item_dir = commissions_item_dir(datadir, comm_item)
         if comm_item.amount > 0:
-            file = os.path.join(comm_item_dir, '%s.xml' % str(comm_item.id).zfill(5))
-            #
-            rel_dir = employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
-            xfilename = os.path.join('%s.xml' % str(comm_item.id).zfill(5))
 
-            f = os.path.join(base_dir, rel_dir, xfilename)
-            # redundant
-            file = f
+            file = commissions_item_fullpathname(datadir, comm_item)
             # add to sync list if comm item not on disk
             if file not in disk_dict:
                 to_sync.append(comm_item)
@@ -426,12 +414,7 @@ def cache_comm_items(session, datadir):
                     to_sync.append(comm_item)
     # Write out xml
     for comm_item in to_sync:
-        #
-        rel_dir = employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
-        xfilename = os.path.join('%s.xml' % str(comm_item.id).zfill(5))
-
-        f = os.path.join(base_dir, rel_dir, xfilename)
-        # redundant
+        f = commissions_item_fullpathname(datadir, comm_item)
         sync_comm_item(session, f, comm_item)
 
 

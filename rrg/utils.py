@@ -76,8 +76,13 @@ def clients_ar_xml_file(datadir):
     return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'ar.xml')
 
 
-def commissions_item_dir(datadir, comm_item):
-    return full_non_dated_xml_obj_path(datadir, comm_item)
+def commissions_item_reldir(comm_item):
+    return employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
+
+def commissions_item_fullpathname(datadir, comm_item):
+    xfilename = os.path.join('%s.xml' % str(comm_item.id).zfill(5))
+
+    return os.path.join(datadir, commissions_item_reldir(comm_item), xfilename)
 
 
 def commissions_payment_dir(datadir, comm_payment):
