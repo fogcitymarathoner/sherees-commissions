@@ -393,7 +393,6 @@ def cache_comm_items(session, datadir):
     base_dir = os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
     disk_dict = directory_date_dictionary(base_dir)
     date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, base_dir)
-
     verify_dirs_ready(date_dict)
     to_sync = []
     for comm_item in citems:
