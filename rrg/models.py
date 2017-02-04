@@ -1086,6 +1086,7 @@ class Payroll(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(72), nullable=False)
 
+    checks = relationship("EmployeePayment", back_populates="payroll", cascade="all, delete, delete-orphan")
     notes = Column(TEXT, nullable=False)
     amount = Column(Float, nullable=False)
     date = Column(Date, index=True, nullable=False, default=default_date, onupdate=default_date)
@@ -1099,6 +1100,10 @@ class Payroll(Base):
         ET.SubElement(doc, 'amount').text = str(self.amount)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date if self.date else dt.now(), TIMESTAMP_FORMAT)
 
+        checks = ET.Element('checks')
+        for o in self.checks:
+            checks.append(o.to_xml())
+        doc.append(checks)
         return doc
 
 

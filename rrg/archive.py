@@ -9,7 +9,25 @@ from rrg.helpers import emp_xml_doc_to_dict
 from rrg.helpers import emp_memo_xml_doc_to_dict
 from rrg.helpers import emp_contract_xml_doc_to_dict
 from rrg.helpers import emp_payment_xml_doc_to_dict
+from rrg.models import Citem
+from rrg.models import Client
+from rrg.models import ClientCheck
+from rrg.models import ClientManager
+from rrg.models import ClientMemo
+from rrg.models import CommPayment
+from rrg.models import Contract
+from rrg.models import ContractItem
+from rrg.models import Employee
+from rrg.models import EmployeeCheck
+from rrg.models import EmployeeMemo
+from rrg.models import Expense
+from rrg.models import Iitem
+from rrg.models import Invoice
+from rrg.models import InvoicePayment
 from rrg.models import Payroll
+from rrg.models import State
+from rrg.models import Vendor
+
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
 
@@ -25,47 +43,42 @@ def obj_dir(datadir, obj):
     :param obj:
     :return:
     """
-    print 'in obj_dir'
-    print type(obj)
-    print type(Payroll)
-    op = Payroll()
-    print type(op)
-    if type(obj) == 'rrg.models.Invoice':
+
+    if isinstance(obj, type(Invoice())):
         return os.path.join(datadir, 'transactions', 'invoices')
-    elif type(obj) == 'rrg.models.Iitem':
+    elif isinstance(obj, type(Iitem())):
         return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_items')
-    elif type(obj) == 'rrg.models.InvoicePayment':
+    elif isinstance(obj, type(InvoicePayment())):
         return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_payments')
-    elif type(obj) == 'rrg.models.Client':
+    elif isinstance(obj, type(Client())):
         return os.path.join(datadir, 'clients')
-    elif type(obj) == 'rrg.models.ClientManager':
+    elif isinstance(obj, type(ClientManager())):
         return os.path.join(os.path.join(datadir, 'clients'), 'managers')
-    elif type(obj) == 'rrg.models.ClientCheck':
+    elif isinstance(obj, type(ClientCheck())):
         return os.path.join(datadir, 'transactions', 'checks')
-    elif type(obj) == 'rrg.models.ClientMemo':
+    elif isinstance(obj, type(ClientMemo())):
         return os.path.join(os.path.join(datadir, 'clients'), 'memos')
-    elif type(obj) == 'rrg.models.Employee':
+    elif isinstance(obj, type(Employee())):
         return os.path.join(datadir, 'employees')
-    elif type(obj) == 'rrg.models.EmployeeMemo':
+    elif isinstance(obj, type(EmployeeMemo())):
         return os.path.join(datadir, 'employees', 'memos')
-    elif type(obj) == 'rrg.models.EmployeePayment':
+    elif isinstance(obj, type(EmployeeCheck())):
         return os.path.join(datadir, 'employees', 'payments')
-    elif type(obj) == 'rrg.models.Contract':
+    elif isinstance(obj, type(Contract())):
         return os.path.join(datadir, 'contracts')
-    elif type(obj) == 'rrg.models.ContractItem':
+    elif isinstance(obj, type(ContractItem())):
         return os.path.join(datadir, 'contracts', 'contract_items')
-    elif type(obj) == 'rrg.models.Citem':
+    elif isinstance(obj, type(Citem())):
         return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
-    elif type(obj) == 'rrg.models.CommPayment':
+    elif isinstance(obj, type(CommPayment())):
         return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments')
-    elif type(obj) == 'rrg.models.Expense':
+    elif isinstance(obj, type(Expense())):
         return os.path.join(datadir, 'expenses')
-    elif type(obj) == type(Payroll()):
-        print 'found'
+    elif isinstance(obj, type(Payroll())):
         return os.path.join(datadir, 'payrolls')
-    elif type(obj) == 'rrg.models.State':
+    elif isinstance(obj, type(State())):
         return os.path.join(datadir, 'states')
-    elif type(obj) == 'rrg.models.Vendor':
+    elif isinstance(obj, type(Vendor())):
         return os.path.join(datadir, 'vendors')
 
 
@@ -419,9 +432,7 @@ def cache_obj(obj, full_path):
 
 def cache_objs(datadir, objs):
     for obj in objs:
-        print type(obj)
-        print obj 
-        print obj_dir(datadir, obj)
+
         full_path = full_non_dated_xml_obj_path(obj_dir(datadir, obj), obj)
         if os.path.isfile(full_path):
             if obj.last_sync_time is None or obj.modified_date is None:
