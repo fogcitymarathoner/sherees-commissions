@@ -46,7 +46,7 @@ def cache_non_date_parsed(session, datadir, model, crypter):
     #
     # Make sure destination directories exist
     #
-    verify_dirs_ready(datadir, [datadir])
+    verify_dirs_ready(date_dict)
     to_sync = []
     for item in items:
         file = full_non_dated_xml_obj_path(datadir, item)

@@ -813,7 +813,7 @@ class Invoice(Base):
     def duedate(self):
         return date_to_datetime(self.date) + td(days=self.terms)
 
-    def to_xml(self):
+    def to_xml(self, crypter):
         doc = ET.Element('invoice')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -840,7 +840,7 @@ class Invoice(Base):
         ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
         iitems = ET.SubElement(doc, 'invoice-items')
         for i in self.invoice_items:
-            iitems.append(i.to_xml())
+            iitems.append(i.to_xml(crypter))
         ipayments = ET.SubElement(doc, 'invoice-payments')
         for i in self.invoice_payments:
             ipayments.append(i.to_xml())
@@ -963,7 +963,7 @@ class Iitem(Base):
             self.id, self.description, self.amount, self.quantity,
             self.invoice_id)
 
-    def to_xml(self):
+    def to_xml(self, crypter):
         doc = ET.Element('invoice-item')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -1090,14 +1090,14 @@ class Payroll(Base):
     amount = Column(Float, nullable=False)
     date = Column(Date, index=True, nullable=False, default=default_date, onupdate=default_date)
 
+    last_sync_time = Column(TIMESTAMP)
     def to_xml(self):
         doc = ET.Element('payroll')
-
         ET.SubElement(doc, 'id').text = str(self.id)
 
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'amount').text = str(self.amount)
-        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date if self.date else dt.now(), TIMESTAMP_FORMAT)
 
         return doc
 

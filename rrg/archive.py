@@ -9,7 +9,7 @@ from rrg.helpers import emp_xml_doc_to_dict
 from rrg.helpers import emp_memo_xml_doc_to_dict
 from rrg.helpers import emp_contract_xml_doc_to_dict
 from rrg.helpers import emp_payment_xml_doc_to_dict
-
+from rrg.models import Payroll
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
 
@@ -25,6 +25,11 @@ def obj_dir(datadir, obj):
     :param obj:
     :return:
     """
+    print 'in obj_dir'
+    print type(obj)
+    print type(Payroll)
+    op = Payroll()
+    print type(op)
     if type(obj) == 'rrg.models.Invoice':
         return os.path.join(datadir, 'transactions', 'invoices')
     elif type(obj) == 'rrg.models.Iitem':
@@ -55,7 +60,8 @@ def obj_dir(datadir, obj):
         return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments')
     elif type(obj) == 'rrg.models.Expense':
         return os.path.join(datadir, 'expenses')
-    elif type(obj) == 'rrg.models.Payroll':
+    elif type(obj) == type(Payroll()):
+        print 'found'
         return os.path.join(datadir, 'payrolls')
     elif type(obj) == 'rrg.models.State':
         return os.path.join(datadir, 'states')
@@ -402,18 +408,21 @@ def cached_contracts_collect_invoices_and_items(datadir):
 
 
 def cache_obj(obj, full_path):
-    if not os.path.isdir(full_path):
-        os.makedirs(full_path)
+    print full_path
+    if not os.path.isdir(os.path.dirname(full_path)):
+        os.makedirs(os.path.dirname(full_path))
     with open(full_path, 'w') as fh:
         fh.write(ET.tostring(obj.to_xml()))
-    obj.update({"last_sync_time": dt.now()})
+    obj.last_sync_time = dt.now()
     print('%s written' % full_path)
 
 
-def cache_objs(objs):
+def cache_objs(datadir, objs):
     for obj in objs:
-
-        full_path = full_non_dated_xml_obj_path(obj_dir(obj), obj)
+        print type(obj)
+        print obj 
+        print obj_dir(datadir, obj)
+        full_path = full_non_dated_xml_obj_path(obj_dir(datadir, obj), obj)
         if os.path.isfile(full_path):
             if obj.last_sync_time is None or obj.modified_date is None:
                 cache_obj(obj, full_path)

@@ -31,5 +31,8 @@ def cache_payrolls():
 
     print('Caching Payrolls %s into %s' % (args.db, os.path.join(args.datadir, 'payrolls')))
     payrolls = session.query(Payroll).all()
-    cache_objs(payrolls)
+    for p in payrolls:
+        print type(p)
+        print p.id
+    cache_objs(args.datadir, payrolls)
     session.commit()
