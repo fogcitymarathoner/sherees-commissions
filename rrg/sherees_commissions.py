@@ -47,7 +47,7 @@ def sheree_total_monies_owed(session, args):
         args.month = cm['month']
         args.year = cm['year']
         total, res = employee_year_month_statement(
-            session, args.employee, args.datadir, args.year, args.month, args.cache)
+            session, sa_sheree(session), args.datadir, args.year, args.month, args.cache)
         total_commissions += total
 
     sherees_paychecks_due, iitems, total_payroll = remaining_payroll(session)
