@@ -1091,6 +1091,10 @@ class Payroll(Base):
     amount = Column(Float, nullable=False)
     date = Column(Date, index=True, nullable=False, default=default_date, onupdate=default_date)
 
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_user_id = Column(Integer, default=2)
+    modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
     def to_xml(self):
         doc = ET.Element('payroll')

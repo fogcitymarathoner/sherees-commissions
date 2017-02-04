@@ -18,7 +18,7 @@ from rrg.models import CommPayment
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import Employee
-from rrg.models import EmployeeCheck
+from rrg.models import EmployeePayment
 from rrg.models import EmployeeMemo
 from rrg.models import Expense
 from rrg.models import Iitem
@@ -62,7 +62,7 @@ def obj_dir(datadir, obj):
         return os.path.join(datadir, 'employees')
     elif isinstance(obj, type(EmployeeMemo())):
         return os.path.join(datadir, 'employees', 'memos')
-    elif isinstance(obj, type(EmployeeCheck())):
+    elif isinstance(obj, type(EmployeePayment())):
         return os.path.join(datadir, 'employees', 'payments')
     elif isinstance(obj, type(Contract())):
         return os.path.join(datadir, 'contracts')
@@ -421,7 +421,6 @@ def cached_contracts_collect_invoices_and_items(datadir):
 
 
 def cache_obj(obj, full_path):
-    print full_path
     if not os.path.isdir(os.path.dirname(full_path)):
         os.makedirs(os.path.dirname(full_path))
     with open(full_path, 'w') as fh:
