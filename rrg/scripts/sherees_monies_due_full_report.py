@@ -3,7 +3,7 @@ import argparse
 from rrg.sherees_commissions import comm_latex_document_header
 from rrg.sherees_commissions import sheree_total_monies_owed
 from rrg.sherees_commissions import payroll_due_report
-from rrg.sherees_commissions import sherees_notes_report
+from rrg.sherees_commissions import sherees_notes_report_db
 from rrg.sherees_commissions import sherees_commissions_report
 from rrg.sherees_commissions import inv_report
 from rrg.models import session_maker
@@ -35,7 +35,7 @@ def monies_due():
         report += payroll_due_report(session, args)
         report += '\n'
         report += 'Notes Report\n'
-        report += sherees_notes_report(session, args)
+        report += sherees_notes_report_db(session, args)
         report += '\n'
         report += 'Commissions Report\n'
         report += sherees_commissions_report(session, args)
