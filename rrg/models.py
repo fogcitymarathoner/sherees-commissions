@@ -1096,6 +1096,7 @@ class Payroll(Base):
     created_user_id = Column(Integer, default=2)
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
+
     def to_xml(self):
         doc = ET.Element('payroll')
         ET.SubElement(doc, 'id').text = str(self.id)
