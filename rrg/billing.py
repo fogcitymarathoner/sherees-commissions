@@ -31,13 +31,12 @@ def db_date_dictionary_model(session, model, destination_dir):
     return em_dict, m_items
 
 
-def verify_dirs_ready(data_dir, rel_dir_set):
+def verify_dirs_ready(date_dict):
     """
     run through the list of commissions directories created by db_data_dictionary_comm_item()
     """
-    for d in rel_dir_set:
-        dest = os.path.join(data_dir, d)
-        mkdirs(dest)
+    for d in date_dict:
+        mkdirs(os.path.dirname(d))
 
 
 def cache_non_date_parsed(session, datadir, model, crypter):
