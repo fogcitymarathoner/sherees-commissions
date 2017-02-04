@@ -82,7 +82,7 @@ def sherees_notes_report_db(session, format):
     :return:
     """
     if format not in ['plain', 'latex']:
-        print('Wrong format')
+        print('xxxWrong format - %s' % format)
         quit()
 
     sheree = sa_sheree(session)

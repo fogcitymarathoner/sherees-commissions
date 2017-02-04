@@ -35,7 +35,7 @@ def monies_due():
         report += payroll_due_report(session, args)
         report += '\n'
         report += 'Notes Report\n'
-        report += sherees_notes_report_db(session, args)
+        report += sherees_notes_report_db(session, args.format)
         report += '\n'
         report += 'Commissions Report\n'
         report += sherees_commissions_report(session, args)
