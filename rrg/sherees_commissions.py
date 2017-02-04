@@ -325,6 +325,7 @@ def db_date_dictionary_comm_item(session, datadir):
     rel_dir_set = set()
     citems = session.query(Citem).order_by(Citem.id)
     for comm_item in citems:
+        f = commissions_item_fullpathname(datadir, comm_item)
         rel_dir_set.add(commissions_item_reldir(comm_item))
         citem_dict[f] = comm_item.last_sync_time
     return citem_dict, citems, rel_dir_set
