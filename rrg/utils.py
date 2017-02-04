@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from sqlalchemy import create_engine
 from rrg.archive import employee_dated_object_reldir
 from rrg.archive import obj_dir
+from rrg.archive import full_non_dated_xml_obj_path
 from rrg.models import Base
 
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
@@ -76,8 +77,13 @@ def clients_ar_xml_file(datadir):
 
 
 def commissions_item_dir(datadir, comm_item):
-    return obj_dir(datadir, comm_item) + employee_dated_object_reldir(comm_item)
+    print comm_item
+    print 'datadir in commissions_item_dir %s' % datadir
+    print 'comm_item in commissions_item_dir %s' % employee_dated_object_reldir(comm_item)
+    print 'full_non_dated_xml_obj_path(datadir, comm_item) in commissions_item_dir %s' % full_non_dated_xml_obj_path(datadir, comm_item)
+    return full_non_dated_xml_obj_path(datadir, comm_item)
 
 
 def commissions_payment_dir(datadir, comm_payment):
     return obj_dir(datadir, comm_payment) + employee_dated_object_reldir(comm_payment)
+

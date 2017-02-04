@@ -1,6 +1,7 @@
 import argparse
 
 from rrg.models import session_maker
+from rrg.maintenance import delete_old_zeroed_invoice_items as routine
 
 parser = argparse.ArgumentParser(description='RRG Delete Old Zero Invoice Items')
 
@@ -11,10 +12,6 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 parser.add_argument('--past-days', help='invoices older than reminders generator start date', default=91)
-
-
-from rrg.maintenance import delete_old_zeroed_invoice_items as routine
-
 
 def delete_zero_invoice_items():
     """

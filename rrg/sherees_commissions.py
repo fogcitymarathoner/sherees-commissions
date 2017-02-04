@@ -14,6 +14,7 @@ from s3_mysql_backup import mkdirs
 
 from rrg.archive import full_dated_obj_xml_path
 from rrg.archive import full_non_dated_xml_obj_path
+from rrg.archive import employee_dated_object_reldir
 from rrg.billing import verify_dirs_ready
 from rrg.models import Employee
 from rrg.models import Citem
@@ -316,15 +317,20 @@ def employee_comm_path_year_month(employee, datadir, year, month):
 def db_date_dictionary_comm_item(session, datadir):
     """
     returns database dictionary counter part to directory_date_dictionary for sync determination
-    :param data_dir:
+    :param data_dir: assumes 'transactions/invoices/.../comm_items' prepended
     :return:
     """
     citem_dict = {}
     rel_dir_set = set()
     citems = session.query(Citem).order_by(Citem.id)
     for comm_item in citems:
-        f, _ = full_dated_obj_xml_path(commissions_item_dir(datadir, comm_item), comm_item)
-        rel_dir_set.add(os.path.dirname(f.replace(datadir, '')[1:len(f.replace(datadir, ''))]))
+        # redundant
+        rel_dir = employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
+        xfilename = os.path.join('%s.xml' % str(comm_item.id).zfill(5))
+
+        f = os.path.join(datadir, rel_dir, xfilename)
+        # redundant
+        rel_dir_set.add(rel_dir)
         citem_dict[f] = comm_item.last_sync_time
     return citem_dict, citems, rel_dir_set
 
@@ -355,11 +361,10 @@ def get_list_of_comm_items_to_sync(data_dir):
     return sync_list
 
 
-def sync_comm_item(session, data_dir, comm_item):
+def sync_comm_item(session, f, comm_item):
     """
     writes xml file for commissions item
     """
-    f = os.path.join(data_dir, '%s.xml' % str(comm_item.id).zfill(5))
     with open(f, 'w') as fh:
         fh.write(ET.tostring(comm_item.to_xml()))
     session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
@@ -389,8 +394,10 @@ def verify_comm_dirs_ready(data_dir, rel_dir_set):
 
 def cache_comm_items(session, datadir):
     # Make query, assemble lists
-    disk_dict = directory_date_dictionary(os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items'))
-    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items'))
+    base_dir = os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
+    disk_dict = directory_date_dictionary(base_dir)
+    print disk_dict
+    date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, base_dir)
     to_sync = []
     for comm_item in citems:
         #
@@ -400,6 +407,13 @@ def cache_comm_items(session, datadir):
         if comm_item.amount > 0:
             verify_dirs_ready(comm_item_dir, [comm_item_dir])
             file = os.path.join(comm_item_dir, '%s.xml' % str(comm_item.id).zfill(5))
+            #
+            rel_dir = employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
+            xfilename = os.path.join('%s.xml' % str(comm_item.id).zfill(5))
+
+            f = os.path.join(base_dir, rel_dir, xfilename)
+            # redundant
+            file = f
             # add to sync list if comm item not on disk
             if file not in disk_dict:
                 to_sync.append(comm_item)
@@ -412,7 +426,13 @@ def cache_comm_items(session, datadir):
                     to_sync.append(comm_item)
     # Write out xml
     for comm_item in to_sync:
-        sync_comm_item(session, commissions_item_dir(datadir, comm_item), comm_item)
+        #
+        rel_dir = employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
+        xfilename = os.path.join('%s.xml' % str(comm_item.id).zfill(5))
+
+        f = os.path.join(base_dir, rel_dir, xfilename)
+        # redundant
+        sync_comm_item(session, f, comm_item)
 
 
 def cache_comm_payments(session, datadir, cache):
