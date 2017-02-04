@@ -396,8 +396,10 @@ def cache_comm_items(session, datadir):
     # Make query, assemble lists
     base_dir = os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
     disk_dict = directory_date_dictionary(base_dir)
-    print disk_dict
     date_dict, citems, rel_dir_set = db_date_dictionary_comm_item(session, base_dir)
+    print date_dict
+    quit()
+    verify_dirs_ready(date_dict)
     to_sync = []
     for comm_item in citems:
         #
@@ -405,7 +407,6 @@ def cache_comm_items(session, datadir):
         #
         comm_item_dir = commissions_item_dir(datadir, comm_item)
         if comm_item.amount > 0:
-            verify_dirs_ready(comm_item_dir, [comm_item_dir])
             file = os.path.join(comm_item_dir, '%s.xml' % str(comm_item.id).zfill(5))
             #
             rel_dir = employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]

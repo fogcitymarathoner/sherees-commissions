@@ -77,10 +77,6 @@ def clients_ar_xml_file(datadir):
 
 
 def commissions_item_dir(datadir, comm_item):
-    print comm_item
-    print 'datadir in commissions_item_dir %s' % datadir
-    print 'comm_item in commissions_item_dir %s' % employee_dated_object_reldir(comm_item)
-    print 'full_non_dated_xml_obj_path(datadir, comm_item) in commissions_item_dir %s' % full_non_dated_xml_obj_path(datadir, comm_item)
     return full_non_dated_xml_obj_path(datadir, comm_item)
 
 
