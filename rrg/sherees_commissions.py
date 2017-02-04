@@ -33,7 +33,7 @@ monthly_statement_ym_header = '\n\n%s/%s - #####################################
 
 
 def sheree_total_monies_owed(session, args):
-    notes = sherees_notes(session)
+    notes = sherees_notes(session, sa_sheree(session))
 
     notes_payments = sheree_notes_payments(session)
     amounts = [-np.amount for np in notes_payments] + [n.amount for n in notes]
