@@ -63,8 +63,22 @@ manager = Manager(app)
 
 @manager.command
 @manager.option('-t', '--type', help='type of ar report', choices=['all', 'open', 'pastdue', 'cleared'])
-def hello(type):
-    print "hello" + type
+def report(type):
+
+    print('Generating %s Report' % type)
+    infile = clients_ar_xml_file(app.DATADIR)
+    print('Parsing %s' % infile)
+    if os.path.isfile(infile):
+        tree = ET.parse(infile)
+        root = tree.getroot()
+        recs = invoice_archives(root, type)
+        for i in recs:
+            xmlpath = os.path.join(app.DATADIR, '%05d.xml' % int(i))
+            date, amount, employee, voided = read_inv_xml_file(xmlpath)
+            if not int(voided):
+                print('%s %s %s %s' % (amount, date, voided, employee))
+    else:
+        print('No AR.xml file found')
 
 if __name__ == "__main__":
     manager.run()
