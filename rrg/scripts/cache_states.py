@@ -20,7 +20,7 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 
-def cache_vendors():
+def cache_states():
     """
     caches states
     :param data_dir:
@@ -31,5 +31,7 @@ def cache_vendors():
 
     print('Caching States %s into %s' % (args.db, os.path.join(args.datadir, 'states')))
     states = session.query(State).all()
+    for s in states:
+       print s.to_xml()
     cache_objs(states)
     session.commit()

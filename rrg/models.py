@@ -1255,6 +1255,7 @@ class Vendor(Base):
             dt.now(), TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
+
         memos = ET.Element('memos')
         for o in self.memos:
             memos.append(o.to_xml())
