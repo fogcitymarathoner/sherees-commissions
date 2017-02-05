@@ -1182,7 +1182,9 @@ class Expense(Base):
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
 
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
-        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT) if self.date else dt.strftime(
+            dt.now(), TIMESTAMP_FORMAT)
+
         ET.SubElement(doc, 'description').text = str(self.description)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date,

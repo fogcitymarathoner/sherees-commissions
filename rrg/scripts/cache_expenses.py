@@ -31,5 +31,5 @@ def cache_expenses():
 
     print('Caching Expenses %s into %s' % (args.db, os.path.join(args.datadir, 'expenses')))
     expenses = session.query(Expense).all()
-    cache_objs(expenses)
+    cache_objs(args.datadir, expenses)
     session.commit()
