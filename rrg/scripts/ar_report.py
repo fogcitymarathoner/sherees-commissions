@@ -62,8 +62,9 @@ def ar_report():
 manager = Manager(app)
 
 @manager.command
-def hello():
-    print "hello"
+@manager.option('-t', '--type', help='type of ar report', choices=['all', 'open', 'pastdue', 'cleared'])
+def hello(type):
+    print "hello" + type
 
 if __name__ == "__main__":
     manager.run()
