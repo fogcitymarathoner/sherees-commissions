@@ -98,7 +98,8 @@ class EmployeePayment(Base):
     def to_xml(self):
         doc = ET.Element('employee-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
-        ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
+        eattributes = {'fullname': '%s %s' % (self.employee.firstname, self.employee.lastname)}
+        ET.SubElement(doc, 'employee_id', attrib=eattributes).text = str(self.employee_id)
         ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
         ET.SubElement(doc, 'payroll_id').text = str(self.payroll_id)
         ET.SubElement(doc, 'notes').text = self.notes
@@ -899,9 +900,6 @@ def is_pastdue(inv, date=None):
         return False
 
 
-# XML
-
-
 def invoice_archives(root, invoice_state='pastdue'):
     """
     returns xml invoice id list for invoice states 'pastdue', 'open', 'cleared' and 'all'
@@ -913,6 +911,9 @@ def invoice_archives(root, invoice_state='pastdue'):
 
 
 class State(Base):
+    """
+    US States.  Employees, Vendors and Clients belong to a State for reporting purposes
+    """
     __tablename__ = 'states'
 
     id = Column(Integer, primary_key=True)
@@ -922,6 +923,18 @@ class State(Base):
     flower = Column(String(27))
     name = Column(String(14))
     state_no = Column(String(9))
+
+    def to_xml(self):
+        doc = ET.Element('state')
+
+        ET.SubElement(doc, 'id').text = str(self.id)
+
+        ET.SubElement(doc, 'post_ab').text = str(self.post_ab)
+        ET.SubElement(doc, 'capital').text = str(self.capital)
+        ET.SubElement(doc, 'date').text = str(self.date)
+        ET.SubElement(doc, 'flower').text = str(self.flower)
+        ET.SubElement(doc, 'name').text = str(self.name)
+        ET.SubElement(doc, 'state_no').text = str(self.state_no)
 
 
 class User(Base):
@@ -1179,6 +1192,7 @@ class Vendor(Base):
     __tablename__ = 'vendors'
 
     id = Column(Integer, primary_key=True)
+    memos = relationship("VendorMemo", back_populates="vendor", cascade="all, delete, delete-orphan")
     name = Column(String(40))
     purpose = Column(String(60))
     street1 = Column(String(30))
@@ -1241,4 +1255,36 @@ class Vendor(Base):
             dt.now(), TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
+        memos = ET.Element('memos')
+        for o in self.memos:
+            memos.append(o.to_xml())
+        return doc
+
+
+class VendorMemo(Base):
+    __tablename__ = 'vendors_memos'
+
+    id = Column(Integer, primary_key=True)
+
+    vendor_id = Column(Integer, ForeignKey('vendor.id'), nullable=False)
+    vendor = relationship("Vendor")
+
+    notes = Column(String(100))
+    date = Column(Date, nullable=False)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+    last_sync_time = Column(TIMESTAMP)
+
+    def __repr__(self):
+        return "<VendorMemo(id='%s', vendor='%s', date='%s', notes='%s')>" % (
+            self.id, self.vendor.name, dt.strftime(self.date, TIMESTAMP_FORMAT), self.notes)
+
+    def to_xml(self):
+        doc = ET.Element('memo')
+        ET.SubElement(doc, 'id').text = str(self.id)
+        ET.SubElement(doc, 'vendor_id').text = str(self.vendor_id)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
