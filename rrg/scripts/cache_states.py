@@ -3,9 +3,9 @@ import argparse
 
 from rrg.archive import cache_objs
 from rrg.models import session_maker
-from rrg.models import Vendor
+from rrg.models import State
 
-parser = argparse.ArgumentParser(description='RRG Vendors')
+parser = argparse.ArgumentParser(description='RRG States')
 
 parser.add_argument(
     '--datadir', required=True,
@@ -22,14 +22,14 @@ parser.add_argument('--db-pass', required=True, help='database pw', default='dea
 
 def cache_vendors():
     """
-    replaces cake cache_vendors
+    caches states
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
     session = session_maker(args)
 
-    print('Caching Vendors %s into %s' % (args.db, os.path.join(args.datadir, 'vendors')))
-    vendors = session.query(Vendor).all()
-    cache_objs(args.datadir, vendors)
+    print('Caching States %s into %s' % (args.db, os.path.join(args.datadir, 'states')))
+    states = session.query(State).all()
+    cache_objs(states)
     session.commit()
