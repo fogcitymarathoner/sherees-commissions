@@ -1230,7 +1230,7 @@ class Vendor(Base):
         ET.SubElement(doc, 'apphonetype2').text = str(self.apphonetype2)
         ET.SubElement(doc, 'apphone2').text = str(self.apphone2)
         ET.SubElement(doc, 'accountnumber').text = str(self.accountnumber)
-        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         ET.SubElement(doc, 'secretbits').text = str(self.secretbits)
 
         ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date,

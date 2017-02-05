@@ -124,6 +124,7 @@ setup(
             'rrg-cache-expenses=rrg.scripts.cache_expenses:cache_expenses',
             'rrg-cache-payrolls=rrg.scripts.cache_payrolls:cache_payrolls',
             'rrg-cache-vendors=rrg.scripts.cache_vendors:cache_vendors',
+            'rrg-cache-states=rrg.scripts.cache_states:cache_states',
             'rrg-cache-contract-items=rrg.scripts.cache_contract_items:cache_contract_items',
             'rrg-cached-contracts=rrg.scripts.cached_contracts:cached_contracts',
             'rrg-cached-contract=rrg.scripts.cached_contract:cached_contract',

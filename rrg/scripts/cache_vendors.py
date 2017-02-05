@@ -31,5 +31,5 @@ def cache_vendors():
 
     print('Caching Vendors %s into %s' % (args.db, os.path.join(args.datadir, 'vendors')))
     vendors = session.query(Vendor).all()
-    cache_objs(vendors)
+    cache_objs(args.datadir, vendors)
     session.commit()
