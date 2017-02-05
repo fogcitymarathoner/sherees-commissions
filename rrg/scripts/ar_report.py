@@ -1,3 +1,4 @@
+#!
 import os
 import argparse
 import xml.etree.ElementTree as ET
@@ -5,6 +6,9 @@ import xml.etree.ElementTree as ET
 from rrg.helpers import read_inv_xml_file
 from rrg.models import invoice_archives
 from rrg.utils import clients_ar_xml_file
+from flask_script import Manager
+
+from rrg import app
 
 parser = argparse.ArgumentParser(description='RRG Accounts Receivable Reports')
 parser.add_argument('type', help='report type',
@@ -37,3 +41,12 @@ def ar_report():
                 print('%s %s %s %s' % (amount, date, voided, employee))
     else:
         print('No AR.xml file found')
+
+manager = Manager(app)
+
+@manager.command
+def hello():
+    print "hello"
+
+if __name__ == "__main__":
+    manager.run()
