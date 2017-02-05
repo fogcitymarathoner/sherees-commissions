@@ -923,6 +923,14 @@ class State(Base):
     flower = Column(String(27))
     name = Column(String(14))
     state_no = Column(String(9))
+    last_sync_time = Column(TIMESTAMP)
+    created_date = Column(Date, default=default_date)
+    modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    created_user_id = Column(Integer)
+    modified_user_id = Column(Integer)
+
+    def __repr__(self):
+        return "<State(id='%s', name='%s', post_ab='%s')>" % (self.id, self.name, self.post_ab)
 
     def to_xml(self):
         doc = ET.Element('state')
@@ -935,7 +943,7 @@ class State(Base):
         ET.SubElement(doc, 'flower').text = str(self.flower)
         ET.SubElement(doc, 'name').text = str(self.name)
         ET.SubElement(doc, 'state_no').text = str(self.state_no)
-
+        return doc
 
 class User(Base):
     __tablename__ = 'users'
@@ -1256,9 +1264,10 @@ class Vendor(Base):
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
 
-        memos = ET.Element('memos')
+        memos = ET.SubElement(doc, 'memo')
         for o in self.memos:
             memos.append(o.to_xml())
+        doc.append(memos)
         return doc
 
 
@@ -1267,7 +1276,7 @@ class VendorMemo(Base):
 
     id = Column(Integer, primary_key=True)
 
-    vendor_id = Column(Integer, ForeignKey('vendor.id'), nullable=False)
+    vendor_id = Column(Integer, ForeignKey('vendors.id'), nullable=False)
     vendor = relationship("Vendor")
 
     notes = Column(String(100))
@@ -1286,6 +1295,6 @@ class VendorMemo(Base):
         doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'vendor_id').text = str(self.vendor_id)
-        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc

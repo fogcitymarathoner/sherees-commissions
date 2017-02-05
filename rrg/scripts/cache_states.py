@@ -31,7 +31,5 @@ def cache_states():
 
     print('Caching States %s into %s' % (args.db, os.path.join(args.datadir, 'states')))
     states = session.query(State).all()
-    for s in states:
-       print s.to_xml()
-    cache_objs(states)
+    cache_objs(args.datadir, states)
     session.commit()
