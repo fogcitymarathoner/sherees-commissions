@@ -837,8 +837,8 @@ class Invoice(Base):
         ET.SubElement(doc, 'modified_date').text = dt.strftime(self.modified_date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
-        ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(), TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'due_date').text = \
+            dt.strftime(self.contract.employee.firstname, self.contract.employee.lastname)
         iitems = ET.SubElement(doc, 'invoice-items')
         for i in self.invoice_items:
             iitems.append(i.to_xml(crypter))
@@ -944,6 +944,7 @@ class State(Base):
         ET.SubElement(doc, 'name').text = str(self.name)
         ET.SubElement(doc, 'state_no').text = str(self.state_no)
         return doc
+
 
 class User(Base):
     __tablename__ = 'users'
