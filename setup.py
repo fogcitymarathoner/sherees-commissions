@@ -174,5 +174,8 @@ setup(
     },
     setup_requires=['pytest-runner', ],
     tests_require=['pytest', ],
-    scripts=['rrg/scripts/ar_report.py', 'rrg/app.py'],
+    scripts=['rrg/scripts/ar_report.py', 
+             'rrg/scripts/assemble_clients_cache.py',
+             'rrg/app.py',
+        ],
 )
