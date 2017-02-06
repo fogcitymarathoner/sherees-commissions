@@ -10,7 +10,6 @@ from rrg.models import Invoice
 from rrg.models import is_pastdue
 from rrg.helpers import date_to_datetime
 from rrg.helpers import MissingEnvVar
-from rrg.billing import verify_dirs_ready
 from rrg.utils import clients_ar_xml_file
 
 parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
@@ -52,7 +51,6 @@ def cache_clients_ar(session, datadir):
     #
     # Make sure destination directories exist
     #
-    verify_dirs_ready(os.path.join(datadir, 'transactions', 'checks'), [os.path.join(datadir, 'transactions', 'checks')])
     all_invs = session.query(Invoice)
     doc = ET.Element('invoices')
     all = ET.SubElement(doc, 'all')

@@ -44,6 +44,8 @@ def ar_report():
     reads ar.xml, outputs tabbed report
     :param data_dir:
     :return:
+    has an entrypoint
+    rrg-ar --datadir /php-apps/cake.rocketsredglare.com/rrg/data/ pastdue
     """
     args = parser.parse_args()
 
@@ -78,7 +80,7 @@ def report(type):
         for i in recs:
             xmlpath = os.path.join(obj_dir(app.config['DATADIR'], Invoice()), '%05d.xml' % int(i))
             date, amount, employee, voided = read_inv_xml_file(xmlpath)
-            if not int(voided):
+            if voided == 'False':
                 print('%s %s %s %s' % (amount, date, voided, employee))
     else:
         print('No AR.xml file found')
