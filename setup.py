@@ -177,6 +177,7 @@ setup(
     scripts=['rrg/scripts/ar_report.py', 
              'rrg/scripts/assemble_clients_cache.py',
              'rrg/scripts/assemble_contracts_cache.py',
+             'rrg/scripts/assemble_employees_cache.py',
              'rrg/app.py',
         ],
 )
