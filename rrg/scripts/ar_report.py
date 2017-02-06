@@ -5,9 +5,12 @@ import xml.etree.ElementTree as ET
 
 from flask_script import Manager
 from flask import Flask
+
 from rrg.helpers import read_inv_xml_file
+from rrg.models import Invoice
 from rrg.models import invoice_archives
 from rrg.utils import clients_ar_xml_file
+from rrg.archive import obj_dir
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -61,8 +64,8 @@ def ar_report():
 
 manager = Manager(app)
 
-@manager.command
-@manager.option('-t', '--type', help='type of ar report', choices=['all', 'open', 'pastdue', 'cleared'])
+
+@manager.option('-t', '--type', help='type of ar report - all, open, pastdue, cleared', choices=['all', 'open', 'pastdue', 'cleared'])
 def report(type):
 
     print('Generating %s Report' % type)
@@ -73,7 +76,7 @@ def report(type):
         root = tree.getroot()
         recs = invoice_archives(root, type)
         for i in recs:
-            xmlpath = os.path.join(app.config['DATADIR'], '%05d.xml' % int(i))
+            xmlpath = os.path.join(obj_dir(app.config['DATADIR'], Invoice()), '%05d.xml' % int(i))
             date, amount, employee, voided = read_inv_xml_file(xmlpath)
             if not int(voided):
                 print('%s %s %s %s' % (amount, date, voided, employee))

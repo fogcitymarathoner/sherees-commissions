@@ -60,4 +60,10 @@ else:
     print('Environment Variable MYSQL_DB not set')
     quit(1)
 
+if os.environ.get('KEYZCAR_DIR'):
+    KEYZCAR_DIR = os.environ.get('KEYZCAR_DIR')
+else:
+    print('Environment Variable KEYZCAR_DIR not set')
+    quit(1)
+
 
