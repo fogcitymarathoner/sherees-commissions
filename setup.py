@@ -178,6 +178,7 @@ setup(
              'rrg/scripts/assemble_clients_cache.py',
              'rrg/scripts/assemble_contracts_cache.py',
              'rrg/scripts/assemble_employees_cache.py',
+             'rrg/scripts/backup_db.py',
              'rrg/app.py',
         ],
 )

@@ -42,10 +42,16 @@ else:
     print('Environment Variable MYSQL_SERVER_PORT_3306_TCP_PORT not set')
     quit(1)
 
-if os.environ.get('MYSQL_PASSWORD'):
-    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD')
+if os.environ.get('DB'):
+    DB = os.environ.get('DB')
 else:
-    print('Environment Variable MYSQL_PASSWORD not set')
+    print('Environment Variable DB not set')
+    quit(1)
+
+if os.environ.get('MYSQL_PASS'):
+    MYSQL_PASS = os.environ.get('MYSQL_PASS')
+else:
+    print('Environment Variable MYSQL_PASS not set')
     quit(1)
 
 if os.environ.get('MYSQL_USER'):
