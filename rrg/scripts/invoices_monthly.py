@@ -1,10 +1,9 @@
-from rrg.reports.invoices import invoices_year_month
-
-from rrg.models import session_maker
-
+import os
 import argparse
-
 from tabulate import tabulate
+
+from rrg.reports.invoices import invoices_year_month
+from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Invoices Year Month Report')
 
@@ -22,6 +21,24 @@ parser.add_argument('--mysql-port', required=True,
 parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw',
                     default='deadbeef')
+
+app = Flask(__name__, instance_relative_config=True)
+
+# Load the default configuration
+if os.environ.get('RRG_SETTINGS'):
+    settings_file = os.environ.get('RRG_SETTINGS')
+else:
+    print('Environment Variable RRG_SETTINGS not set')
+    quit(1)
+
+if os.path.isfile(settings_file):
+    try:
+        app.config.from_envvar('RRG_SETTINGS')
+    except Exception as e:
+        print('something went wrong with config file %s' % settings_file)
+        quit(1)
+else:
+    print('settings file %s does not exits' % settings_file)
 
 
 def invoices_monthly():

@@ -1,6 +1,9 @@
 import argparse
 import os
 import re
+
+from flask_script import Manager
+from flask import Flask
 from s3_mysql_backup import mkdirs
 from s3_mysql_backup.s3_mysql_backup import s3_key
 
@@ -16,6 +19,25 @@ parser.add_argument('--project-name', required=True, help='Project Name', defaul
 parser.add_argument('--bucket-name', required=True, help='Bucket Name', default='php-apps-cluster')
 parser.add_argument('--aws-access-key-id', required=True, help='AWS_ACCESS_KEY_ID', default='rrg')
 parser.add_argument('--aws-secret-access-key', required=True, help='AWS_SECRET_ACCESS_KEY_ID', default='deadbeef')
+
+app = Flask(__name__, instance_relative_config=True)
+
+# Load the default configuration
+if os.environ.get('RRG_SETTINGS'):
+    settings_file = os.environ.get('RRG_SETTINGS')
+else:
+    print('Environment Variable RRG_SETTINGS not set')
+    quit(1)
+
+if os.path.isfile(settings_file):
+    try:
+        app.config.from_envvar('RRG_SETTINGS')
+    except Exception as e:
+        print('something went wrong with config file %s' % settings_file)
+        quit(1)
+else:
+    print('settings file %s does not exits' % settings_file)
+
 
 
 def download_last_db_backup():

@@ -1,6 +1,8 @@
+import os
 import argparse
+from flask_script import Manager
+from flask import Flask
 from datetime import datetime as dt
-from datetime import timedelta as td
 from tabulate import tabulate
 
 from rrg.timecards import timecards as sa_timecards
@@ -19,6 +21,24 @@ parser.add_argument('--mysql-port', required=True,
 parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw',
                     default='deadbeef')
+
+app = Flask(__name__, instance_relative_config=True)
+
+# Load the default configuration
+if os.environ.get('RRG_SETTINGS'):
+    settings_file = os.environ.get('RRG_SETTINGS')
+else:
+    print('Environment Variable RRG_SETTINGS not set')
+    quit(1)
+
+if os.path.isfile(settings_file):
+    try:
+        app.config.from_envvar('RRG_SETTINGS')
+    except Exception as e:
+        print('something went wrong with config file %s' % settings_file)
+        quit(1)
+else:
+    print('settings file %s does not exits' % settings_file)
 
 
 def timecards():

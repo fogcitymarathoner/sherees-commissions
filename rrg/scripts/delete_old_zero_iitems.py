@@ -1,5 +1,8 @@
+import os
 import argparse
 
+from flask_script import Manager
+from flask import Flask
 from rrg.models import session_maker
 from rrg.maintenance import delete_old_zeroed_invoice_items as routine
 
@@ -12,6 +15,25 @@ parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 parser.add_argument('--past-days', help='invoices older than reminders generator start date', default=91)
+
+app = Flask(__name__, instance_relative_config=True)
+
+# Load the default configuration
+if os.environ.get('RRG_SETTINGS'):
+    settings_file = os.environ.get('RRG_SETTINGS')
+else:
+    print('Environment Variable RRG_SETTINGS not set')
+    quit(1)
+
+if os.path.isfile(settings_file):
+    try:
+        app.config.from_envvar('RRG_SETTINGS')
+    except Exception as e:
+        print('something went wrong with config file %s' % settings_file)
+        quit(1)
+else:
+    print('settings file %s does not exits' % settings_file)
+
 
 def delete_zero_invoice_items():
     """
