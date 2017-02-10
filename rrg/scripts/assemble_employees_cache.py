@@ -42,8 +42,6 @@ def assemble_employees_cache():
     routine(args.datadir)
 
 
-
-
 manager = Manager(app)
 
 

@@ -34,11 +34,9 @@ def default_date():
     return date.today()
 
 
-def session_maker(args):
+def session_maker(db_user, db_pass, mysql_host, mysql_port, db):
     engine = create_engine(
-        'mysql+mysqldb://%s:%s@%s:%s/%s' % (
-            args.db_user, args.db_pass, args.mysql_host, args.mysql_port,
-            args.db))
+        'mysql+mysqldb://%s:%s@%s:%s/%s' % (db_user, db_pass, mysql_host, mysql_port, db))
 
     session = sessionmaker(bind=engine)
     return session()

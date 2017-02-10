@@ -53,6 +53,7 @@ def cache_client_memos():
     replaces cake cache clients memos
     """
     args = parser.parse_args()
+    args = parser.parse_args(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
 
     session = session_maker(args)
 
@@ -60,3 +61,21 @@ def cache_client_memos():
     print('Caching Clients-Memos %s into %s' % (args.db, clients_managers_dir(args.datadir)))
     routine(session, clients_managers_dir(args.datadir), ClientMemo, crypter)
     session.commit()
+
+
+manager = Manager(app)
+
+
+@manager.command
+def assemble_employees():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+    print('Caching Clients-Memos %s into %s' % (app.config['DB'], clients_managers_dir(app.config['DATADIR'])))
+    routine(session, clients_managers_dir(app.config['DATADIR']), ClientMemo, crypter)
+    session.commit()
+
+if __name__ == "__main__":
+    manager.run()
