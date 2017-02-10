@@ -60,7 +60,7 @@ def backup_datadir():
 manager = Manager(app)
 
 
-@manager.option('-z', '--zip-backups-dir', help='dir to assemble zipfiles')
+@manager.option('-z', '--zip-backups-dir', help='dir to assemble zipfiles', required=True)
 def backup_datadir_to_s3(zip_backups_dir):
     print('Assembling Clients in %s' % app.config['DATADIR'])
     backup_aging_time = 30
