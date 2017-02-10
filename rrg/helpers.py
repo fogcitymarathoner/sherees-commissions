@@ -3,7 +3,7 @@ from datetime import datetime as dt
 import xml.etree.ElementTree as ET
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
-from s3_mysql_backup import MDY_FORMAT
+from s3_mysql_backup import YMD_FORMAT
 
 class MissingEnvVar(Exception):
     def __init__(self, value):
@@ -36,7 +36,7 @@ def read_inv_xml_file(xmlpath):
 
 
 def xml_timestamp_to_mdy(ele, datetag):
-    return dt.strptime(ele.findall(datetag)[0].text, TIMESTAMP_FORMAT).strftime(MDY_FORMAT)
+    return dt.strptime(ele.findall(datetag)[0].text, TIMESTAMP_FORMAT).strftime(YMD_FORMAT)
 
 
 def emp_xml_doc_to_dict(i, doc, emp_dict):
