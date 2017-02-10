@@ -67,7 +67,7 @@ manager = Manager(app)
 
 
 @manager.command
-def assemble_employees():
+def assemble_client_memos():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])

@@ -180,6 +180,7 @@ setup(
              'rrg/scripts/assemble_employees_cache.py',
              'rrg/scripts/backup_db.py',
              'rrg/scripts/backup_data_to_s3.py',
+             'rrg/scripts/cache_client_memos.py',
              'rrg/app.py',
         ],
 )
