@@ -54,8 +54,8 @@ def backup_db():
 
 manager = Manager(app)
 
-@manager.option('-f', '--s3_folder', help='destination folder on S3')
-@manager.option('-d', '--db-backups-dir', help='directory to zip up database dumps')
+@manager.option('-f', '--s3_folder', help='destination folder on S3', required=True)
+@manager.option('-d', '--db-backups-dir', help='directory to zip up database dumps', required=True)
 def backup_database(s3_folder, db_backups_dir):
     """
     backup_db.py backup_database -d /php-apps/db_backups/ -f mysql-db-backups
