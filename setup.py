@@ -147,8 +147,7 @@ setup(
             'rrg-employees=rrg.scripts.employees:employees',
             'rrg-open_invoices=rrg.scripts.open_invoices:open_invoices',
             'rrg-sherees-payroll=rrg.scripts.sherees_payroll:sherees_payroll',
-            'rrg-invoices-monthly='
-            'rrg.scripts.invoices_monthly:invoices_monthly',
+            'rrg-invoices-monthly=rrg.scripts.invoices_monthly:invoices_monthly',
 
             'rrg-sheree-total-due=rrg.scripts.sheree_monies_due:monies_due',
             'rrg-sheree-total-due-full=rrg.scripts.sherees_monies_due_full_report:monies_due',
@@ -181,6 +180,7 @@ setup(
              'rrg/scripts/backup_db.py',
              'rrg/scripts/backup_data_to_s3.py',
              'rrg/scripts/cache_client_memos.py',
+             'rrg/scripts/cache_clients.py',
              'rrg/app.py',
         ],
 )
