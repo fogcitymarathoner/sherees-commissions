@@ -30,7 +30,7 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def assemble_clients_cache():
+def assemble_clients_cache_ep():
     """
     gathers contracts for clients
     :param data_dir:
@@ -38,18 +38,17 @@ def assemble_clients_cache():
     entrypoint use rrg-assemble-clients --datadir /php-apps/cake.rocketsredglare.com/biz/data/
     """
     args = parser.parse_args()
-
     print('Assembling Clients in %s' % args.datadir)
     routine(args.datadir)
 
 
 manager = Manager(app)
 
+
 @manager.command
-def assemble_clients_contracts():
+def assemble_clients_cache():
     print('Assembling Clients in %s' % app.config['DATADIR'])
     routine(app.config['DATADIR'])
 
 if __name__ == "__main__":
     manager.run()
-

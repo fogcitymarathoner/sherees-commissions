@@ -1,19 +1,11 @@
 import os
-from subprocess import call
-import random
-import string
+
 import argparse
 
 from flask_script import Manager
 from flask import Flask
 from keyczar import keyczar
 
-import xml.etree.ElementTree as ET
-import xml.dom.minidom as xml_pp
-
-from rrg.employees import employees as sa_employees
-from rrg.employees import picked_employee
-from rrg.models import Employee
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Edit Employee')
@@ -54,33 +46,27 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def edit_employee():
+def edit_employee_ep():
     args = parser.parse_args()
-    xml = None
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     crypter = keyczar.Crypter.Read(args.keyczardir)
-    w_employees = sa_employees(session)
-    if args.number in xrange(1, w_employees.count() + 1):
-        employee = picked_employee(session, args)
-        xml = xml_pp.parseString(ET.tostring(employee.to_xml(crypter)))
-        temp_file = os.path.join(os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
-        with open(temp_file, 'w+b') as f:
-            f.write(xml.toprettyxml())
-        call(["vi", temp_file])
-        whole_emp_xml = Employee.from_xml(temp_file)
-        print 'emp from xml'
-        print ET.tostring(whole_emp_xml)
-        print 'emp from xml end'
-        employee.update_from_xml_doc(whole_emp_xml, crypter)
-        ####
-        print employee.firstname
-        print employee.lastname
-        print employee.ssn_crypto
-        print crypter.Decrypt(employee.ssn_crypto)
-        print employee.bankroutingnumber_crypto
-        print crypter.Decrypt(employee.bankroutingnumber_crypto)
 
-        session.commit()
-    else:
-        print('Employee number is not in range')
-        quit()
+    edit_employee(session, crypter, args.number)
+    session.commit()
+
+manager = Manager(app)
+
+
+@manager.option('-n', '--number', dest='number', required=True)
+def edit_employee(number):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+
+    edit_employee(session, crypter, number)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()

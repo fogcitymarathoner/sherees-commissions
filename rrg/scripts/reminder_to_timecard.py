@@ -47,17 +47,41 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def reminder_to_timecard():
+def reminder_to_timecard_ep():
     args = parser.parse_args()
 
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
 
-    t_set = timecards_set(session, args)
-    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(),
-                                   t_set, args)
+    t_set = timecards_set(session)
+    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(), t_set, args.period)
     if args.number in xrange(1, len(w_reminders) + 1):
-        process(session, dt.now() - td(days=90), dt.now(), t_set, args)
+        process(session, dt.now() - td(days=90), dt.now(), t_set, args.period, args.number)
         session.commit()
     else:
         print('Reminder number is not in range')
         quit()
+
+
+manager = Manager(app)
+
+
+@manager.option(
+    '-p', '--period', help='period type', choices=['week', 'biweek', 'semimonth', 'month'], required=True)
+@manager.option('-n', '--number', help='index number', required=True)
+def recover_joomla_documents(period, number):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    t_set = timecards_set(session)
+    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(), t_set, period)
+    if number in xrange(1, len(w_reminders) + 1):
+        process(session, dt.now() - td(days=90), dt.now(), t_set, period, number)
+        session.commit()
+    else:
+        print('Reminder number is not in range')
+        quit()
+
+
+if __name__ == "__main__":
+    manager.run()
+

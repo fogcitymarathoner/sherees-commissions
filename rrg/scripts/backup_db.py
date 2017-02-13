@@ -41,26 +41,37 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def backup_db():
+def backup_db_ep():
     """
     dumps databases into /backups, uploads to s3, deletes backups older than a month
     entrypoint
     rrg-backup-db --db-user root --bucket-name php-apps-cluster --aws-access-key-id dddddd --aws-secret-access-key ccccccc --mysql-host $MYSQL_SERVER_PORT_3306_TCP_ADDR --mysql-port $MYSQL_SERVER_PORT_3306_TCP_PORT --db-pass xxx $1
     """
     args = parser.parse_args()
-
-    s3_backup_db(args)
+    s3_backup_db(
+        args.aws_access_key_id,
+        args.aws_secret_access_key,
+        args.aws_bucket,
+        args.s3_folder,
+        args.database,
+        args.mysql_host,
+        args.mysql_port,
+        args.db_user,
+        args.db_pass,
+        args.db_backups_dir,
+        args.backup_aging_time)
 
 
 manager = Manager(app)
 
+
 @manager.option('-f', '--s3_folder', help='destination folder on S3', required=True)
 @manager.option('-d', '--db-backups-dir', help='directory to zip up database dumps', required=True)
-def backup_database(s3_folder, db_backups_dir):
+@manager.option('-a', '--backup_aging_time', help='dont let backups get older than ...', default=30)
+def backup_db(s3_folder, db_backups_dir, backup_aging_time):
     """
     backup_db.py backup_database -d /php-apps/db_backups/ -f mysql-db-backups
     """
-    backup_aging_time = 30
     s3_backup_db(
         app.config['AWS_ACCESS_KEY_ID'],
         app.config['AWS_SECRET_ACCESS_KEY'],

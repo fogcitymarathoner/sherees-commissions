@@ -35,12 +35,29 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def delete_zero_invoice_items():
+def delete_zero_invoice_items_ep():
     """
     deletes zero value invoice items older than 91 days
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     routine(session, args)
     session.commit()
+
+
+manager = Manager(app)
+
+
+@manager.option('-p', '--pastdays', dest='pastdays', required=True)
+def delete_zero_invoice_items(pastdays):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    routine(session, pastdays)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()
+

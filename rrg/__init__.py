@@ -1,4 +1,4 @@
-import os
+
 from datetime import datetime as dt
 import argparse
 import xml.etree.ElementTree as ET
@@ -13,8 +13,7 @@ from rrg.helpers import MissingEnvVar
 from rrg.utils import clients_ar_xml_file
 
 parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
-parser.add_argument('reminders', metavar='N', type=int, nargs='+',
-                    help='setup reminders for timecards')
+parser.add_argument('reminders', metavar='N', type=int, nargs='+', help='setup reminders for timecards')
 
 
 def cleared_invoices_client(client, all_invs):

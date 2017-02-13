@@ -41,10 +41,9 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def open_invoices():
+def open_invoices_ep():
     args = parser.parse_args()
-
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
 
     w_open_invoices = sa_open_invoices(session)
     tbl = []
@@ -55,5 +54,30 @@ def open_invoices():
              r.contract.employee.lastname,
              dt.strftime(r.period_start, '%m/%d/%Y'), dt.strftime(r.period_end, '%m/%d/%Y')])
         i += 1
-    print(
-    tabulate(tbl, headers=['number', 'client', 'employee', 'start', 'end']))
+    print(tabulate(tbl, headers=['number', 'client', 'employee', 'start', 'end']))
+
+
+manager = Manager(app)
+
+
+@manager.option(
+    '-f', '--format', help='format of commissions report - plain, latex', choices=['plain', 'latex'], default='plain')
+def open_invoices():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    w_open_invoices = sa_open_invoices(session)
+    tbl = []
+    i = 1
+    for r in w_open_invoices:
+        tbl.append(
+            [i, r.contract.client.name, r.contract.employee.firstname + ' ' +
+             r.contract.employee.lastname,
+             dt.strftime(r.period_start, '%m/%d/%Y'), dt.strftime(r.period_end, '%m/%d/%Y')])
+        i += 1
+    print(tabulate(tbl, headers=['number', 'client', 'employee', 'start', 'end']))
+
+
+if __name__ == "__main__":
+    manager.run()
+

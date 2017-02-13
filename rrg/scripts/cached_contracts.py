@@ -8,9 +8,7 @@ from rrg.archive import contracts as routine
 parser = argparse.ArgumentParser(description='RRG Archived Contracts')
 
 parser.add_argument(
-    '--datadir', required=True,
-    help='datadir root',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
+    '--datadir', required=True, help='datadir root', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -31,7 +29,7 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cached_contracts():
+def cached_contracts_ep():
     """
     prints list of archived contracts for selection
     :param data_dir:
@@ -40,3 +38,18 @@ def cached_contracts():
     args = parser.parse_args()
     print('Archived Contracts in %s' % args.datadir)
     routine(args.datadir)
+
+
+manager = Manager(app)
+
+
+def cached_contracts():
+
+    print('Archived Contracts in %s' % app.config['DATADIR'])
+    routine(app.config['DATADIR'])
+
+
+if __name__ == "__main__":
+    manager.run()
+
+

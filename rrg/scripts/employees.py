@@ -7,10 +7,8 @@ from flask import Flask
 from tabulate import tabulate
 
 from keyczar import keyczar
-from keyczar.errors import Base64DecodingError
-import string
-from rrg.employees import employees as sa_employees
 from rrg.models import session_maker
+from rrg.employees import selection_list
 
 parser = argparse.ArgumentParser(description='RRG Employees')
 
@@ -51,35 +49,33 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def employees():
+def employees_ep():
     args = parser.parse_args()
 
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     crypter = keyczar.Crypter.Read(args.keyczardir)
-    printable = set(string.printable)
-    w_employees = sa_employees(session)
-    tbl = []
-    i = 1
-    for e in w_employees:
-        try:
-            ssn = crypter.Decrypt(e.ssn_crypto)
-        except Base64DecodingError:
-            ssn = None
-        try:
-            bankaccountnumber = crypter.Decrypt(e.bankaccountnumber_crypto)
-        except Base64DecodingError:
-            bankaccountnumber = None
-        try:
-            bankroutingnumber = crypter.Decrypt(e.bankroutingnumber_crypto)
-        except Base64DecodingError:
-            bankroutingnumber = None
-        tbl.append(
-            [i, e.id, filter(lambda x: x in printable, e.firstname + ' ' +
-             e.lastname),
-             filter(lambda x: x in printable, ssn) if ssn else None,
-             bankaccountnumber,
-             bankroutingnumber,
-            ])
-        i += 1
+
     print(
-    tabulate(tbl, headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
+    tabulate(
+        selection_list(session, crypter),
+        headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
+
+
+manager = Manager(app)
+
+
+@manager.command
+def employees():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+
+    print(
+    tabulate(
+        selection_list(session, crypter),
+        headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
+
+
+if __name__ == "__main__":
+    manager.run()

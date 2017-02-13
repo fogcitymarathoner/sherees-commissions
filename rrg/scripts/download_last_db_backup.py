@@ -1,14 +1,11 @@
 import argparse
 import os
-import re
 
 from flask_script import Manager
 from flask import Flask
-from s3_mysql_backup import mkdirs
-from s3_mysql_backup.s3_mysql_backup import s3_key
+from rrg.utils import download_last_database_backup
 
-parser = argparse.ArgumentParser(
-    description='S3 Download DB Backups')
+parser = argparse.ArgumentParser(description='S3 Download DB Backups')
 
 parser.add_argument('project', help='project name',choices=['rrg', 'biz'])
 parser.add_argument('--db-backups-dir', required=True, help='database backups directory',
@@ -39,56 +36,24 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-
-def download_last_db_backup():
+def download_last_db_backup_ep():
     """
     download last project db backup from S3
     """
     args = parser.parse_args()
+    download_last_database_backup(
+        args.aws_access_key_id, args.aws_secret_access_key, args.bucket_name, args.project_name, args.db_backups_dir)
 
-    archive_file_extension = 'sql.bz2'
-    if os.name == 'nt':
-        raise NotImplementedError
 
-    else:
-        key, bucketlist = s3_key(**args)
+manager = Manager(app)
 
-        TARFILEPATTERN = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-%s.%s" % \
-                         (args.project_name, archive_file_extension)
 
-        #
-        # delete files over a month old, locally and on server
-        #
-        backup_list = []
-        for f in bucketlist:
-            parray = f.name.split('/')
-            filename = parray[len(parray)-1]
-            if re.match(TARFILEPATTERN, filename):
-                farray = f.name.split('/')
-                fname = farray[len(farray)-1]
-                dstr = fname[0:19]
+@manager.option('-d', '--db-backups-dir', help='directory to zip up database dumps', required=True)
+@manager.option('-p', '--project-name', dest='project_name', required=True)
+def download_last_db_backup(project_name, aws_access_key_id, aws_secret_access_key, bucket_name, db_backups_dir):
+    download_last_database_backup(aws_access_key_id, aws_secret_access_key, bucket_name, project_name, db_backups_dir)
 
-                fdate = dt.strptime(dstr, "%Y-%m-%d-%H-%M-%S")
-                backup_list.append({'date': fdate, 'key': f})
 
-        backup_list = sorted(
-            backup_list, key=lambda k: k['date'], reverse=True)
-
-        if len(backup_list) > 0:
-            last_backup = backup_list[0]
-            keyString = str(last_backup['key'].key)
-            basename = os.path.basename(keyString)
-            # check if file exists locally, if not: download it
-
-            mkdirs(args.db_backups_dir)
-
-            dest = os.path.join(args.db_backups_dir, basename)
-            print('Downloading %s to %s' % (keyString, dest))
-            if not os.path.exists(dest):
-                with open(dest, 'wb') as f:
-                    last_backup['key'].get_contents_to_file(f)
-            return last_backup['key']
-        else:
-            print 'There is no S3 backup history for project %s' % args.project_name
-            print 'In ANY Folder of bucket %s' % bucket_name
+if __name__ == "__main__":
+    manager.run()
 

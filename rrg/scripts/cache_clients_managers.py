@@ -13,10 +13,8 @@ parser = argparse.ArgumentParser(description='RRG Cache Clients Managers')
 
 parser.add_argument('project', help='project name', choices=['rrg', 'biz'])
 parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir with client memos',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
-
+    '--datadir',
+    required=True, help='datadir dir with client memos', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 parser.add_argument(
     '--keyczardir', required=True,
@@ -47,15 +45,31 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_client_managers():
+def cache_client_managers_ep():
     """
     replaces cake cache clients memos
     """
     args = parser.parse_args()
-
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     crypter = keyczar.Crypter.Read(args.keyczardir)
-
     print('Caching Clients-Managers %s into %s' % (args.db, clients_managers_dir(args.datadir)))
     routine(session, clients_managers_dir(args.datadir), ClientManager, crypter)
     session.commit()
+
+
+manager = Manager(app)
+
+
+@manager.command
+def cache_client_managers():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+    print('Caching Clients-Managers %s into %s' % (app.config['DB'], clients_managers_dir(app.config['DATADIR'])))
+    routine(session, clients_managers_dir(app.config['DATADIR']), ClientManager, crypter)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()

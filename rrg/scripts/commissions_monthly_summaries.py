@@ -1,16 +1,12 @@
 import os
-from datetime import datetime as dt
 import argparse
 
 from flask_script import Manager
 from flask import Flask
-from tabulate import tabulate
 
+from rrg.commissions import monthly_summaries
 from rrg.models import session_maker
-from rrg.models import Employee
-from rrg.sherees_commissions import employee_year_month_statement
-from rrg.sherees_commissions import comm_months
-from rrg.utils import monthy_statement_ym_header
+
 
 parser = argparse.ArgumentParser(description='RRG All Sales People Monthly Commissions Reports')
 
@@ -47,24 +43,23 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def monthlies_summary():
+def monthlies_summary_ep():
     args = parser.parse_args()
-    session = session_maker(args)
-    salespeople = session.query(Employee).filter(Employee.salesforce==True)
-    for salesperson in salespeople:
-        balance = 0
-        for cm in comm_months(end=dt.now()):
-            print('%s %s' % (salesperson.firstname, salesperson.lastname))
-            print(monthy_statement_ym_header % (cm['month'], cm['year']))
-            year = cm['year']
-            month = cm['month']
-            # employee_year_month_statement(session, employee, datadir, year, month, cache)
-            total, res = employee_year_month_statement(session, salesperson, args.datadir, year, month, args.cache)
-            balance += total
-            res_dict_transposed = {
-                'id': [''],
-                'date': ['%s/%s' % (cm['month'], cm['year'])],
-                'description': ['New Balance: %s' % balance],
-                'amount': ['Period Total %s' % total]
-            }
-            print(tabulate(res_dict_transposed, headers='keys', tablefmt='plain'))
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
+    monthly_summaries(session)
+
+
+manager = Manager(app)
+
+
+def monthlies_summary():
+
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
+    monthly_summaries(session)
+
+
+if __name__ == "__main__":
+    manager.run()

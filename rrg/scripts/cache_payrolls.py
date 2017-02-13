@@ -10,12 +10,7 @@ from rrg.models import Payroll
 
 parser = argparse.ArgumentParser(description='RRG Employees')
 
-parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
-
-
+parser.add_argument('--datadir', required=True, help='datadir dir', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
 parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
@@ -41,17 +36,33 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_payrolls():
+def cache_payrolls_ep():
     """
     replaces cake cache_payrolls
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
-
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     print('Caching Payrolls %s into %s' % (args.db, os.path.join(args.datadir, 'payrolls')))
     payrolls = session.query(Payroll).all()
-
     cache_objs(args.datadir, payrolls)
     session.commit()
+
+
+manager = Manager(app)
+
+
+@manager.command
+def cache_payrolls():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print('Caching Payrolls %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'payrolls')))
+    payrolls = session.query(Payroll).all()
+    cache_objs(app.config['DATADIR'], payrolls)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()

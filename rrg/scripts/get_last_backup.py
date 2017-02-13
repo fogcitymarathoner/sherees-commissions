@@ -3,8 +3,7 @@ import argparse
 
 from flask_script import Manager
 from flask import Flask
-from s3_mysql_backup import download_last_db_backup
-from s3_mysql_backup import s3_bucket
+from rrg.utils import download_last_database_backup
 
 parser = argparse.ArgumentParser(description='RRG Get Last Backup')
 parser.add_argument('--db-backups-dir', help='database backups directory', default='/php-apps/db_backups/')
@@ -35,12 +34,25 @@ if os.path.isfile(settings_file):
 else:
     print('settings file %s does not exits' % settings_file)
 
-def get_last_db_backup():
+
+def get_last_db_backup_ep():
     """
     download last project db backup from S3
     """
     args = parser.parse_args()
     args.pat = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-%s.sql.bz2" % args.database
-    bucket = s3_bucket(args)
-    args.bucketlist = bucket.list()
-    download_last_db_backup(args)
+    download_last_database_backup(
+        args.aws_access_key_id, args.aws_secret_access_key, args.bucket_name, args.project_name, args.db_backups_dir)
+
+
+manager = Manager(app)
+
+
+@manager.option('-d', '--db-backups-dir', help='directory to zip up database dumps', required=True)
+@manager.option('-p', '--project-name', dest='project_name', required=True)
+def get_last_db_backup(project_name, aws_access_key_id, aws_secret_access_key, bucket_name, db_backups_dir):
+    download_last_database_backup(aws_access_key_id, aws_secret_access_key, bucket_name, project_name, db_backups_dir)
+
+
+if __name__ == "__main__":
+    manager.run()

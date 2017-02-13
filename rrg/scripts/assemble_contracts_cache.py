@@ -28,7 +28,8 @@ if os.path.isfile(settings_file):
 else:
     print('settings file %s does not exits' % settings_file)
 
-def assemble_contracts_cache():
+
+def assemble_contracts_cache_ep():
     """
     gathers contract items and invoices for contracts
     :param data_dir:
@@ -43,7 +44,7 @@ manager = Manager(app)
 
 
 @manager.command
-def assemble_contracts():
+def assemble_contracts_cache():
     print('Assembling Contracts in %s' % os.path.join(app.config['DATADIR'], 'contracts'))
     routine(app.config['DATADIR'])
 

@@ -32,7 +32,7 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cached_contract():
+def cached_contract_ep():
     """
     prints selected archived contract
     :param data_dir:
@@ -42,3 +42,19 @@ def cached_contract():
 
     print('Archived Contract in %s' % args.datadir)
     routine(args.datadir, args.id)
+
+
+manager = Manager(app)
+
+
+@manager.option('-i', '--id', dest='id', required=True)
+def cached_contract(id):
+
+    print('Archived Contract in %s' % app.config['DATADIR'])
+    routine(app.config['DATADIR'], id)
+
+
+if __name__ == "__main__":
+    manager.run()
+
+

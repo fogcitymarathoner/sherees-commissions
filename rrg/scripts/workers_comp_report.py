@@ -44,12 +44,37 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def workers_comp_report():
+def workers_comp_report_ep():
     args = parser.parse_args()
-
-    session = session_maker(args)
-    report =  wc_report(session, args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
+    report = wc_report(session, args.start_date, args.end_date)
     print 'Workers comp report for %s - %s' % (args.start_date, args.end_date)
+    for state in report:
+        print 'State - %s' % state['state']
+        data = []
+        regular_total = 0
+        overtime_total = 0
+        doubletime_total = 0
+        for d in state['employees']:
+            data.append([d['employee'], d['regular'], d['overtime'], d['doubletime']])
+            regular_total += d['regular']
+            overtime_total += d['overtime']
+            doubletime_total += d['doubletime']
+        data.append(['', regular_total, overtime_total, doubletime_total])
+        print tabulate.tabulate(data, headers=['employee', 'regular', 'overtime', 'doubletime'])
+
+
+manager = Manager(app)
+
+
+@manager.option('-s', '--start-date', dest='start_date', required=True)
+@manager.option('-e', '--end-date', dest='end_date', required=True)
+def workers_comp_report(start_date, end_date):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    report = wc_report(session, start_date, end_date)
+    print 'Workers comp report for %s - %s' % (start_date, end_date)
     for state in report:
         print 'State - %s' % state['state']
         data = []

@@ -3,11 +3,8 @@ import argparse
 
 from flask_script import Manager
 from flask import Flask
-from rrg.sherees_commissions import employee_year_month_statement
+from rrg.commissions import monthly_detail
 from rrg.models import session_maker
-from rrg.models import Employee
-from rrg.archive import employee as archived_employee
-from rrg.utils import monthy_statement_ym_header
 
 parser = argparse.ArgumentParser(description='RRG Sales Person Monthly Commissions Reports')
 
@@ -26,8 +23,6 @@ parser.add_argument('--datadir', required=True, help='datadir dir with ar.xml',
 parser.add_argument('--cache', dest='cache', action='store_true')
 parser.add_argument('--no-cache', dest='cache', action='store_false')
 parser.set_defaults(cache=True)
-
-ledger_line_format = '%s %s %s %s'
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -48,18 +43,28 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def monthly_detail():
+def monthly_commissions_ep():
     args = parser.parse_args()
-    session = session_maker(args)
-    print(monthy_statement_ym_header % (args.year, args.month))
-    employee_dict = archived_employee(args.id, args.datadir)
-    if employee_dict['salesforce']:
-        employee = session.query(Employee).filter(Employee.id == employee_dict['id']).first()
-        total, res = employee_year_month_statement(session, employee, args.datadir, args.year, args.month, args.cache)
-        print('Total %s ' % total)
-        for i in res:
-            print(ledger_line_format % (
-                i['id'], i['date'], i['description'],
-                i['amount']))
-    else:
-        print('%s %s is not a sales person' % (employee_dict['firstname'], employee_dict['lastname']))
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
+    monthly_detail(session, args.id, args.datadir, args.year, args.month, args.cache)
+
+
+manager = Manager(app)
+
+
+@manager.option('-i', '--id', dest='id', required=True)
+@manager.option('-y', '--year', dest='year', required=True)
+@manager.option('-m', '--month', dest='month', required=True)
+@manager.option('-c', '--cache', dest='cache', default=True)
+def monthly_commissions(id, year, month, cache):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    monthly_detail(session, id, app.config['DATA_DIR'], year, month, cache)
+
+
+if __name__ == "__main__":
+    manager.run()
+
+
+

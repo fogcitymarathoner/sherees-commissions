@@ -31,7 +31,7 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cached_employees():
+def cached_employees_ep():
     """
     prints list of archived employees for selection
     :param data_dir:
@@ -41,3 +41,19 @@ def cached_employees():
 
     print('Archived Employees in %s' % args.datadir)
     routine(args.datadir)
+
+
+manager = Manager(app)
+
+
+def cached_employees():
+
+    print('Archived Employees in %s' % app.config['DATADIR'])
+    routine(app.config['DATADIR'])
+
+
+if __name__ == "__main__":
+    manager.run()
+
+
+

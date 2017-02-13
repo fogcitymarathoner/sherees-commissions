@@ -17,8 +17,9 @@ from rrg.reminders import semimonths_between_dates
 from rrg.reminders import months_between_dates
 from rrg.reminders import current_semimonth
 from rrg.reminders_generation import create_invoice_for_period
-from rrg.sherees_commissions import sherees_contracts_of_interest
-from rrg.sherees_commissions import sherees_invoices_of_interest
+from rrg.sherees_commissions import sa_sheree
+from rrg.commissions import sales_person_contracts_of_interest
+from rrg.commissions import sales_person_invoices_of_interest
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
@@ -282,19 +283,19 @@ DEBUG:test:<Employee(id='1640', firstname='sales', lastname='person2')>
         """
         assert sys._called_from_test
 
-    def test_sherees_contracts_of_interest(self):
+    def test_sales_person_contracts_of_interest(self):
         """
         test xml output of contract
         :return:
         """
-        contracts = sherees_contracts_of_interest(self.session)
+        contracts = sales_person_contracts_of_interest(self.session, sa_sheree(self.session))
         logger.debug('Sherees Contracts')
         for c in contracts:
             logger.debug(c)
         assert 12 == len(contracts)
 
     def test_sherees_invoices_of_interest_xml(self):
-        invs = sherees_invoices_of_interest(self.session)
+        invs = sales_person_invoices_of_interest(self.session, sa_sheree(self.session))
         for i in invs:
             logger.debug('inv of inst')
             logger.debug(i)
@@ -309,4 +310,4 @@ DEBUG:test:<Employee(id='1640', firstname='sales', lastname='person2')>
         test results of sherees invoices of interest
         :return:
         """
-        assert 12 == sherees_invoices_of_interest(self.session).count()
+        assert 12 == sales_person_invoices_of_interest(self.session, sa_sheree(self.session)).count()

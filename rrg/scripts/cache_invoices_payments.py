@@ -46,15 +46,36 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_invoice_payments():
+def cache_invoice_payments_ep():
     """
     replaces cake cache commissions items
     """
     args = parser.parse_args()
 
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
 
     crypter = keyczar.Crypter.Read(args.keyczardir)
     print('Caching Invoice-Payments %s into %s' % (args.db, transactions_invoice_payments_dir(args.datadir)))
     routine(session, transactions_invoice_payments_dir(args.datadir), InvoicePayment, crypter)
     session.commit()
+
+
+manager = Manager(app)
+
+
+@manager.command
+def cache_invoice_payments():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+    print(
+        'Caching Invoice-Payments %s into %s' % (
+            app.config['DB'], transactions_invoice_payments_dir(app.config['DATADIR'])))
+    routine(session, transactions_invoice_payments_dir(app.config['DATADIR']), InvoicePayment, crypter)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()

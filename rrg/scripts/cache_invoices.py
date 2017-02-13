@@ -43,13 +43,33 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_invoices():
+def cache_invoices_ep():
     """
     replaces cake cache commissions items
     """
     args = parser.parse_args()
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     crypter = keyczar.Crypter.Read(args.keyczardir)
     print('Caching Invoices %s into %s' % (args.db, os.path.join(args.datadir, 'transactions', 'invoices')))
     cache_routine(session, os.path.join(args.datadir, 'transactions', 'invoices'), Invoice, crypter)
     session.commit()
+
+
+manager = Manager(app)
+
+
+@manager.command
+def cache_invoices():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    crypter = keyczar.Crypter.Read(app.config['KEYZCARDIR'])
+    print(
+        'Caching Invoices %s into %s' % (
+            app.config['DB'], os.path.join(app.config['DATADIR'], 'transactions', 'invoices')))
+    cache_routine(session, os.path.join(app.config['DATADIR'], 'transactions', 'invoices'), Invoice, crypter)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()

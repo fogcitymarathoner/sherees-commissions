@@ -40,14 +40,12 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def backup_datadir():
+def backup_datadir_ep():
     """
     zips into args.db_backups_dir and uploads to args.bucket_name/args.s3_folder
     fab -f ./fabfile.py backup_dbs
     """
-
     args = parser.parse_args()
-
     backup(
         args.datadir,
         args.aws_access_key_id,
@@ -61,9 +59,9 @@ manager = Manager(app)
 
 
 @manager.option('-z', '--zip-backups-dir', help='dir to assemble zipfiles', required=True)
-def backup_datadir_to_s3(zip_backups_dir):
+@manager.option('-a', '--backup_aging_time', help='dont let backups get older than ...', default=30)
+def backup_datadir(zip_backups_dir, backup_aging_time):
     print('Assembling Clients in %s' % app.config['DATADIR'])
-    backup_aging_time = 30
     project = 'rrg'
     backup(
         app.config['DATADIR'],

@@ -41,15 +41,32 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_comm_payments():
+def cache_comm_payments_ep():
     """
     replaces cake cache commissions payments
     """
     args = parser.parse_args()
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     if args.project == 'rrg':
         print('Caching Commission Payments')
         args.cache = False
         cache_commissions_payments(session, args.datadir, args.cache)
     else:
         print('Project not "rrg" skipping Caching Commission Items')
+
+
+manager = Manager(app)
+
+
+@manager.option('-c', '--cache', dest='cache', default=True)
+def cache_comm_payments(cache):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print('Caching Commission Payments')
+    cache_commissions_payments(session, app.config['DATADIR'], cache)
+
+
+if __name__ == "__main__":
+    manager.run()
+

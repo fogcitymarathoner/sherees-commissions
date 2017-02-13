@@ -11,7 +11,6 @@ parser.add_argument(
     '--datadir', required=True, help='data root directory', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
-
 app = Flask(__name__, instance_relative_config=True)
 
 # Load the default configuration
@@ -31,7 +30,7 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def assemble_employees_cache():
+def assemble_employees_cache_ep():
     """
     gathers contracts for employees
     :param data_dir:
@@ -46,7 +45,7 @@ manager = Manager(app)
 
 
 @manager.command
-def assemble_employees():
+def assemble_employees_cache():
     print('Assembling Employees in %s' % os.path.join(app.config['DATADIR'], 'employees'))
     routine(app.config['DATADIR'])
 

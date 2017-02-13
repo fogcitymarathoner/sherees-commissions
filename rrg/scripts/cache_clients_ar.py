@@ -10,10 +10,7 @@ from rrg.utils import clients_ar_xml_file
 parser = argparse.ArgumentParser(description='RRG Cache Clients AR')
 
 parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
-
+    '--datadir', required=True, help='datadir dir with ar.xml', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
 parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
 parser.add_argument('--db', required=True, help='d', default='rrg')
@@ -39,14 +36,30 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_client_accounts_receivable():
+def cache_client_accounts_receivable_ep():
     """
     replaces cake cache_client_ar
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
-
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     print('Caching Clients AR into %s' % clients_ar_xml_file(args.datadir))
     cache_clients_ar(session, args.datadir)
+
+
+manager = Manager(app)
+
+
+@manager.command
+def cache_client_accounts_receivable():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print('Caching Clients AR into %s' % clients_ar_xml_file(app.config['DATADIR']))
+    cache_clients_ar(session, app.config['DATADIR'])
+
+
+if __name__ == "__main__":
+    manager.run()
+

@@ -41,16 +41,36 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_states():
+def cache_states_ep():
     """
     caches states
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
 
     print('Caching States %s into %s' % (args.db, os.path.join(args.datadir, 'states')))
     states = session.query(State).all()
     cache_objs(args.datadir, states)
     session.commit()
+
+
+manager = Manager(app)
+
+
+def cache_states():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
+    print('Caching States %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'states')))
+    states = session.query(State).all()
+    cache_objs(app.config['DATADIR'], states)
+    session.commit()
+
+if __name__ == "__main__":
+    manager.run()
+
+
+

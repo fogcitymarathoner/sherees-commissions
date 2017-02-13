@@ -40,14 +40,14 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_clients():
+def cache_clients_ep():
     """
     replaces cake cache_clients
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     crypter = keyczar.Crypter.Read(args.keyczardir)
     print('Caching Clients %s into %s' % (args.db, os.path.join(args.datadir, 'clients')))
     routine(session, os.path.join(args.datadir, 'clients'), Client, crypter)
@@ -58,11 +58,10 @@ manager = Manager(app)
 
 
 @manager.command
-def cache_clients_data():
+def cache_clients():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-
     crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
     print('Caching Clients %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'clients')))
     routine(session, os.path.join(app.config['DATADIR'], 'clients'), Client, crypter)

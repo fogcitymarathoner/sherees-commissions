@@ -44,26 +44,47 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def recover_joomla_documents():
+def recover_joomla_documents_ep():
     """
     recovers vintage files from joomla blob records
     :param datadir:
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
-
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     print('Recover Joomla Files')
-
     all_files = session.query(DownloadFile).filter(DownloadFile.isblob == 1)
     for f in all_files:
         print(f)
-        chunks = session.query(
-            DownloadBlob).filter(DownloadBlob.file == f).order_by(
-            DownloadBlob.chunkid)
+        chunks = session.query(DownloadBlob).filter(DownloadBlob.file == f).order_by(DownloadBlob.chunkid)
         outfile = os.path.join(args.datadir, f.realname)
         for chunk in chunks:
             print(chunk)
             with open(outfile, 'w') as fh:
                 fh.write(chunk.datachunk)
         print('Wrote file %s' % outfile)
+
+
+manager = Manager(app)
+
+
+def recover_joomla_documents():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print('Recover Joomla Files')
+    all_files = session.query(DownloadFile).filter(DownloadFile.isblob == 1)
+    for f in all_files:
+        print(f)
+        chunks = session.query(DownloadBlob).filter(DownloadBlob.file == f).order_by(DownloadBlob.chunkid)
+        outfile = os.path.join(app.config['DATADIR'], f.realname)
+        for chunk in chunks:
+            print(chunk)
+            with open(outfile, 'w') as fh:
+                fh.write(chunk.datachunk)
+        print('Wrote file %s' % outfile)
+
+
+if __name__ == "__main__":
+    manager.run()
+

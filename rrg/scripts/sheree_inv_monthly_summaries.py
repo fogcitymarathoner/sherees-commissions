@@ -4,26 +4,19 @@ from flask_script import Manager
 from flask import Flask
 from rrg.models import session_maker
 from rrg.sherees_commissions import inv_report
+from rrg.sherees_commissions import sa_sheree
 
 parser = argparse.ArgumentParser(description='RRG Sherees Monthly Invoices Reports')
 
 parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/'
-            'invoices/invoice_items/')
+    '--datadir', required=True, help='datadir dir with ar.xml',
+    default='/php-apps/cake.rocketsredglare.com/rrg/data/transactions/invoices/invoice_items/')
 
-parser.add_argument(
-    '--format', required=True, choices=['plain', 'latex'],
-    help='output format', default='plain')
+parser.add_argument('--format', required=True, choices=['plain', 'latex'], help='output format', default='plain')
 
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
-parser.add_argument('--mysql-host', required=True,
-                    help='database host - MYSQL_PORT_3306_TCP_ADDR',
-                    default='marcdba')
-parser.add_argument('--mysql-port', required=True,
-                    help='database port - MYSQL_PORT_3306_TCP_PORT',
-                    default=3306)
+parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
+parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
 parser.add_argument('--db', required=True, help='d', default='rrg')
 parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 parser.add_argument('--cache', dest='cache', action='store_true')
@@ -49,8 +42,24 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def monthlies_summary():
+def monthlies_summary_ep():
     args = parser.parse_args()
 
-    session = session_maker(args)
-    print(inv_report(session, args))
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
+    print(inv_report(session, sa_sheree(session), args.data_dir, args.cache, args.format))
+
+
+manager = Manager(app)
+
+
+@manager.option('-c', '--cache', dest='cache', default=True)
+@manager.option('-f', '--format', help='type of output plain or latex', required=True, choices=['plain', 'latex'])
+def monthlies_summary(format, cache):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print(inv_report(session, sa_sheree(session), app.config['DATADIR'], cache, format))
+
+
+if __name__ == "__main__":
+    manager.run()

@@ -39,7 +39,7 @@ parser.add_argument(
     default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
-def ar_report():
+def ar_report_ep():
     """
     reads ar.xml, outputs tabbed report
     :param data_dir:
@@ -67,8 +67,10 @@ def ar_report():
 manager = Manager(app)
 
 
-@manager.option('-t', '--type', help='type of ar report - all, open, pastdue, cleared', choices=['all', 'open', 'pastdue', 'cleared'])
-def report(type):
+@manager.option(
+    '-t',
+    '--type', help='type of ar report - all, open, pastdue, cleared', choices=['all', 'open', 'pastdue', 'cleared'])
+def ar_report(type):
 
     print('Generating %s Report' % type)
     infile = clients_ar_xml_file(app.config['DATADIR'])

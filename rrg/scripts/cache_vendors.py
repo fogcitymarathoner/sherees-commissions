@@ -40,16 +40,34 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_vendors():
+def cache_vendors_ep():
     """
     replaces cake cache_vendors
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
 
     print('Caching Vendors %s into %s' % (args.db, os.path.join(args.datadir, 'vendors')))
     vendors = session.query(Vendor).all()
     cache_objs(args.datadir, vendors)
     session.commit()
+
+
+manager = Manager(app)
+
+
+def cache_vendors():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
+    print('Caching Vendors %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'vendors')))
+    vendors = session.query(Vendor).all()
+    cache_objs(app.config['DATADIR'], vendors)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()

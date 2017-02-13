@@ -47,7 +47,7 @@ def timecard_hash(timecard):
         dt.strftime(timecard.period_end, YMD_FORMAT))).hexdigest()
 
 
-def timecards(session, args):
+def timecards(session):
     """
     returns set of timecard hashs of contract.id+startdate+enddate
     timecard not used
@@ -60,44 +60,40 @@ def timecards(session, args):
                  Employee.active == 1)).all()
 
 
-def reminders_set(session, args):
+def reminders_set(session, period, payroll_run_date):
     args.period = 'week'
-    contracts_w = contracts_per_period(session, args)
+    contracts_w = contracts_per_period(session, period)
 
     args.period = 'biweek'
-    contracts_b = contracts_per_period(session, args)
+    contracts_b = contracts_per_period(session, period)
 
     args.period = 'semimonth'
-    contracts_s = contracts_per_period(session, args)
+    contracts_s = contracts_per_period(session, period)
 
     args.period = 'month'
-    contracts_m = contracts_per_period(session, args)
+    contracts_m = contracts_per_period(session, period)
     #
     reminders_set = set()
     for c, cl, em in contracts_w:
-        for ws, we in weeks_between_dates(date_to_datetime(c.startdate),
-                                          args.payroll_run_date):
+        for ws, we in weeks_between_dates(date_to_datetime(c.startdate), payroll_run_date):
             reminders_set.add(reminder_hash(c, ws, we))
     for c, cl, em in contracts_b:
-        for ws, we in biweeks_between_dates(date_to_datetime(c.startdate),
-                                            args.payroll_run_date):
+        for ws, we in biweeks_between_dates(date_to_datetime(c.startdate), payroll_run_date):
             reminders_set.add(reminder_hash(c, ws, we))
     for c, cl, em in contracts_s:
-        for ws, we in semimonths_between_dates(date_to_datetime(c.startdate),
-                                               args.payroll_run_date):
+        for ws, we in semimonths_between_dates(date_to_datetime(c.startdate), payroll_run_date):
             reminders_set.add(reminder_hash(c, ws, we))
     for c, cl, em in contracts_m:
-        for ws, we in months_between_dates(date_to_datetime(c.startdate),
-                                           args.payroll_run_date):
+        for ws, we in months_between_dates(date_to_datetime(c.startdate), payroll_run_date):
             reminders_set.add(reminder_hash(c, ws, we))
     return reminders_set
 
 
-def reminders(session, reminder_period_start, payroll_run_date, t_set, args):
+def reminders(session, reminder_period_start, payroll_run_date, t_set, period):
     # generate list of reminders in a period for a period type [week, biweek, semimonth, month]
 
     reminders = []
-    for c, cl, em in contracts_per_period(session, args):
+    for c, cl, em in contracts_per_period(session, period):
         if args.period == 'week':
             for ws, we in weeks_between_dates(reminder_period_start,
                                               payroll_run_date):
@@ -122,36 +118,34 @@ def reminders(session, reminder_period_start, payroll_run_date, t_set, args):
     return reminders
 
 
-def reminder_to_timecard(session, reminder_period_start, payroll_run_date, t_set,
-                    args):
+def reminder_to_timecard(session, reminder_period_start, payroll_run_date, t_set, period, number):
     """
     A new invoice is a timecard if voided False and timecard true
     """
     # create voided invoice for args.number'th reminder from reminders
 
-    reminders_tbs = reminders(session, reminder_period_start, payroll_run_date,
-                              t_set, args)
+    reminders_tbs = reminders(session, reminder_period_start, payroll_run_date, t_set, period)
 
-    contract, start, end = reminders_tbs[args.number - 1]
+    contract, start, end = reminders_tbs[number - 1]
     new_inv = create_invoice_for_period(session, contract, start, end)
     new_inv.voided = False
     new_inv.mock = False
     new_inv.timecard = True
 
-def forget_reminder(session, reminder_period_start, payroll_run_date, t_set,
-                    args):
+
+def forget_reminder(session, reminder_period_start, payroll_run_date, t_set, period, number):
     # create voided invoice for args.number'th reminder from reminders
 
-    reminders_tbs = reminders(session, reminder_period_start, payroll_run_date,
-                              t_set, args)
+    reminders_tbs = reminders(session, reminder_period_start, payroll_run_date, t_set, period)
 
-    contract, start, end = reminders_tbs[args.number - 1]
+    contract, start, end = reminders_tbs[number - 1]
     new_inv = create_invoice_for_period(session, contract, start, end)
     new_inv.voided = True
 
-def timecards_set(session, args):
+
+def timecards_set(session):
     timecards_set = set()
-    for t in timecards(session, args):
+    for t in timecards(session):
         timecards_set.add(timecard_hash(t[0]))
     return timecards_set
 

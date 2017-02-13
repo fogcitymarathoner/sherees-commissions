@@ -2,19 +2,15 @@ import os
 import argparse
 from flask_script import Manager
 from flask import Flask
-from rrg.sherees_commissions import comm_latex_document_header
-from rrg.sherees_commissions import sheree_total_monies_owed
-from rrg.sherees_commissions import payroll_due_report
-from rrg.sherees_commissions import sherees_notes_report_db
-from rrg.sherees_commissions import sherees_commissions_report
-from rrg.sherees_commissions import inv_report
+from rrg.commissions import money_due
 from rrg.models import session_maker
+
+from rrg.sherees_commissions import sa_sheree
 
 parser = argparse.ArgumentParser(description='RRG Money Due to Sheree Long Report')
 
 parser.add_argument('--format', required=True, choices=['plain', 'latex'], help='output format', default='plain')
-parser.add_argument(
-    '--datadir', required=True, help='datadir', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
+parser.add_argument('--datadir', required=True, help='datadir', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
 parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
 parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
@@ -43,35 +39,21 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def monies_due():
+def monies_due_ep():
     args = parser.parse_args()
-    session = session_maker(args)
-    report = ''
-    if args.format == 'plain':
-        report += 'Summary\n'
-        report += sheree_total_monies_owed(session, args)
-        report += '\n'
-        report += 'Hourly\n'
-        report += payroll_due_report(session, args)
-        report += '\n'
-        report += 'Notes Report\n'
-        report += sherees_notes_report_db(session, args.format)
-        report += '\n'
-        report += 'Commissions Report\n'
-        report += sherees_commissions_report(session, args)
-        report += '\n'
-        report += 'Invoices Report\n'
-        report += inv_report(session, args)
-    elif args.format == 'latex':
-        report += comm_latex_document_header("Sheree's Monies Due Report")
-        report += sheree_total_monies_owed(session, args)
-        report += '\n'
-        report += payroll_due_report(session, args)
-        report += '\n'
-        report += sherees_notes_report(session, args)
-        report += '\n'
-        report += sherees_commissions_report(session, args)
-        report += '\n'
-        report += inv_report(session, args)
-        report += '\n\end{document}\n'
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
+    report = money_due(session, sa_sheree(session), args.datadir, args.cache, args.format)
+    print(report)
+
+
+manager = Manager(app)
+
+
+@manager.option('-c', '--cache', dest='cache', default=True)
+@manager.option('-f', '--format', help='type of output plain or latex', required=True, choices=['plain', 'latex'])
+def monies_due(format, cache):
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    report = money_due(session, sa_sheree(session), app.config['DATADIR'], cache, format)
     print(report)

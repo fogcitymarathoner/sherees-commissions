@@ -1,7 +1,6 @@
 import os
 import argparse
 
-
 from flask_script import Manager
 from flask import Flask
 from rrg.archive import cache_objs
@@ -41,16 +40,33 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_expenses():
+def cache_expenses_ep():
     """
     replaces cake cache_expenses
     :param data_dir:
     :return:
     """
     args = parser.parse_args()
-    session = session_maker(args)
-
+    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     print('Caching Expenses %s into %s' % (args.db, os.path.join(args.datadir, 'expenses')))
     expenses = session.query(Expense).all()
     cache_objs(args.datadir, expenses)
     session.commit()
+
+
+manager = Manager(app)
+
+
+@manager.command
+def cache_expenses():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print('Caching Expenses %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'expenses')))
+    expenses = session.query(Expense).all()
+    cache_objs(app.config['DATADIR'], expenses)
+    session.commit()
+
+
+if __name__ == "__main__":
+    manager.run()
