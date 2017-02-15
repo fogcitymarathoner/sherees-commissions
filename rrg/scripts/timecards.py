@@ -54,6 +54,7 @@ def timecards_ep():
 manager = Manager(app)
 
 
+@manager.command
 def timecards():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
@@ -67,5 +68,8 @@ def timecards():
              r.contract.employee.lastname,
              dt.strftime(r.period_start, '%m/%d/%Y'), dt.strftime(r.period_end, '%m/%d/%Y')])
         i += 1
-    print(
-    tabulate(tbl, headers=['number', 'client', 'employee', 'start', 'end']))
+    print(tabulate(tbl, headers=['number', 'client', 'employee', 'start', 'end']))
+
+
+if __name__ == "__main__":
+    manager.run()

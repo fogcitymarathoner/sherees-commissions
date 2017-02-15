@@ -62,7 +62,7 @@ manager = Manager(app)
 
 @manager.option(
     '-f', '--format', help='format of commissions report - plain, latex', choices=['plain', 'latex'], default='plain')
-def open_invoices():
+def open_invoices(format):
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])

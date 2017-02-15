@@ -27,7 +27,7 @@ def contracts_per_period(session, period):
             .join(Employee).filter(
             and_(Contract.active == 1, Client.active == 1,
                  Employee.active == 1,
-                 Contract.period_id == periods[args.period])).all()
+                 Contract.period_id == periods[period])).all()
         return contracts
 
 
