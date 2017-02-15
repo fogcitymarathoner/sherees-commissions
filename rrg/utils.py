@@ -20,6 +20,7 @@ from rrg.archive import obj_dir
 from rrg.models import Base
 from rrg.invoices import open_invoices as sa_open_invoices
 from rrg.timecards import  timecards as sa_timecards
+from rrg.timecards import picked_timecard
 from rrg.invoices import picked_open_invoice
 from rrg.models import Invoice
 from rrg.models import Iitem
@@ -200,7 +201,7 @@ def edit_employee(session, crypter, number):
         quit()
 
 
-def edit_invoice(session, phase, number):
+def edit_invoice(session, crypter, phase, number):
 
     if phase == 'open':
         winvoices = sa_open_invoices(session)
@@ -211,7 +212,7 @@ def edit_invoice(session, phase, number):
             invoice = picked_open_invoice(session, number)
         elif phase =='timecard':
             invoice = picked_timecard(session, number)
-        xml = xml_pp.parseString(ET.tostring(Invoice.to_xml()))
+        xml = xml_pp.parseString(ET.tostring(invoice.to_xml(crypter)))
         temp_file = os.path.join(
             os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
         with open(temp_file, 'w+b') as f:

@@ -1,18 +1,11 @@
 import os
-from subprocess import call
-import random
-import string
+
 import argparse
 
 from flask_script import Manager
 from flask import Flask
-import xml.etree.ElementTree as ET
-import xml.dom.minidom as xml_pp
 
-from rrg.timecards import timecards as sa_timecards
-from rrg.timecards import picked_timecard
-from rrg.models import Invoice
-from rrg.models import Iitem
+from keyczar import keyczar
 from rrg.models import session_maker
 from rrg.utils import edit_invoice
 
@@ -59,7 +52,8 @@ def edit_timecard(number):
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
 
-    edit_invoice(session, 'timecard', number)
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+    edit_invoice(session, crypter, 'timecard', int(number))
     session.commit()
 
 
