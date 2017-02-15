@@ -16,7 +16,7 @@ RUN pip2.7 install Flask
 RUN python2.7 setup.py install 
 RUN ls /usr/local/bin
 RUN mkdir -p /src/python-source
-RUN mkdir /keyczar
+RUN mkdir /keyzcar
 RUN mkdir /datadir
 RUN mkdir /backups
 RUN rm -rf /code /s3_mysql_backup

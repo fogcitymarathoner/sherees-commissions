@@ -11,9 +11,7 @@ from rrg.models import session_maker
 parser = argparse.ArgumentParser(description='RRG Cache Contracts')
 
 parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
+    '--datadir', required=True, help='datadir dir', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 
 parser.add_argument(

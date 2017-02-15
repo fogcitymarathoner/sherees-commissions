@@ -1,7 +1,6 @@
 import logging
 from keyczar.errors import Base64DecodingError
 import string
-from rrg.employees import employees as sa_employees
 from rrg.models import Employee
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
@@ -26,7 +25,7 @@ def picked_employee(session, number):
 
 def selection_list(session, crypter):
     printable = set(string.printable)
-    w_employees = sa_employees(session)
+    w_employees = employees(session)
     tbl = []
     i = 1
     for e in w_employees:

@@ -152,7 +152,6 @@ setup(
             'rrg-reminder-to-timecard=rrg.scripts.reminder_to_timecard:reminder_to_timecard_ep',
             'rrg-sherees-inv-monthlies=rrg.scripts.sheree_inv_monthly_summaries:monthlies_summary_ep',
             'rrg-sherees-inv-monthly=rrg.scripts.sheree_inv_monthly_summary:monthly_detail_ep',
-            'rrg-comm-monthly=rrg.scripts.commissions_monthly_summary:monthly_detail_ep',
             'rrg-sheree-total-due=rrg.scripts.sheree_monies_due:monies_due_ep',
             'rrg-sherees-invoices-items=rrg.scripts.sherees_invoices_items:invoices_items_ep',
             'rrg-sheree-total-due-full=rrg.scripts.sherees_monies_due_full_report:monies_due_ep',
