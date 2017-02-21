@@ -46,6 +46,7 @@ def cached_employees_ep():
 manager = Manager(app)
 
 
+@manager.command
 def cached_employees():
 
     print('Archived Employees in %s' % app.config['DATADIR'])
@@ -54,6 +55,4 @@ def cached_employees():
 
 if __name__ == "__main__":
     manager.run()
-
-
 
