@@ -44,17 +44,27 @@ def selection_list(crypter, employees):
     tbl = []
     i = 1
     for e in employees:
-        try:
-            ssn = crypter.Decrypt(e.ssn_crypto)
-        except Base64DecodingError:
+        if e.ssn_crypto:
+            try:
+                ssn = crypter.Decrypt(e.ssn_crypto)
+            except Base64DecodingError:
+                ssn = None
+        else:
             ssn = None
-        try:
-            bankaccountnumber = crypter.Decrypt(e.bankaccountnumber_crypto)
-        except Base64DecodingError:
+        print len(e.bankaccountnumber_crypto)
+        if e.bankaccountnumber_crypto:
+            try:
+                bankaccountnumber = crypter.Decrypt(e.bankaccountnumber_crypto)
+            except Base64DecodingError:
+                bankaccountnumber = None
+        else:
             bankaccountnumber = None
-        try:
-            bankroutingnumber = crypter.Decrypt(e.bankroutingnumber_crypto)
-        except Base64DecodingError:
+        if e.bankroutingnumber_crypto:
+            try:
+                bankroutingnumber = crypter.Decrypt(e.bankroutingnumber_crypto)
+            except Base64DecodingError:
+                bankroutingnumber = None
+        else:
             bankroutingnumber = None
         tbl.append(
             [i, e.id, filter(lambda x: x in printable, e.firstname + ' ' +

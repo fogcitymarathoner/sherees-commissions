@@ -212,6 +212,7 @@ setup(
             'rrg/scripts/forget_reminder.py',
             'rrg/scripts/get_last_backup.py',
             'rrg/scripts/invoices_monthly.py',
+            'rrg/scripts/make_timecard_for_employee.py',
             'rrg/scripts/notes_report.py',
             'rrg/scripts/open_invoices.py',
             'rrg/scripts/recover_joomla_documents.py',
