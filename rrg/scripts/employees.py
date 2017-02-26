@@ -8,7 +8,7 @@ from tabulate import tabulate
 
 from keyczar import keyczar
 from rrg.models import session_maker
-from rrg.employees import selection_list
+from rrg.employees import selection_list_all as selection_list
 
 parser = argparse.ArgumentParser(description='RRG Employees')
 
