@@ -32,12 +32,13 @@ def timecards(session):
     """
     return session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
 
+
 def picked_timecard(session, number):
     timecards = session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
     return timecards[number-1]
+
 
 def void_timecard(session, number):
     timecards = session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
     timecard_to_void = timecards[number-1]
     timecard_to_void.voided = True
-

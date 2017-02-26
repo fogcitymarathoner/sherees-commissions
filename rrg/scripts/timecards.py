@@ -61,10 +61,9 @@ def timecards():
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     w_timecards = sa_timecards(session)
     tbl = []
-    i = 1
-    for r in w_timecards:
+    for i, r in enumerate(w_timecards):
         tbl.append(
-            [i, r.contract.client.name, r.contract.employee.firstname + ' ' +
+            [i + 1, r.contract.client.name, r.contract.employee.firstname + ' ' +
              r.contract.employee.lastname,
              dt.strftime(r.period_start, '%m/%d/%Y'), dt.strftime(r.period_end, '%m/%d/%Y')])
         i += 1

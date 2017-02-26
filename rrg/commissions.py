@@ -11,9 +11,7 @@ from s3_mysql_backup import TIMESTAMP_FORMAT
 
 from rrg.archive import employee as archived_employee
 from rrg.models import ContractItemCommItem
-from rrg.commissions import comm_months
-from rrg.commissions import salesperson_year_month_statement
-from rrg.commissions import employee_commissions_transactions_year_month
+
 from rrg.models import Employee
 from rrg.models import Citem
 from rrg.models import CommPayment

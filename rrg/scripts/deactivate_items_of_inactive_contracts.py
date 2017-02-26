@@ -1,13 +1,10 @@
 import os
-from datetime import datetime as dt
-from datetime import timedelta as td
+
 from flask_script import Manager
 from flask import Flask
 
-from rrg.timecards import void_timecard as process
-from rrg.timecards import timecards as sa_timecards
 from rrg.models import session_maker
-
+from rrg.contracts import deactivate_items_of_deactivated_contracts
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -31,20 +28,15 @@ else:
 manager = Manager(app)
 
 
-@manager.option('-n', '--number', dest='number', default=True)
-def void_timecard(number):
-    print("Voiding Timecard Number %s" % number)
+@manager.command
+def deactivate_items_of_inactive_contracts():
+
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    w_timecards = sa_timecards(session)
-    if int(number) in [i for i in xrange(1, w_timecards.count() + 1)]:
-        process(session, int(number))
-        session.commit()
-    else:
-        print('Timecard number is not in range')
-        quit()
+    deactivate_items_of_deactivated_contracts(session)
 
+    session.commit()
 
 if __name__ == "__main__":
     manager.run()

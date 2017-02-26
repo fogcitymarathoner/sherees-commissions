@@ -9,6 +9,7 @@ logger = logging.getLogger('test')
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 """
+Basic Functions for Employees model
 """
 
 
