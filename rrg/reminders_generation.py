@@ -90,32 +90,40 @@ def reminders_set(session, period, payroll_run_date):
 
 
 def reminders(session, reminder_period_start, payroll_run_date, t_set, period):
-    # generate list of reminders in a period for a period type [week, biweek, semimonth, month]
+    """
+    generate list of reminders in a period for a period type [week, biweek, semimonth, month]
+    :param session:
+    :param reminder_period_start:
+    :param payroll_run_date:
+    :param t_set:
+    :param period:
+    :return:
+    """
 
-    reminders = []
+    reminders_list = []
     for c, cl, em in contracts_per_period(session, period):
         if period == 'week':
             for ws, we in weeks_between_dates(reminder_period_start,
                                               payroll_run_date):
                 if reminder_hash(c, ws, we) not in t_set:
-                    reminders.append((c, ws, we))
+                    reminders_list.append((c, ws, we))
         elif period == 'biweek':
             for ws, we in biweeks_between_dates(date_to_datetime(c.startdate),
                                                 payroll_run_date):
                 if reminder_hash(c, ws, we) not in t_set:
-                    reminders.append((c, ws, we))
+                    reminders_list.append((c, ws, we))
         elif period == 'semimonth':
             for ws, we in semimonths_between_dates(
                     date_to_datetime(c.startdate), payroll_run_date):
                 if reminder_hash(c, ws, we) not in t_set:
-                    reminders.append((c, ws, we))
+                    reminders_list.append((c, ws, we))
         else:
             for ws, we in months_between_dates(date_to_datetime(c.startdate),
                                                payroll_run_date):
                 if reminder_hash(c, ws, we) not in t_set:
-                    reminders.append((c, ws, we))
+                    reminders_list.append((c, ws, we))
 
-    return reminders
+    return reminders_list
 
 
 def reminder_to_timecard(session, reminder_period_start, payroll_run_date, t_set, period, number):

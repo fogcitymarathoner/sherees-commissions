@@ -1,7 +1,5 @@
 import os
 
-import argparse
-
 from flask_script import Manager
 from flask import Flask
 

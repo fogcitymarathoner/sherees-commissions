@@ -19,6 +19,20 @@ def employees(session):
     return session.query(Employee)
 
 
+def employees_active(session):
+    """
+    return list of active employees
+    """
+    return session.query(Employee).filter(Employee.active==True)
+
+
+def employees_inactive(session):
+    """
+    return list of inactive employees
+    """
+    return session.query(Employee).filter(Employee.active==False)
+
+
 def picked_employee(session, number):
     employees = session.query(Employee).all()
     return employees[number-1]
@@ -60,3 +74,25 @@ def selection_list_all(session, crypter):
     :return:
     """
     return selection_list(crypter, employees(session))
+
+
+
+def selection_list_active(session, crypter):
+    """
+    return tabulated list of active employees
+    :param session:
+    :param crypter:
+    :return:
+    """
+    return selection_list(crypter, employees_active(session))
+
+
+
+def selection_list_inactive(session, crypter):
+    """
+    return tabulated list of inactive employees
+    :param session:
+    :param crypter:
+    :return:
+    """
+    return selection_list(crypter, employees_inactive(session))
