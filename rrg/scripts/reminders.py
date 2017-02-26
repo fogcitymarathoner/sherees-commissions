@@ -39,22 +39,6 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def reminders_ep():
-    args = parser.parse_args()
-    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-    t_set = timecards_set(session)
-    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(), t_set, args.period)
-    tbl = []
-    i = 1
-    for r in w_reminders:
-        tbl.append(
-            [i, r[0].client.name, r[0].employee.firstname + ' ' +
-             r[0].employee.lastname,
-             dt.strftime(r[1], '%m/%d/%Y'), dt.strftime(r[2], '%m/%d/%Y')])
-        i += 1
-    print(tabulate(tbl, headers=['number', 'client', 'employee', 'start', 'end']))
-
-
 manager = Manager(app)
 
 

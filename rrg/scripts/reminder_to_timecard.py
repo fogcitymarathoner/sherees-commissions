@@ -47,21 +47,6 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def reminder_to_timecard_ep():
-    args = parser.parse_args()
-
-    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-
-    t_set = timecards_set(session)
-    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(), t_set, args.period)
-    if args.number in xrange(1, len(w_reminders) + 1):
-        process(session, dt.now() - td(days=90), dt.now(), t_set, args.period, args.number)
-        session.commit()
-    else:
-        print('Reminder number is not in range')
-        quit()
-
-
 manager = Manager(app)
 
 

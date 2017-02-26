@@ -36,13 +36,6 @@ if os.path.isfile(settings_file):
 else:
     print('settings file %s does not exits' % settings_file)
 
-
-def edit_timecard_ep():
-    args = parser.parse_args()
-    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-
-    edit_invoice(session, 'timecard', args.number)
-
 manager = Manager(app)
 
 
