@@ -1,25 +1,11 @@
 import os
-import argparse
 from flask_script import Manager
 from flask import Flask
 
-from rrg.invoices import open_invoices as sa_open_invoices
+from rrg.invoices import pastdue_invoices as sa_pastdue_invoices
 from rrg.models import session_maker
 from rrg.invoices import tabulate_invoices
 
-parser = argparse.ArgumentParser(description='RRG Open Invoices')
-
-parser.add_argument('--db-user', required=True, help='database user',
-                    default='marcdba')
-parser.add_argument('--mysql-host', required=True,
-                    help='database host - MYSQL_PORT_3306_TCP_ADDR',
-                    default='marcdba')
-parser.add_argument('--mysql-port', required=True,
-                    help='database port - MYSQL_PORT_3306_TCP_PORT',
-                    default=3306)
-parser.add_argument('--db', required=True, help='d', default='rrg')
-parser.add_argument('--db-pass', required=True, help='database pw',
-                    default='deadbeef')
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -45,13 +31,13 @@ manager = Manager(app)
 
 @manager.option(
     '-f', '--format', help='format of commissions report - plain, latex', choices=['plain', 'latex'], default='plain')
-def open_invoices(format):
+def pastdue_invoices(format):
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    w_open_invoices = sa_open_invoices(session)
+    w_pastdue_invoices = sa_pastdue_invoices(session)
 
-    print(tabulate_invoices(w_open_invoices))
+    print(tabulate_invoices(w_pastdue_invoices))
 
 
 if __name__ == "__main__":
