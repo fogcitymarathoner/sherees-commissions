@@ -206,6 +206,19 @@ class Employee(Base):
             self.id, self.firstname, self.lastname)
 
     def to_xml(self, crypter):
+        if self.ssn_crypto:
+            ssn_crypto = crypter.Decrypt(self.ssn_crypto)
+        else:
+            ssn_crypto = None
+        if self.bankaccountnumber_crypto:
+            bankaccountnumber_crypto = crypter.Decrypt(self.bankaccountnumber_crypto)
+        else:
+            bankaccountnumber_crypto = None
+        if self.bankroutingnumber_crypto:
+            bankroutingnumber_crypto = crypter.Decrypt(self.bankroutingnumber_crypto)
+        else:
+            bankroutingnumber_crypto = None
+
         doc = ET.Element('employee')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'firstname').text = self.firstname
@@ -217,10 +230,10 @@ class Employee(Base):
         ET.SubElement(doc, 'city').text = self.city
         ET.SubElement(doc, 'state').text = str(self.state.name)
         ET.SubElement(doc, 'zip').text = self.zip
-        ET.SubElement(doc, 'ssn_crypto').text = crypter.Decrypt(self.ssn_crypto)
-        ET.SubElement(doc, 'bankaccountnumber_crypto').text = crypter.Decrypt(self.bankaccountnumber_crypto)
+        ET.SubElement(doc, 'ssn_crypto').text = ssn_crypto
+        ET.SubElement(doc, 'bankaccountnumber_crypto').text = bankaccountnumber_crypto
         ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
-        ET.SubElement(doc, 'bankroutingnumber_crypto').text = crypter.Decrypt(self.bankroutingnumber_crypto)
+        ET.SubElement(doc, 'bankroutingnumber_crypto').text = bankroutingnumber_crypto
         ET.SubElement(doc, 'directdeposit').text = str(self.directdeposit)
         ET.SubElement(doc, 'allowancefederal').text = str(self.allowancefederal)
         ET.SubElement(doc, 'allowancestate').text = str(self.allowancestate)
@@ -254,18 +267,18 @@ class Employee(Base):
 
         checks = ET.Element('employee-payments')
         for o in self.checks:
-            checks.append(o.to_xml())
+            checks.append(o.to_xml(crypter))
         doc.append(checks)
         memos = ET.Element('memos')
         for o in self.memos:
-            memos.append(o.to_xml())
+            memos.append(o.to_xml(crypter))
         doc.append(memos)
 
         ET.SubElement(doc, 'contracts')
 
         comm_items = ET.Element('employee-commissions-items')
         for o in self.comm_items:
-            comm_items.append(o.to_xml())
+            comm_items.append(o.to_xml(crypter))
         doc.append(comm_items)
         cnotes = ET.Element('employee-commissions-notes')
         for o in self.cnotes:

@@ -177,7 +177,8 @@ def employee(id, datadir):
         if root == employees_directory:
             for f in files:
                 if re.search(pat, f):
-                    if i == id:
+
+                    if i == int(id):
                         doc = ET.parse(os.path.join(root, f)).getroot()
                         emp_dict = emp_xml_doc_to_dict(i, doc, emp_dict)
                         for eles in doc.findall('memos'):

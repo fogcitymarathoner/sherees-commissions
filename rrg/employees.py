@@ -51,7 +51,6 @@ def selection_list(crypter, employees):
                 ssn = None
         else:
             ssn = None
-        print len(e.bankaccountnumber_crypto)
         if e.bankaccountnumber_crypto:
             try:
                 bankaccountnumber = crypter.Decrypt(e.bankaccountnumber_crypto)
@@ -85,7 +84,6 @@ def selection_list_all(session, crypter):
     :return:
     """
     return selection_list(crypter, employees(session))
-
 
 
 def selection_list_active(session, crypter):

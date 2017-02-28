@@ -1,16 +1,12 @@
 import os
-import argparse
 
 from flask_script import Manager
 from flask import Flask
-from rrg.archive import employees as routine
+from tabulate import tabulate
 
-parser = argparse.ArgumentParser(description='RRG Archived Employees')
-
-parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir with ar.xml',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
+from keyczar import keyczar
+from rrg.models import session_maker
+from rrg.clients import selection_list_all as selection_list
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -31,28 +27,21 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cached_employees_ep():
-    """
-    prints list of archived employees for selection
-    :param data_dir:
-    :return:
-    """
-    args = parser.parse_args()
-
-    print('Archived Employees in %s' % args.datadir)
-    routine(args.datadir)
-
-
 manager = Manager(app)
 
 
 @manager.command
-def cached_employees():
+def clients():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
-    print('Archived Employees in %s' % app.config['DATADIR'])
-    routine(app.config['DATADIR'])
+    print(
+    tabulate(
+        selection_list(session, crypter),
+        headers=['number', 'sqlid', 'name', 'street1', 'city', 'state']))
 
 
 if __name__ == "__main__":
     manager.run()
-

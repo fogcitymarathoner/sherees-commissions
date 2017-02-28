@@ -174,7 +174,9 @@ def download_last_database_backup(aws_access_key_id, aws_secret_access_key, buck
 
 def edit_employee(session, crypter, number):
     w_employees = sa_employees(session)
-    if number in xrange(1, w_employees.count() + 1):
+
+    if number in range(1, w_employees.count() + 1):
+
         employee = picked_employee(session, number)
         xml = xml_pp.parseString(ET.tostring(employee.to_xml(crypter)))
         temp_file = os.path.join(
@@ -183,17 +185,8 @@ def edit_employee(session, crypter, number):
             f.write(xml.toprettyxml())
         call(["vi", temp_file])
         whole_emp_xml = Employee.from_xml(temp_file)
-        print 'emp from xml'
-        print ET.tostring(whole_emp_xml)
-        print 'emp from xml end'
+
         employee.update_from_xml_doc(whole_emp_xml, crypter)
-        ####
-        print employee.firstname
-        print employee.lastname
-        print employee.ssn_crypto
-        print crypter.Decrypt(employee.ssn_crypto)
-        print employee.bankroutingnumber_crypto
-        print crypter.Decrypt(employee.bankroutingnumber_crypto)
 
         session.commit()
     else:
