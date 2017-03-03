@@ -1,27 +1,24 @@
 import os
-
+import xml.etree.ElementTree as ET
 from datetime import datetime as dt
 from datetime import timedelta as td
-import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from sqlalchemy import and_
 
 from s3_mysql_backup import mkdirs
+from sqlalchemy import and_
 
-from rrg.archive import full_dated_obj_xml_path
-from rrg.archive import full_non_dated_xml_obj_path
 from rrg.billing import verify_dirs_ready
-from rrg.commissions import sales_person_invoices_of_interest
 from rrg.commissions import comm_months
-from rrg.commissions import iitem_exclude
 from rrg.commissions import employee_commissions_transactions_year_month
-from rrg.models import Employee
+from rrg.commissions import iitem_exclude
+from rrg.commissions import sales_person_invoices_of_interest
+from rrg.lib import archive
 from rrg.models import Citem
-
+from rrg.models import Employee
 from rrg.models import Invoice
-from rrg.utils import directory_date_dictionary
-from rrg.utils import commissions_item_reldir
 from rrg.utils import commissions_item_fullpathname
+from rrg.utils import commissions_item_reldir
+from rrg.utils import directory_date_dictionary
 
 
 def sa_sheree(session):
@@ -139,7 +136,7 @@ def cache_comm_payments(session, datadir, cache):
                 employee_commissions_transactions_year_month(session, employee, datadir, year, month, cache)
             for pay in payments:
                 if pay.amount > 0:
-                    filename, pay_m_y = full_dated_obj_xml_path(datadir, pay)
+                    filename, pay_m_y = archive.full_dated_obj_xml_path(datadir, pay)
                     if not os.path.isdir(os.path.dirname(filename)):
                         mkdirs(os.path.dirname(filename))
                     with open(filename, 'w') as fh:
@@ -184,7 +181,7 @@ def iitem_xml_pretty_str(iitem):
 
 
 def cache_invoice(datadir, inv):
-    f, rel_dir = full_non_dated_xml_obj_path(os.path.join(datadir, 'transactions', 'invoices'), inv)
+    f, rel_dir = archive.full_non_dated_xml_obj_path(os.path.join(datadir, 'transactions', 'invoices'), inv)
     full_path = os.path.join(datadir, rel_dir)
     if not os.path.isdir(full_path):
         os.makedirs(full_path)
@@ -202,7 +199,7 @@ def cache_invoices(session, datadir):
 def cache_invoices_items(datadir, session, employee, cache):
     for inv in sales_person_invoices_of_interest(session, employee):
         for iitem in inv.invoice_items:
-            f = full_non_dated_xml_obj_path(datadir, iitem)
+            f = archive.full_non_dated_xml_obj_path(datadir, iitem)
             with open(f, 'w') as fh:
                 fh.write(iitem_xml_pretty_str(iitem))
             print('%s written' % f)

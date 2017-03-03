@@ -1,12 +1,12 @@
-import os
 import argparse
+import os
 
-
-from flask_script import Manager
 from flask import Flask
-from rrg.archive import cache_objs
-from rrg.models import session_maker
+from flask_script import Manager
+
+from rrg.lib import archive
 from rrg.models import State
+from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG States')
 
@@ -52,7 +52,7 @@ def cache_states_ep():
 
     print('Caching States %s into %s' % (args.db, os.path.join(args.datadir, 'states')))
     states = session.query(State).all()
-    cache_objs(args.datadir, states)
+    archive.cache_objs(args.datadir, states)
     session.commit()
 
 
@@ -66,7 +66,7 @@ def cache_states():
 
     print('Caching States %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'states')))
     states = session.query(State).all()
-    cache_objs(app.config['DATADIR'], states)
+    archive.cache_objs(app.config['DATADIR'], states)
     session.commit()
 
 if __name__ == "__main__":

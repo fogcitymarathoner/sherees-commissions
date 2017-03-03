@@ -1,25 +1,26 @@
 import os
+from datetime import datetime as dt
+from datetime import timedelta as td
 
-from flask_script import Manager
 from flask import Flask
+from flask_script import Manager
+from keyczar import keyczar
+from s3_mysql_backup import YMD_FORMAT
 from tabulate import tabulate
 
-from keyczar import keyczar
-
-from rrg.archive import cached_employees_collect_contracts
-from rrg.archive import employee
-from rrg.archive import employees
+from rrg import utils
 from rrg.billing import cache_non_date_parsed
-from rrg.models import session_maker
+from rrg.lib import archive
+from rrg.lib import employees
+from rrg.lib import reminders
+from rrg.lib import reminders_generation
+from rrg.models import Contract
 from rrg.models import Employee
-from rrg.employees import selection_list_all
-from rrg.employees import selection_list_active
-from rrg.employees import selection_list_inactive
 from rrg.models import EmployeeMemo
 from rrg.models import EmployeePayment
+from rrg.models import edit_employee_script
+from rrg.models import session_maker
 from rrg.renderers import format_employee
-from rrg.utils import edit_employee as utils_edit_employee
-from rrg.utils import employees_memos_dir
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -43,6 +44,74 @@ else:
 manager = Manager(app)
 
 
+@manager.command
+def make_timecard_for_employee():
+    """
+    A Text-based user workflow to make a time card for an employee
+    # select active employee
+    # select active contract of selected employee
+    # select any period going 90 days back
+    Goes back 90 days
+    :return:
+    """
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+    employee_list = employees.selection_list_active(session, crypter)
+    #
+    # Select an Active Employee
+    print(
+        tabulate(
+            employee_list, headers=[
+                'number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
+    selection = raw_input("Please select an employee or 'q' to quit: ")
+    if selection == 'q':
+        quit()
+    selected_employee = employee_list[int(selection)-1]
+
+    employee = session.query(Employee).get(int(selected_employee[1]))
+    print '%s %s' % (employee.firstname, employee.lastname)
+    #
+    # Select an Active Contract of the Employee's
+    contracts = []
+    for i, c in enumerate(employee.contracts):
+        if c.active:
+            contracts.append([i + 1, c.id, c.client.name, c.startdate, c.enddate])
+    print tabulate(contracts, headers=['number', 'sqlid', 'client', 'title', 'startdate', 'enddate'])
+    selection = raw_input("Please select an employee's contract or 'q' to quit: ")
+    if selection == 'q':
+        quit()
+    selected_contract = contracts[int(selection) - 1]
+    contract = session.query(Contract).get(int(selected_contract[1]))
+    # Weekly Contract
+    if contract.period_id == 1:
+        periods_for_contract = reminders.weeks_between_dates(dt.now() - td(days=90), dt.now())
+    # Bi-Weekly Contract
+    elif contract.period_id == 2:
+        periods_for_contract = reminders.biweeks_between_dates(dt.now() - td(days=90), dt.now())
+    # Semi-Monthly Contract
+    elif contract.period_id == 3:
+        periods_for_contract = reminders.semimonths_between_dates(dt.now() - td(days=90), dt.now())
+    # Monthly Contract
+    elif contract.period_id == 4:
+        periods_for_contract = reminders.months_between_dates(dt.now() - td(days=90), dt.now())
+    # Tabulate the periods for selection
+    periods = []
+    for i, p in enumerate(periods_for_contract):
+        periods.append([i + 1, dt.strftime(p[0], YMD_FORMAT), dt.strftime(p[1], YMD_FORMAT)])
+    print tabulate(periods, headers=['number', 'period start', 'period end'])
+    selection = raw_input("Please select a period for timecard or 'q' to quit: ")
+    if selection == 'q':
+        quit()
+    selected_period = periods[int(selection) - 1]
+    new_inv = reminders_generation.create_invoice_for_period(session, contract, selected_period[1], selected_period[2])
+    new_inv.voided = False
+    new_inv.mock = False
+    new_inv.timecard = True
+    session.commit()
+
+
 @manager.option('-n', '--number', dest='number', required=True)
 def edit_employee(number):
     session = session_maker(
@@ -50,7 +119,7 @@ def edit_employee(number):
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
-    utils_edit_employee(session, crypter, int(number))
+    edit_employee_script(session, crypter, int(number))
     session.commit()
 
 
@@ -65,7 +134,7 @@ def cached_employees():
 def cached_employee(id):
 
     print('Archived Employee in %s' % app.config['DATADIR'])
-    employee_dict = employee(id, app.config['DATADIR'])
+    employee_dict = archive.employee(id, app.config['DATADIR'])
 
     print format_employee(employee_dict)
 
@@ -76,8 +145,8 @@ def cache_employee_memos():
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-    print('Caching Employees-Memos %s into %s' % (app.config['DB'], employees_memos_dir(app.config['DATADIR'])))
-    cache_non_date_parsed(session, employees_memos_dir(app.config['DATADIR']), EmployeeMemo, crypter)
+    print('Caching Employees-Memos %s into %s' % (app.config['DB'], utils.employees_memos_dir(app.config['DATADIR'])))
+    cache_non_date_parsed(session, utils.employees_memos_dir(app.config['DATADIR']), EmployeeMemo, crypter)
     session.commit()
 
 
@@ -111,7 +180,7 @@ def assemble_employees_cache():
     :return:
     """
     print('Assembling Employees in %s' % os.path.join(app.config['DATADIR'], 'employees'))
-    cached_employees_collect_contracts(app.config['DATADIR'])
+    archive.cached_employees_collect_contracts(app.config['DATADIR'])
 
 
 @manager.command
@@ -127,7 +196,7 @@ def list_all_employees():
 
     print(
         tabulate(
-            selection_list_all(session, crypter),
+            employees.selection_list_all(session, crypter),
             headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
 
 
@@ -144,7 +213,7 @@ def list_active_employees():
 
     print(
         tabulate(
-            selection_list_active(session, crypter),
+            employees.selection_list_active(session, crypter),
             headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
 
 
@@ -161,7 +230,7 @@ def list_inactive_employees():
 
     print(
         tabulate(
-            selection_list_inactive(session, crypter),
+            employees.selection_list_inactive(session, crypter),
             headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
 
 

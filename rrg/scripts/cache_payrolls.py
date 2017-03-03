@@ -1,12 +1,12 @@
-import os
 import argparse
+import os
 
-
-from flask_script import Manager
 from flask import Flask
-from rrg.archive import cache_objs
-from rrg.models import session_maker
+from flask_script import Manager
+
+from rrg.lib import archive
 from rrg.models import Payroll
+from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Employees')
 
@@ -46,7 +46,7 @@ def cache_payrolls_ep():
     session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     print('Caching Payrolls %s into %s' % (args.db, os.path.join(args.datadir, 'payrolls')))
     payrolls = session.query(Payroll).all()
-    cache_objs(args.datadir, payrolls)
+    archive.cache_objs(args.datadir, payrolls)
     session.commit()
 
 
@@ -60,7 +60,7 @@ def cache_payrolls():
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     print('Caching Payrolls %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'payrolls')))
     payrolls = session.query(Payroll).all()
-    cache_objs(app.config['DATADIR'], payrolls)
+    archive.cache_objs(app.config['DATADIR'], payrolls)
     session.commit()
 
 

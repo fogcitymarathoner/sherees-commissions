@@ -1,18 +1,17 @@
 import os
+from keyczar import keyczar
 
 from flask_script import Manager
 from flask import Flask
-from tabulate import tabulate
-
-from keyczar import keyczar
+from rrg.billing import cache_non_date_parsed
 from rrg.models import session_maker
 from rrg.models import Client
-from rrg.models import generate_ar_report
-from rrg.clients import selection_list_all
-from rrg.clients import selection_list_active
-from rrg.clients import selection_list_inactive
+from rrg.models import Contract
+from rrg.models import Invoice
 
-from rrg import helpers
+from rrg import cache_clients_ar
+
+from rrg.utils import clients_ar_xml_file
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -37,89 +36,50 @@ manager = Manager(app)
 
 
 @manager.command
-def all():
+def clients():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+    print('Caching Clients %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'clients')))
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'clients'), Client, crypter)
+    session.commit()
+
+@manager.command
+def invoices():
     """
-    show list of all clients in database
+    cache xml invoices
     :return:
     """
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-
     print(
-        tabulate(
-            selection_list_all(session, crypter),
-            headers=['number', 'sqlid', 'name', 'city', 'state']))
+        'Caching Invoices %s into %s' % (
+            app.config['DB'], os.path.join(app.config['DATADIR'], 'transactions', 'invoices')))
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'transactions', 'invoices'), Invoice, crypter)
+    session.commit()
 
 
 @manager.command
-def active():
-    """
-    show list of active clients in database
-    :return:
-    """
+def client_accounts_receivable():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-
-    print(
-        tabulate(
-            selection_list_active(session, crypter),
-            headers=['number', 'sqlid', 'name', 'city', 'state']))
+    print('Caching Clients AR into %s' % clients_ar_xml_file(app.config['DATADIR']))
+    cache_clients_ar(session, app.config['DATADIR'])
 
 
 @manager.command
-def ar():
-    """
-    rolling workflow for an active client's ar
-    :return:
-    """
+def contracts():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-    client_list = selection_list_active(session, crypter)
-    print(
-        tabulate(
-            client_list,
-            headers=['number', 'sqlid', 'name', 'city', 'state']))
-
-    selection = raw_input("Please select an employee or 'q' to quit: ")
-    if selection == 'q':
-        quit()
-    selected_client = client_list[int(selection)-1]
-
-    client = session.query(Client).get(int(selected_client[1]))
-    print '%s' % client.name
-
-
-    selection = raw_input("Please select an ar report type [all, cleared, pastdue, open] or 'q' to quit: ")
-    if selection == 'q':
-        quit()
-    if selection not in ['all', 'cleared', 'pastdue', 'open']:
-        print 'Wrong Ar type selected'
-        quit()
-
-    print generate_ar_report(app, selection)
-
-@manager.command
-def inactive():
-    """
-    show list of inactive clients in database
-    :return:
-    """
-    session = session_maker(
-        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
-        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-
-    print(
-        tabulate(
-            selection_list_inactive(session, crypter),
-            headers=['number', 'sqlid', 'name', 'city', 'state']))
-
+    print('Caching Contracts %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'contracts')))
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'contracts'), Contract, crypter)
+    session.commit()
 
 if __name__ == "__main__":
     manager.run()

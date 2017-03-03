@@ -1,24 +1,24 @@
-import sys
-from datetime import datetime as dt
 import logging
+import sys
+import xml.etree.ElementTree as ET
+from datetime import datetime as dt
+
+from rrg.lib.reminders import biweeks_between_dates
+from rrg.lib.reminders import current_semimonth
+from rrg.lib.reminders import months_between_dates
+from rrg.lib.reminders import semimonths_between_dates
+from rrg.lib.reminders import weeks_between_dates
+from rrg.lib.reminders_generation import create_invoice_for_period
+from rrg.models import Client
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
-from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import Iitem
 from rrg.models import periods
-from rrg.reminders import weeks_between_dates
-from rrg.reminders import biweeks_between_dates
-from rrg.reminders import semimonths_between_dates
-from rrg.reminders import months_between_dates
-from rrg.reminders import current_semimonth
-from rrg.reminders_generation import create_invoice_for_period
-from rrg.sherees_commissions import iitem_xml_pretty_str
-from rrg.sherees_commissions import iitem_to_xml
 from rrg.models import session_maker
-
-import xml.etree.ElementTree as ET
+from rrg.sherees_commissions import iitem_to_xml
+from rrg.sherees_commissions import iitem_xml_pretty_str
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')

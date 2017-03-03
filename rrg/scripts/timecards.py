@@ -5,7 +5,7 @@ from flask import Flask
 from datetime import datetime as dt
 from tabulate import tabulate
 
-from rrg.timecards import timecards as sa_timecards
+from rrg.models import open_timecards
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Pending Invoices')
@@ -38,7 +38,7 @@ else:
 def timecards_ep():
     args = parser.parse_args()
     session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-    w_timecards = sa_timecards(session)
+    w_timecards = open_timecards(session)
     tbl = []
     i = 1
     for r in w_timecards:
@@ -59,7 +59,7 @@ def timecards():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    w_timecards = sa_timecards(session)
+    w_timecards = open_timecards(session)
     tbl = []
     for i, r in enumerate(w_timecards):
         tbl.append(

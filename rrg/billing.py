@@ -3,8 +3,10 @@ import xml.etree.ElementTree as ET
 from datetime import datetime as dt
 
 from s3_mysql_backup import mkdirs
+
+from rrg.lib.archive import full_non_dated_xml_obj_path
 from rrg.utils import directory_date_dictionary
-from rrg.archive import full_non_dated_xml_obj_path
+
 
 def sync(session, data_dir, ep, model, crypter):
     """

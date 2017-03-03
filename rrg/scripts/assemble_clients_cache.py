@@ -1,10 +1,10 @@
-import os
 import argparse
+import os
 
-from flask_script import Manager
 from flask import Flask
+from flask_script import Manager
 
-from rrg.archive import cached_clients_collect_contracts as routine
+from rrg.lib import archive
 
 parser = argparse.ArgumentParser(description='RRG Assemble Clients Cache')
 
@@ -39,7 +39,7 @@ def assemble_clients_cache_ep():
     """
     args = parser.parse_args()
     print('Assembling Clients in %s' % args.datadir)
-    routine(args.datadir)
+    archive.cached_clients_collect_contracts(args.datadir)
 
 
 manager = Manager(app)
@@ -48,7 +48,7 @@ manager = Manager(app)
 @manager.command
 def assemble_clients_cache():
     print('Assembling Clients in %s' % app.config['DATADIR'])
-    routine(app.config['DATADIR'])
+    archive.cached_clients_collect_contracts(app.config['DATADIR'])
 
 if __name__ == "__main__":
     manager.run()

@@ -1,23 +1,22 @@
+import logging
 import sys
 from datetime import datetime as dt
 from datetime import timedelta as td
-import logging
 
+from rrg.lib.reminders import biweeks_between_dates
+from rrg.lib.reminders import current_semimonth
+from rrg.lib.reminders import months_between_dates
+from rrg.lib.reminders import semimonths_between_dates
+from rrg.lib.reminders import weeks_between_dates
+from rrg.lib.reminders_generation import rebuild_empty_invoice_commissions
+from rrg.models import Citem
+from rrg.models import Client
 from rrg.models import Contract
 from rrg.models import ContractItem
-from rrg.models import Client
 from rrg.models import Employee
-from rrg.models import Invoice
 from rrg.models import Iitem
+from rrg.models import Invoice
 from rrg.models import periods
-from rrg.models import Citem
-from rrg.reminders import weeks_between_dates
-from rrg.reminders import biweeks_between_dates
-from rrg.reminders import semimonths_between_dates
-from rrg.reminders import months_between_dates
-from rrg.reminders import current_semimonth
-from rrg.reminders_generation import rebuild_empty_invoice_commissions
-
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)

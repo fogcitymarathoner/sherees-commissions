@@ -5,8 +5,8 @@ from flask import Flask
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as xml_pp
 
-from rrg.timecards import timecards as sa_timecards
-from rrg.timecards import picked_timecard
+from rrg.models import open_timecards
+from rrg.models import picked_timecard
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Forget Reminder')
@@ -40,7 +40,7 @@ else:
 def view_timecard_ep():
     args = parser.parse_args()
     session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-    w_timecards = sa_timecards(session)
+    w_timecards = open_timecards(session)
     if args.number in xrange(1, w_timecards.count() + 1):
         timecard = picked_timecard(session, args.number)
         xml = xml_pp.parseString(ET.tostring(timecard.to_xml()))
@@ -73,7 +73,7 @@ def view_timecard(number):
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    w_timecards = sa_timecards(session)
+    w_timecards = open_timecards(session)
     if number in xrange(1, w_timecards.count() + 1):
         timecard = picked_timecard(session, number)
         xml = xml_pp.parseString(ET.tostring(timecard.to_xml()))

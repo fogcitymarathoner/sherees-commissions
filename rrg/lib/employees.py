@@ -1,42 +1,15 @@
 import logging
 from keyczar.errors import Base64DecodingError
 import string
-from rrg.models import Employee
+
+from rrg.models import employees
+from rrg.models import employees_active
+from rrg.models import employees_inactive
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
 
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-"""
-Basic Functions for Employees model
-"""
-
-
-def employees(session):
-    """
-    return list of all employees
-    """
-    return session.query(Employee)
-
-
-def employees_active(session):
-    """
-    return list of active employees
-    """
-    return session.query(Employee).filter(Employee.active==True)
-
-
-def employees_inactive(session):
-    """
-    return list of inactive employees
-    """
-    return session.query(Employee).filter(Employee.active==False)
-
-
-def picked_employee(session, number):
-    employees = session.query(Employee).all()
-    return employees[number-1]
 
 
 def selection_list(crypter, employees):

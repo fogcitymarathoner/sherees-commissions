@@ -3,9 +3,9 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 
-from rrg.invoices import open_invoices as sa_open_invoices
+from rrg.models import open_invoices as sa_open_invoices
 from rrg.models import session_maker
-from rrg.invoices import tabulate_invoices
+from rrg.models import tabulate_invoices
 
 parser = argparse.ArgumentParser(description='RRG Open Invoices')
 

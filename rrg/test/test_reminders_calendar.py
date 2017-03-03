@@ -1,21 +1,19 @@
+import logging
 import sys
-import re
 from datetime import datetime as dt
 from datetime import timedelta as td
-import logging
 
-from rrg.reminders import current_week
-from rrg.reminders import current_month
-from rrg.reminders import first_biweek_of_year
-from rrg.reminders import next_biweek
-from rrg.reminders import current_biweek
-from rrg.reminders import biweeks_between_dates
-from rrg.reminders import weeks_between_dates
-from rrg.reminders import semimonths_between_dates
-from rrg.reminders import months_between_dates
-
-from rrg.reminders import previous_monday
-from rrg.reminders import next_sunday
+from rrg.lib.reminders import biweeks_between_dates
+from rrg.lib.reminders import current_biweek
+from rrg.lib.reminders import current_month
+from rrg.lib.reminders import current_week
+from rrg.lib.reminders import first_biweek_of_year
+from rrg.lib.reminders import months_between_dates
+from rrg.lib.reminders import next_biweek
+from rrg.lib.reminders import next_sunday
+from rrg.lib.reminders import previous_monday
+from rrg.lib.reminders import semimonths_between_dates
+from rrg.lib.reminders import weeks_between_dates
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')

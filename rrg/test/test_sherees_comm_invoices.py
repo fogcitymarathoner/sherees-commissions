@@ -1,26 +1,27 @@
+import logging
 import sys
+import xml.etree.ElementTree as ET
 from datetime import datetime as dt
 from datetime import timedelta as td
-import logging
-from freezegun import freeze_time
-import xml.etree.ElementTree as ET
 
+from freezegun import freeze_time
+
+from rrg.commissions import sales_person_contracts_of_interest
+from rrg.commissions import sales_person_invoices_of_interest
+from rrg.lib.reminders import biweeks_between_dates
+from rrg.lib.reminders import current_semimonth
+from rrg.lib.reminders import months_between_dates
+from rrg.lib.reminders import semimonths_between_dates
+from rrg.lib.reminders import weeks_between_dates
+from rrg.lib.reminders_generation import create_invoice_for_period
+from rrg.models import Client
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
-from rrg.models import Client
 from rrg.models import Employee
 from rrg.models import periods
-from rrg.reminders import weeks_between_dates
-from rrg.reminders import biweeks_between_dates
-from rrg.reminders import semimonths_between_dates
-from rrg.reminders import months_between_dates
-from rrg.reminders import current_semimonth
-from rrg.reminders_generation import create_invoice_for_period
-from rrg.sherees_commissions import sa_sheree
-from rrg.commissions import sales_person_contracts_of_interest
-from rrg.commissions import sales_person_invoices_of_interest
 from rrg.models import session_maker
+from rrg.sherees_commissions import sa_sheree
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)

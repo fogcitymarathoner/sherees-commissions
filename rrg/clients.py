@@ -43,7 +43,7 @@ def selection_list(crypter, clients):
     tbl = []
     i = 1
     for e in clients:
-        tbl.append([i, e.id, e.name, e.city, e.state,])
+        tbl.append([i, e.id, e.name, e.city, e.state.name,])
         i += 1
     return tbl
 
@@ -56,7 +56,6 @@ def selection_list_all(session, crypter):
     :return:
     """
     return selection_list(crypter, clients(session))
-
 
 
 def selection_list_active(session, crypter):

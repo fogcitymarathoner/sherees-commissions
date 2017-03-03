@@ -1,9 +1,10 @@
-import os
 import argparse
+import os
 
-from flask_script import Manager
 from flask import Flask
-from rrg.archive import contracts as routine
+from flask_script import Manager
+
+from rrg.lib import archive
 
 parser = argparse.ArgumentParser(description='RRG Archived Contracts')
 
@@ -37,7 +38,7 @@ def cached_contracts_ep():
     """
     args = parser.parse_args()
     print('Archived Contracts in %s' % args.datadir)
-    routine(args.datadir)
+    archive.contracts(args.datadir)
 
 
 manager = Manager(app)
@@ -46,7 +47,7 @@ manager = Manager(app)
 def cached_contracts():
 
     print('Archived Contracts in %s' % app.config['DATADIR'])
-    routine(app.config['DATADIR'])
+    archive.contracts(app.config['DATADIR'])
 
 
 if __name__ == "__main__":

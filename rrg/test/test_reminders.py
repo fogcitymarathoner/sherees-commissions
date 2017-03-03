@@ -1,29 +1,30 @@
+import logging
 import sys
 from datetime import datetime as dt
 from datetime import timedelta as td
-import logging
+
 from tabulate import tabulate
 
-from rrg.models import Contract
+from rrg.helpers import date_to_datetime
+from rrg.lib.reminders import biweeks_between_dates
+from rrg.lib.reminders import current_semimonth
+from rrg.lib.reminders import months_between_dates
+from rrg.lib.reminders import semimonths_between_dates
+from rrg.lib.reminders import weeks_between_dates
+from rrg.lib.reminders_generation import forget_reminder
+from rrg.lib.reminders_generation import reminders
+from rrg.lib.reminders_generation import reminders_set
+from rrg.lib.reminders_generation import timecard_hash
+from rrg.lib.reminders_generation import timecards
+from rrg.lib.reminders_generation import timecards_set
 from rrg.models import Client
+from rrg.models import Contract
 from rrg.models import Employee
 from rrg.models import Invoice
-from rrg.models import periods
 from rrg.models import is_pastdue
-from rrg.helpers import date_to_datetime
-from rrg.reminders import weeks_between_dates
-from rrg.reminders import biweeks_between_dates
-from rrg.reminders import semimonths_between_dates
-from rrg.reminders import months_between_dates
-from rrg.reminders import current_semimonth
-from rrg.queries import contracts_per_period
-from rrg.reminders_generation import timecard_hash
-from rrg.reminders_generation import reminders_set
-from rrg.reminders_generation import reminders
-from rrg.reminders_generation import timecards_set
-from rrg.reminders_generation import timecards
-from rrg.reminders_generation import forget_reminder
+from rrg.models import periods
 from rrg.models import session_maker
+from rrg.queries import contracts_per_period
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')

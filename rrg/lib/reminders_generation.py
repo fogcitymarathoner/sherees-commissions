@@ -1,20 +1,21 @@
-from datetime import datetime as dt
 import hashlib
 import logging
-from sqlalchemy import and_
-from s3_mysql_backup import YMD_FORMAT
+from datetime import datetime as dt
 
-from rrg.models import Invoice
-from rrg.models import Contract
+from s3_mysql_backup import YMD_FORMAT
+from sqlalchemy import and_
+
+from rrg.lib.archive import date_to_datetime
+from rrg.lib.reminders import biweeks_between_dates
+from rrg.lib.reminders import months_between_dates
+from rrg.lib.reminders import semimonths_between_dates
+from rrg.lib.reminders import weeks_between_dates
+from rrg.models import Citem
 from rrg.models import Client
+from rrg.models import Contract
 from rrg.models import Employee
 from rrg.models import Iitem
-from rrg.models import Citem
-from rrg.reminders import weeks_between_dates
-from rrg.reminders import biweeks_between_dates
-from rrg.reminders import semimonths_between_dates
-from rrg.reminders import months_between_dates
-from rrg.helpers import date_to_datetime
+from rrg.models import Invoice
 from rrg.queries import contracts_per_period
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)

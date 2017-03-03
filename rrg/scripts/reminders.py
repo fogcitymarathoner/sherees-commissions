@@ -1,14 +1,13 @@
 import os
-from flask_script import Manager
-from flask import Flask
 from datetime import datetime as dt
 from datetime import timedelta as td
+
+from flask import Flask
+from flask_script import Manager
 from tabulate import tabulate
 
-from rrg.reminders_generation import timecards_set
-from rrg.reminders_generation import reminders as period_reminders
+from rrg.lib import reminders_generation
 from rrg.models import session_maker
-
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -38,8 +37,8 @@ def reminders(period):
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    t_set = timecards_set(session)
-    w_reminders = period_reminders(session, dt.now() - td(days=90), dt.now(), t_set, period)
+    t_set = reminders_generation.timecards_set(session)
+    w_reminders = reminders_generation.reminders(session, dt.now() - td(days=90), dt.now(), t_set, period)
     tbl = []
     i = 1
     for r in w_reminders:

@@ -1,34 +1,15 @@
-
 import os
 import re
 import time
 from datetime import datetime as dt
 
-from subprocess import call
-import random
-import string
-
-import xml.etree.ElementTree as ET
-import xml.dom.minidom as xml_pp
+from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
+from s3_mysql_backup import mkdirs
+from s3_mysql_backup import s3_bucket
 
 from sqlalchemy import create_engine
-from rrg.employees import employees as sa_employees
-from rrg.employees import picked_employee
-from rrg.models import Employee
-from rrg.archive import employee_dated_object_reldir
-from rrg.archive import obj_dir
-from rrg.models import Base
-from rrg.invoices import open_invoices as sa_open_invoices
-from rrg.timecards import  timecards as sa_timecards
-from rrg.timecards import picked_timecard
-from rrg.invoices import picked_open_invoice
-from rrg.models import Invoice
-from rrg.models import Iitem
 
-from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
-from s3_mysql_backup import s3_bucket
-from s3_mysql_backup import mkdirs
-
+from rrg.lib import archive
 
 monthy_statement_ym_header = '%s/%s - #########################################################'
 
@@ -102,7 +83,7 @@ def clients_managers_dir(datadir):
 
 
 def commissions_item_reldir(comm_item):
-    return employee_dated_object_reldir(comm_item)[1:len(employee_dated_object_reldir(comm_item))]
+    return archive.employee_dated_object_reldir(comm_item)[1:len(archive.employee_dated_object_reldir(comm_item))]
 
 
 def commissions_item_fullpathname(datadir, comm_item):
@@ -114,7 +95,7 @@ def commissions_item_fullpathname(datadir, comm_item):
 
 
 def commissions_payment_dir(datadir, comm_payment):
-    return obj_dir(datadir, comm_payment) + employee_dated_object_reldir(comm_payment)
+    return archive.obj_dir(datadir, comm_payment) + archive.employee_dated_object_reldir(comm_payment)
 
 
 def employees_memos_dir(datadir):
@@ -170,57 +151,3 @@ def download_last_database_backup(aws_access_key_id, aws_secret_access_key, buck
         else:
             print 'There is no S3 backup history for project %s' % project_name
             print 'In ANY Folder of bucket %s' % bucket_name
-
-
-def edit_employee(session, crypter, number):
-    w_employees = sa_employees(session)
-
-    if number in range(1, w_employees.count() + 1):
-
-        employee = picked_employee(session, number)
-        xml = xml_pp.parseString(ET.tostring(employee.to_xml(crypter)))
-        temp_file = os.path.join(
-            os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
-        with open(temp_file, 'w+b') as f:
-            f.write(xml.toprettyxml())
-        call(["vi", temp_file])
-        whole_emp_xml = Employee.from_xml(temp_file)
-
-        employee.update_from_xml_doc(whole_emp_xml, crypter)
-
-        session.commit()
-    else:
-        print('Employee number is not in range')
-        quit()
-
-
-def edit_invoice(session, crypter, phase, number):
-
-    if phase == 'open':
-        winvoices = sa_open_invoices(session)
-    elif phase =='timecard':
-        winvoices = sa_timecards(session)
-    if number in xrange(1, winvoices.count() + 1):
-        if phase == 'open':
-            invoice = picked_open_invoice(session, number)
-        elif phase =='timecard':
-            invoice = picked_timecard(session, number)
-        xml = xml_pp.parseString(ET.tostring(invoice.to_xml(crypter)))
-        temp_file = os.path.join(
-            os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
-        with open(temp_file, 'w+b') as f:
-            f.write(xml.toprettyxml())
-        call(["vi", temp_file])
-        whole_inv_xml = Invoice.from_xml(temp_file)
-
-        invoice.update_from_xml_doc(whole_inv_xml)
-
-        for iitem in whole_inv_xml.iter('invoice-item'):
-            iid = int(iitem.findall('id')[0].text)
-            sa_item = session.query(Iitem).get(iid)
-            sa_item.update_from_xml_doc(iitem)
-
-        session.commit()
-    else:
-        print('Invoice number is not in range')
-        quit()

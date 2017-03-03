@@ -1,11 +1,12 @@
-import os
 import argparse
+import os
 
-from flask_script import Manager
 from flask import Flask
-from rrg.archive import cache_objs
-from rrg.models import session_maker
+from flask_script import Manager
+
+from rrg.lib import archive
 from rrg.models import Vendor
+from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Vendors')
 
@@ -51,7 +52,7 @@ def cache_vendors_ep():
 
     print('Caching Vendors %s into %s' % (args.db, os.path.join(args.datadir, 'vendors')))
     vendors = session.query(Vendor).all()
-    cache_objs(args.datadir, vendors)
+    archive.cache_objs(args.datadir, vendors)
     session.commit()
 
 
@@ -65,7 +66,7 @@ def cache_vendors():
 
     print('Caching Vendors %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'vendors')))
     vendors = session.query(Vendor).all()
-    cache_objs(app.config['DATADIR'], vendors)
+    archive.cache_objs(app.config['DATADIR'], vendors)
     session.commit()
 
 

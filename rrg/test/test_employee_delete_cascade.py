@@ -1,31 +1,31 @@
+import logging
 import sys
 from datetime import datetime as dt
 from datetime import timedelta as td
-import logging
+
 from freezegun import freeze_time
 
+from rrg.lib.reminders import biweeks_between_dates
+from rrg.lib.reminders import current_semimonth
+from rrg.lib.reminders import months_between_dates
+from rrg.lib.reminders import semimonths_between_dates
+from rrg.lib.reminders import weeks_between_dates
+from rrg.lib.reminders_generation import create_invoice_for_period
+from rrg.models import Citem
+from rrg.models import Client
+from rrg.models import ClientMemo
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
-from rrg.models import Client
-from rrg.models import ClientMemo
 from rrg.models import Employee
-from rrg.models import EmployeePayment
 from rrg.models import EmployeeMemo
-from rrg.models import Invoice
+from rrg.models import EmployeePayment
 from rrg.models import Iitem
-from rrg.models import Citem
-from rrg.models import Payroll
-from rrg.models import periods
+from rrg.models import Invoice
 from rrg.models import Note
 from rrg.models import NotePayment
-from rrg.reminders import weeks_between_dates
-from rrg.reminders import biweeks_between_dates
-from rrg.reminders import semimonths_between_dates
-from rrg.reminders import months_between_dates
-from rrg.reminders import current_semimonth
-from rrg.reminders_generation import create_invoice_for_period
-
+from rrg.models import Payroll
+from rrg.models import periods
 from rrg.models import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)

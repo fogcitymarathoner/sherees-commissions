@@ -1,11 +1,13 @@
-import os
 import argparse
+import os
 
-from flask_script import Manager
 from flask import Flask
-from rrg.archive import cache_objs
-from rrg.models import session_maker
+from flask_script import Manager
+
+from rrg.lib import archive
+
 from rrg.models import Expense
+from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Employees')
 
@@ -50,7 +52,7 @@ def cache_expenses_ep():
     session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
     print('Caching Expenses %s into %s' % (args.db, os.path.join(args.datadir, 'expenses')))
     expenses = session.query(Expense).all()
-    cache_objs(args.datadir, expenses)
+    archive.cache_objs(args.datadir, expenses)
     session.commit()
 
 
@@ -64,7 +66,7 @@ def cache_expenses():
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     print('Caching Expenses %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'expenses')))
     expenses = session.query(Expense).all()
-    cache_objs(app.config['DATADIR'], expenses)
+    archive.cache_objs(app.config['DATADIR'], expenses)
     session.commit()
 
 

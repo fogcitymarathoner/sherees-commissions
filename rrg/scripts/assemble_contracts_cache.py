@@ -1,10 +1,10 @@
-import os
 import argparse
+import os
 
-from flask_script import Manager
 from flask import Flask
+from flask_script import Manager
 
-from rrg.archive import cached_contracts_collect_invoices_and_items as routine
+from rrg.lib import archive
 
 parser = argparse.ArgumentParser(description='RRG Assemble Contracts Cache')
 parser.add_argument(
@@ -37,7 +37,7 @@ def assemble_contracts_cache_ep():
     """
     args = parser.parse_args()
     print('Assembling Contracts in %s' % os.path.join(args.datadir, 'contracts'))
-    routine(args.datadir)
+    archive.cached_contracts_collect_invoices_and_items(args.datadir)
 
 
 manager = Manager(app)
@@ -46,7 +46,7 @@ manager = Manager(app)
 @manager.command
 def assemble_contracts_cache():
     print('Assembling Contracts in %s' % os.path.join(app.config['DATADIR'], 'contracts'))
-    routine(app.config['DATADIR'])
+    archive.cached_contracts_collect_invoices_and_items(app.config['DATADIR'])
 
 if __name__ == "__main__":
     manager.run()

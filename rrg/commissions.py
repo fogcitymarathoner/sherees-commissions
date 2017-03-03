@@ -1,23 +1,22 @@
-import re
 import os
+import re
+import xml.etree.ElementTree as ET
 from datetime import datetime as dt
+from operator import itemgetter
+
+from s3_mysql_backup import TIMESTAMP_FORMAT
+from s3_mysql_backup import YMD_FORMAT
 from sqlalchemy import and_
 from tabulate import tabulate
-from operator import itemgetter
-import xml.etree.ElementTree as ET
 
-from s3_mysql_backup import YMD_FORMAT
-from s3_mysql_backup import TIMESTAMP_FORMAT
-
-from rrg.archive import employee as archived_employee
-from rrg.models import ContractItemCommItem
-
-from rrg.models import Employee
+from rrg.lib import archive
 from rrg.models import Citem
 from rrg.models import CommPayment
+from rrg.models import ContractItemCommItem
+from rrg.models import Employee
 from rrg.models import Invoice
-from rrg.payroll import remaining_payroll
 from rrg.payroll import employee_payroll_due_report
+from rrg.payroll import remaining_payroll
 from rrg.queries import salespersons_notes_payments
 from rrg.sales import salespersons_notes
 from rrg.utils import monthy_statement_ym_header
@@ -107,7 +106,7 @@ def salesperson_year_month_statement(session, employee, datadir, year, month, ca
 
 
 def sales_person_commissions_report(session, employee, cache, datadir, format):
-    if args.format not in ['plain', 'latex']:
+    if format not in ['plain', 'latex']:
         print('Wrong format')
         quit()
     balance = 0
@@ -132,7 +131,7 @@ def sales_person_commissions_report(session, employee, cache, datadir, format):
             res_dict_transposed['amount'].append('Period Total %s' % total)
             report += tabulate(res_dict_transposed, headers='keys',
                                tablefmt='psql')
-    elif args.format == 'latex':
+    elif format == 'latex':
         report += '\n\section{Commissions}\n'
         for cm in comm_months(end=dt.now()):
             report += '\n\subsection{%s/%s}\n' % (cm['year'], cm['month'])
@@ -168,7 +167,7 @@ def monthly_summaries(session):
             print(monthy_statement_ym_header % (cm['month'], cm['year']))
             year = cm['year']
             month = cm['month']
-            total, res = employee_year_month_statement(session, salesperson, args.datadir, year, month, args.cache)
+            total, res = employee_year_month_statement(session, salesperson, datadir, year, month, cache)
             balance += total
             res_dict_transposed = {
                 'id': [''],
@@ -181,7 +180,7 @@ def monthly_summaries(session):
 
 def monthly_detail(session, emp_id, datadir, year, month, cache):
     print(monthy_statement_ym_header % (year, month))
-    employee_dict = archived_employee(emp_id, datadir)
+    employee_dict = archive.employee(emp_id, datadir)
     if employee_dict['salesforce']:
         employee = session.query(Employee).filter(Employee.id == employee_dict['id']).first()
         total, res = employee_year_month_statement(session, employee, datadir, year, month, cache)

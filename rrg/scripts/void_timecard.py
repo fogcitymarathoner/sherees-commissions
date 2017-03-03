@@ -1,11 +1,9 @@
 import os
-from datetime import datetime as dt
-from datetime import timedelta as td
 from flask_script import Manager
 from flask import Flask
 
-from rrg.timecards import void_timecard as process
-from rrg.timecards import timecards as sa_timecards
+from rrg.models import void_timecard as process
+from rrg.models import open_timecards
 from rrg.models import session_maker
 
 
@@ -37,7 +35,7 @@ def void_timecard(number):
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    w_timecards = sa_timecards(session)
+    w_timecards = open_timecards(session)
     if int(number) in [i for i in xrange(1, w_timecards.count() + 1)]:
         process(session, int(number))
         session.commit()

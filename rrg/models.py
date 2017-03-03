@@ -1,10 +1,21 @@
 """
 does not work on alpine because libmysqlclient-dev package is not available.
 """
+import os
+import random
 import re
-from datetime import date
+import string
+import xml.dom.minidom as xml_pp
+import xml.etree.ElementTree as ET
+from datetime import datetime as dt
+from subprocess import call
+import re
+
 from datetime import datetime as dt
 from datetime import timedelta as td
+from subprocess import call
+from datetime import date
+
 
 from sqlalchemy import Column
 from sqlalchemy import Integer
@@ -23,11 +34,18 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 import xml.etree.ElementTree as ET
+import xml.dom.minidom as xml_pp
+
+from tabulate import tabulate
+from rrg.helpers import read_inv_xml_file
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import YMD_FORMAT
 
-from rrg.helpers import date_to_datetime
+from rrg.lib.archive import date_to_datetime
+from rrg import utils
+from rrg import invoices
+
 
 
 def default_date():
@@ -815,7 +833,7 @@ class Invoice(Base):
     last_sync_time = Column(DateTime)
 
     def __repr__(self):
-        return "<Invoice(id='%s', client='%s', contract='%s', amount='%s', worker='%s'" \
+        return "<Invoice(id='%s', client='%s', contract='%s', amount='%s', worker='%s', " \
                "duedate='%s', period_start='%s', " \
                "period_end='%s', date='%s', voided='%s')>" % (
                    self.id, self.contract.client.name, self.contract.title, self.amount, '%s %s' % (
@@ -829,7 +847,10 @@ class Invoice(Base):
         doc = ET.Element('invoice')
 
         ET.SubElement(doc, 'id').text = str(self.id)
-        ET.SubElement(doc, 'contract_id').text = str(self.contract_id)
+        ele = ET.SubElement(doc, 'contract_id')
+        ele.text = str(self.contract_id)
+        ele.set('client', self.contract.client.name)
+        ET.SubElement(doc, 'client_id').text = str(self.contract.client.id)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'po').text = str(self.po)
         ET.SubElement(doc, 'employerexpenserate').text = str(self.employerexpenserate)
@@ -897,20 +918,6 @@ class Invoice(Base):
             self.posted = True
         self.period_start = inv_doc.findall('period_start')[0].text
         self.period_end = inv_doc.findall('period_end')[0].text
-
-
-def is_pastdue(inv, date=None):
-    """
-    returns true or false if invoice is pastdue, server day
-
-    :return:
-    """
-    if not date:
-        date = dt.now()
-    if inv.duedate() >= date:
-        return True
-    else:
-        return False
 
 
 def invoice_archives(root, invoice_state='pastdue'):
@@ -1314,3 +1321,226 @@ class VendorMemo(Base):
         ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
+
+
+def obj_dir(datadir, obj):
+    """
+    central place to generate archive directories
+    :param datadir:
+    :param obj:
+    :return:
+    """
+
+    if isinstance(obj, type(Invoice())):
+        return os.path.join(datadir, 'transactions', 'invoices')
+    elif isinstance(obj, type(Iitem())):
+        return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_items')
+    elif isinstance(obj, type(InvoicePayment())):
+        return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_payments')
+    elif isinstance(obj, type(Client())):
+        return os.path.join(datadir, 'clients')
+    elif isinstance(obj, type(ClientManager())):
+        return os.path.join(os.path.join(datadir, 'clients'), 'managers')
+    elif isinstance(obj, type(ClientCheck())):
+        return os.path.join(datadir, 'transactions', 'checks')
+    elif isinstance(obj, type(ClientMemo())):
+        return os.path.join(os.path.join(datadir, 'clients'), 'memos')
+    elif isinstance(obj, type(Employee())):
+        return os.path.join(datadir, 'employees')
+    elif isinstance(obj, type(EmployeeMemo())):
+        return os.path.join(datadir, 'employees', 'memos')
+    elif isinstance(obj, type(EmployeePayment())):
+        return os.path.join(datadir, 'employees', 'payments')
+    elif isinstance(obj, type(Contract())):
+        return os.path.join(datadir, 'contracts')
+    elif isinstance(obj, type(ContractItem())):
+        return os.path.join(datadir, 'contracts', 'contract_items')
+    elif isinstance(obj, type(Citem())):
+        return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
+    elif isinstance(obj, type(CommPayment())):
+        return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments')
+    elif isinstance(obj, type(Expense())):
+        return os.path.join(datadir, 'expenses')
+    elif isinstance(obj, type(Payroll())):
+        return os.path.join(datadir, 'payrolls')
+    elif isinstance(obj, type(State())):
+        return os.path.join(datadir, 'states')
+    elif isinstance(obj, type(Vendor())):
+        return os.path.join(datadir, 'vendors')
+
+
+def generate_ar_report(app, type):
+    print('Generating %s Report' % type)
+    infile = utils.clients_ar_xml_file(app.config['DATADIR'])
+    print('Parsing %s' % infile)
+    results = []
+    if os.path.isfile(infile):
+        tree = ET.parse(infile)
+        root = tree.getroot()
+        recs = invoice_archives(root, type)
+        for i in recs:
+            xmlpath = os.path.join(obj_dir(app.config['DATADIR'], Invoice()), '%05d.xml' % int(i))
+            date, amount, employee, voided, terms, sqlid, client = read_inv_xml_file(xmlpath)
+            if voided == 'False':
+                results.append([amount, date, voided, employee, terms, sqlid, client])
+    else:
+        print('No AR.xml file found')
+    return tabulate(results, headers=['amount', 'date', 'voided', 'employee', 'terms', 'sqlid', 'client'])
+
+
+"""
+Basic functions for Invoice Model
+"""
+
+
+def open_invoices(session):
+    """
+    return list of OPEN invoices
+    """
+    return session.query(Invoice).filter(
+        Invoice.voided==False, Invoice.posted==True, Invoice.cleared==False, Invoice.mock == False, Invoice.amount > 0)
+
+
+def pastdue_invoices(session):
+    """
+    return list of PastDue invoices
+    """
+    res = []
+    oinvs = open_invoices(session)
+    for oi in oinvs:
+        if Invoice.duedate(oi) <= dt.now():
+            res.append(oi)
+    return res
+
+
+def picked_open_invoice(session, args):
+    o_invoices = open_invoices(session)
+    return o_invoices[args.number-1]
+
+
+def tabulate_invoices(invoices):
+    """
+    Return given invoices list tabulated
+    :param invoices:
+    :return:
+    """
+    tbl = []
+    i = 1
+    for r in invoices:
+        tbl.append(
+            [i, r.id, r.contract.client.name, r.contract.employee.firstname + ' ' +
+             r.contract.employee.lastname,
+             dt.strftime(r.period_start, '%m/%d/%Y'), dt.strftime(r.period_end, '%m/%d/%Y'),
+             r.date, r.date + td(days=r.contract.terms), r.amount])
+        i += 1
+    return tabulate(tbl, headers=['number', 'sqlid', 'client', 'employee', 'start', 'end', 'date', 'duedate', 'amount'])
+
+
+def edit_invoice(session, crypter, phase, number):
+
+    if phase == 'open':
+        winvoices = invoices.sa_open_invoices(session)
+    elif phase =='timecard':
+        winvoices = sa_timecards(session)
+    if number in xrange(1, winvoices.count() + 1):
+        if phase == 'open':
+            invoice = picked_open_invoice(session, number)
+        elif phase =='timecard':
+            invoice = picked_timecard(session, number)
+        xml = xml_pp.parseString(ET.tostring(invoice.to_xml(crypter)))
+        temp_file = os.path.join(
+            os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
+        with open(temp_file, 'w+b') as f:
+            f.write(xml.toprettyxml())
+        call(["vi", temp_file])
+        whole_inv_xml = Invoice.from_xml(temp_file)
+
+        invoice.update_from_xml_doc(whole_inv_xml)
+
+        for iitem in whole_inv_xml.iter('invoice-item'):
+            iid = int(iitem.findall('id')[0].text)
+            sa_item = session.query(Iitem).get(iid)
+            sa_item.update_from_xml_doc(iitem)
+
+        session.commit()
+    else:
+        print('Invoice number is not in range')
+        quit()
+
+
+"""
+Basic Functions for Employees model
+"""
+
+
+def employees(session):
+    """
+    return list of all employees
+    """
+    return session.query(Employee)
+
+
+def employees_active(session):
+    """
+    return list of active employees
+    """
+    return session.query(Employee).filter(Employee.active==True)
+
+
+def employees_inactive(session):
+    """
+    return list of inactive employees
+    """
+    return session.query(Employee).filter(Employee.active==False)
+
+
+def picked_employee(session, number):
+    all_employees = session.query(Employee).all()
+    return all_employees[number-1]
+
+
+def edit_employee_script(session, crypter, number):
+    """
+    Running dialog script for editing an employee
+    :param session:
+    :param crypter:
+    :param number:
+    :return:
+    """
+    w_employees = employees.employees(session)
+
+    if number in range(1, w_employees.count() + 1):
+
+        employee = employees.picked_employee(session, number)
+        xml = xml_pp.parseString(ET.tostring(employee.to_xml(crypter)))
+        temp_file = os.path.join(
+            os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
+        with open(temp_file, 'w+b') as f:
+            f.write(xml.toprettyxml())
+        call(["vi", temp_file])
+        whole_emp_xml = Employee.from_xml(temp_file)
+
+        employee.update_from_xml_doc(whole_emp_xml, crypter)
+
+        session.commit()
+    else:
+        print('Employee number is not in range')
+        quit()
+
+
+def open_timecards(session):
+    """
+    return list of timecards from reminders
+    """
+    return session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
+
+
+def picked_timecard(session, number):
+    timecards = session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
+    return timecards[number-1]
+
+
+def void_timecard(session, number):
+    timecards = session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
+    timecard_to_void = timecards[number-1]
+    timecard_to_void.voided = True

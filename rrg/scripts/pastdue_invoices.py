@@ -2,9 +2,9 @@ import os
 from flask_script import Manager
 from flask import Flask
 
-from rrg.invoices import pastdue_invoices as sa_pastdue_invoices
+from rrg.models import pastdue_invoices as sa_pastdue_invoices
 from rrg.models import session_maker
-from rrg.invoices import tabulate_invoices
+from rrg.models import tabulate_invoices
 
 
 app = Flask(__name__, instance_relative_config=True)

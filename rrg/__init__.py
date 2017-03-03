@@ -7,8 +7,8 @@ from rrg.models import Contract
 from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
-from rrg.models import is_pastdue
-from rrg.helpers import date_to_datetime
+
+from rrg.lib.archive import date_to_datetime
 from rrg.helpers import MissingEnvVar
 from rrg.utils import clients_ar_xml_file
 
@@ -26,7 +26,6 @@ def cleared_invoices_client(client, all_invs):
     cleared_invoices = []
     for i in all_invs:
         if i.contract.client == client and i.posted and not i.voided and i.cleared:
-
             cleared_invoices.append(i)
     return cleared_invoices
 
@@ -44,6 +43,21 @@ def open_invoices_client(client, all_invs):
             open_invoices.append(i)
         print(i)
     return open_invoices
+
+
+def _is_pastdue(inv, date=None):
+    """
+    returns true or false if invoice is pastdue, server day
+    :param inv:
+    :param date:
+    :return:
+    """
+    if not date:
+        date = dt.now()
+    if inv.duedate() < date:
+        return True
+    else:
+        return False
 
 
 def cache_clients_ar(session, datadir):
@@ -64,7 +78,7 @@ def cache_clients_ar(session, datadir):
                 id = ET.SubElement(open, 'invoice')
                 id.text = str(i.id)
                 if i.date:
-                    if is_pastdue(i, dt.now()):
+                    if _is_pastdue(i, dt.now()):
                         id = ET.SubElement(pastdue, 'invoice')
                         id.text = str(i.id)
             else:

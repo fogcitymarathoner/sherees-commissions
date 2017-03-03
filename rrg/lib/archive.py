@@ -5,28 +5,8 @@ from tabulate import tabulate
 import xml.etree.ElementTree as ET
 import logging
 
-from rrg.helpers import emp_xml_doc_to_dict
-from rrg.helpers import emp_memo_xml_doc_to_dict
-from rrg.helpers import emp_contract_xml_doc_to_dict
-from rrg.helpers import emp_payment_xml_doc_to_dict
-from rrg.models import Citem
-from rrg.models import Client
-from rrg.models import ClientCheck
-from rrg.models import ClientManager
-from rrg.models import ClientMemo
-from rrg.models import CommPayment
-from rrg.models import Contract
-from rrg.models import ContractItem
-from rrg.models import Employee
-from rrg.models import EmployeePayment
-from rrg.models import EmployeeMemo
-from rrg.models import Expense
-from rrg.models import Iitem
-from rrg.models import Invoice
-from rrg.models import InvoicePayment
-from rrg.models import Payroll
-from rrg.models import State
-from rrg.models import Vendor
+from s3_mysql_backup import TIMESTAMP_FORMAT
+from s3_mysql_backup import YMD_FORMAT
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -36,50 +16,51 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 pat = '[0-9]{5}\.[xX][Mm][Ll]$'
 
 
-def obj_dir(datadir, obj):
-    """
-    central place to generate archive directories
-    :param datadir:
-    :param obj:
-    :return:
-    """
+def date_to_datetime(date):
+    return dt(year=date.year, month=date.month, day=date.day)
 
-    if isinstance(obj, type(Invoice())):
-        return os.path.join(datadir, 'transactions', 'invoices')
-    elif isinstance(obj, type(Iitem())):
-        return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_items')
-    elif isinstance(obj, type(InvoicePayment())):
-        return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_payments')
-    elif isinstance(obj, type(Client())):
-        return os.path.join(datadir, 'clients')
-    elif isinstance(obj, type(ClientManager())):
-        return os.path.join(os.path.join(datadir, 'clients'), 'managers')
-    elif isinstance(obj, type(ClientCheck())):
-        return os.path.join(datadir, 'transactions', 'checks')
-    elif isinstance(obj, type(ClientMemo())):
-        return os.path.join(os.path.join(datadir, 'clients'), 'memos')
-    elif isinstance(obj, type(Employee())):
-        return os.path.join(datadir, 'employees')
-    elif isinstance(obj, type(EmployeeMemo())):
-        return os.path.join(datadir, 'employees', 'memos')
-    elif isinstance(obj, type(EmployeePayment())):
-        return os.path.join(datadir, 'employees', 'payments')
-    elif isinstance(obj, type(Contract())):
-        return os.path.join(datadir, 'contracts')
-    elif isinstance(obj, type(ContractItem())):
-        return os.path.join(datadir, 'contracts', 'contract_items')
-    elif isinstance(obj, type(Citem())):
-        return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
-    elif isinstance(obj, type(CommPayment())):
-        return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_payments')
-    elif isinstance(obj, type(Expense())):
-        return os.path.join(datadir, 'expenses')
-    elif isinstance(obj, type(Payroll())):
-        return os.path.join(datadir, 'payrolls')
-    elif isinstance(obj, type(State())):
-        return os.path.join(datadir, 'states')
-    elif isinstance(obj, type(Vendor())):
-        return os.path.join(datadir, 'vendors')
+
+def xml_timestamp_to_mdy(ele, datetag):
+    return dt.strptime(ele.findall(datetag)[0].text, TIMESTAMP_FORMAT).strftime(YMD_FORMAT)
+
+
+def emp_payment_xml_doc_to_dict(doc):
+    return {
+        'id': doc.findall('id')[0].text,
+        'date': xml_timestamp_to_mdy(doc, 'date'),
+        'check_number': doc.findall('ref')[0].text,
+        'amount': doc.findall('amount')[0].text,
+        'invoice_id': doc.findall('invoice_id')[0].text, }
+
+
+def emp_memo_xml_doc_to_dict(ele):
+    return {
+        'id': ele.findall('id')[0].text,
+        'date': xml_timestamp_to_mdy(ele, 'date'),
+        'notes': ele.findall('notes')[0].text}
+
+
+def emp_contract_xml_doc_to_dict(ele):
+    return {
+        'id': ele.findall('id')[0].text,
+        'title': ele.findall('title')[0].text}
+
+
+def emp_xml_doc_to_dict(i, doc, emp_dict):
+    emp_dict['index'] = i
+    emp_dict['id'] = doc.findall('id')[0].text
+    emp_dict['firstname'] = doc.findall('firstname')[0].text
+    emp_dict['lastname'] = doc.findall('lastname')[0].text
+    emp_dict['street1'] = doc.findall('street1')[0].text
+    emp_dict['street2'] = doc.findall('street2')[0].text
+    emp_dict['city'] = doc.findall('city')[0].text
+    emp_dict['state'] = doc.findall('state')[0].text
+    emp_dict['zip'] = doc.findall('zip')[0].text
+    emp_dict['startdate'] = xml_timestamp_to_mdy(doc, 'startdate')
+    emp_dict['enddate'] = xml_timestamp_to_mdy(doc, 'enddate')
+    emp_dict['dob'] = xml_timestamp_to_mdy(doc, 'dob')
+    emp_dict['salesforce'] = doc.findall('salesforce')[0].text
+    return emp_dict
 
 
 def full_non_dated_xml_id_path(data_dir, id):
