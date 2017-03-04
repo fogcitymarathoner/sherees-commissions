@@ -12,7 +12,6 @@ from rrg.clients import selection_list_all
 from rrg.clients import selection_list_active
 from rrg.clients import selection_list_inactive
 
-from rrg import helpers
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -62,6 +61,7 @@ def active():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
     crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
@@ -76,6 +76,7 @@ def ar():
     rolling workflow for an active client's ar
     :return:
     """
+
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])

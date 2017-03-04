@@ -1,5 +1,6 @@
 import os
 from datetime import datetime as dt
+from datetime import timedelta as td
 import xml.etree.ElementTree as ET
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
@@ -24,10 +25,12 @@ def read_inv_xml_file(xmlpath):
         client = contract_id_ele.attrib['client']
         voided = iroot.findall('voided')[0].text
         terms = iroot.findall('terms')[0].text
+        duedate = dt.strftime(dt.strptime(iroot.findall('date')[0].text, TIMESTAMP_FORMAT) + td(days=int(terms)), YMD_FORMAT)
         sqlid = int(iroot.findall('id')[0].text)
     else:
 
         date = ''
+        duedate = ''
         amount = ''
         employee = ''
         voided = '1'
@@ -35,5 +38,5 @@ def read_inv_xml_file(xmlpath):
         sqlid = ''
         client = ''
         print('file %s is missing' % xmlpath)
-    return date, amount, employee, voided, terms, sqlid, client
+    return date, amount, employee, voided, terms, sqlid, client, duedate
 

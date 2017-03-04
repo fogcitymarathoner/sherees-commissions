@@ -5,11 +5,7 @@ import os
 import random
 import re
 import string
-import xml.dom.minidom as xml_pp
-import xml.etree.ElementTree as ET
-from datetime import datetime as dt
-from subprocess import call
-import re
+
 
 from datetime import datetime as dt
 from datetime import timedelta as td
@@ -45,7 +41,6 @@ from s3_mysql_backup import YMD_FORMAT
 from rrg.lib.archive import date_to_datetime
 from rrg import utils
 from rrg import invoices
-
 
 
 def default_date():
@@ -1380,12 +1375,12 @@ def generate_ar_report(app, type):
         recs = invoice_archives(root, type)
         for i in recs:
             xmlpath = os.path.join(obj_dir(app.config['DATADIR'], Invoice()), '%05d.xml' % int(i))
-            date, amount, employee, voided, terms, sqlid, client = read_inv_xml_file(xmlpath)
+            date, amount, employee, voided, terms, sqlid, client, duedate = read_inv_xml_file(xmlpath)
             if voided == 'False':
-                results.append([amount, date, voided, employee, terms, sqlid, client])
+                results.append([amount, date, voided, employee, terms, sqlid, client, duedate])
     else:
         print('No AR.xml file found')
-    return tabulate(results, headers=['amount', 'date', 'voided', 'employee', 'terms', 'sqlid', 'client'])
+    return tabulate(results, headers=['amount', 'date', 'voided', 'employee', 'terms', 'sqlid', 'client', 'duedate'])
 
 
 """

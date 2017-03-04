@@ -1,6 +1,5 @@
 import logging
-from keyczar.errors import Base64DecodingError
-import string
+
 from rrg.models import Client
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
