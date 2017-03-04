@@ -11,7 +11,6 @@ from tabulate import tabulate
 from rrg import utils
 from rrg.billing import cache_non_date_parsed
 from rrg.lib import archive
-from rrg.lib import employees
 from rrg.lib import reminders
 from rrg.lib import reminders_generation
 from rrg.models import Contract
@@ -20,6 +19,7 @@ from rrg.models import EmployeeMemo
 from rrg.models import EmployeePayment
 from rrg.models import edit_employee_script
 from rrg.models import session_maker
+from rrg.models import employees
 from rrg.renderers import format_employee
 
 app = Flask(__name__, instance_relative_config=True)
