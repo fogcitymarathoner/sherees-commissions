@@ -266,6 +266,11 @@ def contract_attach_collected_contract_items(citem_doc_list):
 
 
 def cached_employees_collect_contracts(datadir):
+    """
+    attaches contracts with transactions to clients docs for archiving
+    :param datadir:
+    :return:
+    """
     employees_directory = os.path.join(datadir, 'employees')
     contracts_directory = os.path.join(datadir, 'contracts')
     conttractsdocs = []
@@ -318,6 +323,28 @@ def cached_clients_collect_contracts(datadir):
                     invdoc = ET.parse(fullpath).getroot()
                     conttractsdocs.append(invdoc)
     print('%s contracts found' % len(conttractsdocs))
+    clients_memos_directory = os.path.join(datadir, 'clients', 'memos')
+    memossdocs = []
+    for iroot, idirs, ifiles in os.walk(contracts_directory):
+        if iroot == contracts_directory:
+            print('Scanning %s for memos' % iroot)
+            for invf in ifiles:
+                if re.search(pat, invf):
+                    fullpath = os.path.join(iroot, invf)
+                    memodoc = ET.parse(fullpath).getroot()
+                    memossdocs.append(memodoc)
+    print('%s memos found' % len(memossdocs))
+    clients_managers_directory = os.path.join(datadir, 'clients', 'managers')
+    managersdocs = []
+    for iroot, idirs, ifiles in os.walk(clients_managers_directory):
+        if iroot == clients_managers_directory:
+            print('Scanning %s for memos' % iroot)
+            for invf in ifiles:
+                if re.search(pat, invf):
+                    fullpath = os.path.join(iroot, invf)
+                    memodoc = ET.parse(fullpath).getroot()
+                    managersdocs.append(memodoc)
+    print('%s managers found' % len(managersdocs))
     # loop through clients, update contracts subdoc
     for root, dirs, files in os.walk(clients_directory):
         if root == clients_directory:
@@ -343,6 +370,11 @@ def cached_clients_collect_contracts(datadir):
 
 
 def cached_contracts_collect_invoices_and_items(datadir):
+    """
+    appends transactions to contracts
+    :param datadir:
+    :return:
+    """
     invoices_directory = os.path.join(datadir, 'transactions', 'invoices')
     contract_items_directory = os.path.join(datadir, 'contracts', 'contract_items')
     contracts_directory = os.path.join(datadir, 'contracts')

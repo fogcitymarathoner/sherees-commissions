@@ -446,6 +446,7 @@ class Client(Base):
     contracts = relationship("Contract", back_populates="client", cascade="all, delete, delete-orphan")
     checks = relationship("ClientCheck", back_populates="client", cascade="all, delete, delete-orphan")
     memos = relationship("ClientMemo", back_populates="client", cascade="all, delete, delete-orphan")
+    managers = relationship("ClientMagers", back_populates="client", cascade="all, delete, delete-orphan")
 
     name = Column(String(50))
     street1 = Column(String(50))
@@ -486,6 +487,10 @@ class Client(Base):
         memos = ET.Element('memos')
         for o in self.memos:
             memos.append(o.to_xml())
+        doc.append(memos)
+        managers = ET.Element('managers')
+        for o in self.managers:
+            managers.append(o.to_xml())
         doc.append(memos)
         ET.SubElement(doc, 'contracts')
         return doc
