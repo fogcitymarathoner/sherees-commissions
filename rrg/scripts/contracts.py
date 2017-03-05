@@ -5,7 +5,6 @@ from flask_script import Manager
 from flask import Flask
 from tabulate import tabulate
 
-from keyczar import keyczar
 from rrg.models import session_maker
 from rrg.contracts import selection_list_all as selection_list
 
@@ -36,11 +35,10 @@ def contracts():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
     tabulate(
-        selection_list(session, crypter),
+        selection_list(session),
         headers=['number', 'sqlid', 'contract', 'employee', 'startdate', 'enddate']))
 
 

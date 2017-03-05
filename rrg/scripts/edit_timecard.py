@@ -3,7 +3,6 @@ import os
 from flask_script import Manager
 from flask import Flask
 
-from keyczar import keyczar
 from rrg.models import session_maker
 from rrg.utils import edit_invoice
 
@@ -35,8 +34,7 @@ def edit_timecard(number):
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
 
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-    edit_invoice(session, crypter, 'timecard', int(number))
+    edit_invoice(session, 'timecard', int(number))
     session.commit()
 
 

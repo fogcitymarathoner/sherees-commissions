@@ -1,5 +1,4 @@
 import os
-from keyczar import keyczar
 
 from flask_script import Manager
 from flask import Flask
@@ -40,9 +39,8 @@ def clients():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
     print('Caching Clients %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'clients')))
-    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'clients'), Client, crypter)
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'clients'), Client)
     session.commit()
 
 @manager.command
@@ -54,11 +52,11 @@ def invoices():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+
     print(
         'Caching Invoices %s into %s' % (
             app.config['DB'], os.path.join(app.config['DATADIR'], 'transactions', 'invoices')))
-    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'transactions', 'invoices'), Invoice, crypter)
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'transactions', 'invoices'), Invoice)
     session.commit()
 
 
@@ -76,9 +74,9 @@ def contracts():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+
     print('Caching Contracts %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'contracts')))
-    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'contracts'), Contract, crypter)
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'contracts'), Contract)
     session.commit()
 
 if __name__ == "__main__":

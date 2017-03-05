@@ -4,7 +4,6 @@ from flask_script import Manager
 from flask import Flask
 from tabulate import tabulate
 
-from keyczar import keyczar
 from rrg.models import session_maker
 from rrg.models import Client
 from rrg.models import generate_ar_report
@@ -44,11 +43,10 @@ def all():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
         tabulate(
-            selection_list_all(session, crypter),
+            selection_list_all(session),
             headers=['number', 'sqlid', 'name', 'city', 'state']))
 
 
@@ -62,11 +60,10 @@ def active():
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
 
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
         tabulate(
-            selection_list_active(session, crypter),
+            selection_list_active(session),
             headers=['number', 'sqlid', 'name', 'city', 'state']))
 
 
@@ -80,30 +77,29 @@ def ar():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-    client_list = selection_list_active(session, crypter)
+    client_list = selection_list_active(session)
     print(
         tabulate(
             client_list,
             headers=['number', 'sqlid', 'name', 'city', 'state']))
 
-    selection = raw_input("Please select an employee or 'q' to quit: ")
+    selection = input("Please select an employee or 'q' to quit: ")
     if selection == 'q':
         quit()
     selected_client = client_list[int(selection)-1]
 
     client = session.query(Client).get(int(selected_client[1]))
-    print '%s' % client.name
+    print('%s' % client.name)
 
 
-    selection = raw_input("Please select an ar report type [all, cleared, pastdue, open] or 'q' to quit: ")
+    selection = input("Please select an ar report type [all, cleared, pastdue, open] or 'q' to quit: ")
     if selection == 'q':
         quit()
     if selection not in ['all', 'cleared', 'pastdue', 'open']:
-        print 'Wrong Ar type selected'
+        print('Wrong Ar type selected')
         quit()
 
-    print generate_ar_report(app, selection)
+    print(generate_ar_report(app, selection))
 
 @manager.command
 def inactive():
@@ -114,11 +110,10 @@ def inactive():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
         tabulate(
-            selection_list_inactive(session, crypter),
+            selection_list_inactive(session),
             headers=['number', 'sqlid', 'name', 'city', 'state']))
 
 

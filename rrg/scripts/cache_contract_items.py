@@ -1,6 +1,5 @@
 import os
 import argparse
-from keyczar import keyczar
 
 from flask_script import Manager
 from flask import Flask
@@ -49,10 +48,9 @@ def cache_contract_items_ep():
     """
     args = parser.parse_args()
     session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-    crypter = keyczar.Crypter.Read(args.keyczardir)
 
     print('Caching Contract Items %s into %s' % (args.db, os.path.join(args.datadir, 'contracts', 'contract_items')))
-    routine(session, os.path.join(args.datadir, 'contracts', 'contract_items'), ContractItem, crypter)
+    routine(session, os.path.join(args.datadir, 'contracts', 'contract_items'), ContractItem)
     session.commit()
 
 
@@ -64,11 +62,10 @@ def cache_contract_items():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
     print(
         'Caching Contract Items %s into %s' % (
             app.config['DB'], os.path.join(app.config['DATADIR'], 'contracts', 'contract_items')))
-    routine(session, os.path.join(app.config['DATADIR'], 'contracts', 'contract_items'), ContractItem, crypter)
+    routine(session, os.path.join(app.config['DATADIR'], 'contracts', 'contract_items'), ContractItem)
     session.commit()
 
 

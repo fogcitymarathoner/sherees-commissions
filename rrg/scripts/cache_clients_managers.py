@@ -1,6 +1,5 @@
 import os
 import argparse
-from keyczar import keyczar
 
 from flask_script import Manager
 from flask import Flask
@@ -51,9 +50,8 @@ def cache_client_managers_ep():
     """
     args = parser.parse_args()
     session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-    crypter = keyczar.Crypter.Read(args.keyczardir)
     print('Caching Clients-Managers %s into %s' % (args.db, clients_managers_dir(args.datadir)))
-    routine(session, clients_managers_dir(args.datadir), ClientManager, crypter)
+    routine(session, clients_managers_dir(args.datadir), ClientManager)
     session.commit()
 
 
@@ -65,9 +63,8 @@ def cache_client_managers():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
     print('Caching Clients-Managers %s into %s' % (app.config['DB'], clients_managers_dir(app.config['DATADIR'])))
-    routine(session, clients_managers_dir(app.config['DATADIR']), ClientManager, crypter)
+    routine(session, clients_managers_dir(app.config['DATADIR']), ClientManager)
     session.commit()
 
 

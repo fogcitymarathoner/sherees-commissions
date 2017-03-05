@@ -1,5 +1,5 @@
 import logging
-from keyczar.errors import Base64DecodingError
+
 import string
 
 from rrg.models import employees
@@ -12,32 +12,15 @@ logger = logging.getLogger('test')
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 
-def selection_list(crypter, employees):
+def selection_list(employees):
     printable = set(string.printable)
     tbl = []
     i = 1
     for e in employees:
-        if e.ssn_crypto:
-            try:
-                ssn = crypter.Decrypt(e.ssn_crypto)
-            except Base64DecodingError:
-                ssn = None
-        else:
-            ssn = None
-        if e.bankaccountnumber_crypto:
-            try:
-                bankaccountnumber = crypter.Decrypt(e.bankaccountnumber_crypto)
-            except Base64DecodingError:
-                bankaccountnumber = None
-        else:
-            bankaccountnumber = None
-        if e.bankroutingnumber_crypto:
-            try:
-                bankroutingnumber = crypter.Decrypt(e.bankroutingnumber_crypto)
-            except Base64DecodingError:
-                bankroutingnumber = None
-        else:
-            bankroutingnumber = None
+
+        ssn = e.ssn_crypto
+        bankaccountnumber = e.bankaccountnumber_crypto
+        bankroutingnumber = e.bankroutingnumber_crypto
         tbl.append(
             [i, e.id, filter(lambda x: x in printable, e.firstname + ' ' +
              e.lastname),
@@ -49,32 +32,32 @@ def selection_list(crypter, employees):
     return tbl
 
 
-def selection_list_all(session, crypter):
+def selection_list_all(session):
     """
     return tabulated list of all employees
     :param session:
-    :param crypter:
+
     :return:
     """
-    return selection_list(crypter, employees(session))
+    return selection_list(employees(session))
 
 
-def selection_list_active(session, crypter):
+def selection_list_active(session):
     """
     return tabulated list of active employees
     :param session:
-    :param crypter:
+
     :return:
     """
-    return selection_list(crypter, employees_active(session))
+    return selection_list(employees_active(session))
 
 
 
-def selection_list_inactive(session, crypter):
+def selection_list_inactive(session):
     """
     return tabulated list of inactive employees
     :param session:
-    :param crypter:
+
     :return:
     """
-    return selection_list(crypter, employees_inactive(session))
+    return selection_list(employees_inactive(session))

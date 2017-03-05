@@ -102,7 +102,6 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'rrg-assemble-clients=rrg.scripts.assemble_clients_cache:assemble_clients_cache_ep',
             'rrg-assemble-contracts=rrg.scripts.assemble_contracts_cache:assemble_contracts_cache_ep',
             'rrg-backup-dir=rrg.scripts.backup_dir:backup_dir_ep',
             'rrg-backup-db=rrg.scripts.backup_db:backup_db_ep',

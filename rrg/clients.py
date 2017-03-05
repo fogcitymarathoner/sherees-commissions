@@ -38,7 +38,7 @@ def picked_employee(session, number):
     return clients[number-1]
 
 
-def selection_list(crypter, clients):
+def selection_list(clients):
     tbl = []
     i = 1
     for e in clients:
@@ -47,32 +47,32 @@ def selection_list(crypter, clients):
     return tbl
 
 
-def selection_list_all(session, crypter):
+def selection_list_all(session):
     """
     return tabulated list of all clients
     :param session:
-    :param crypter:
+    
     :return:
     """
-    return selection_list(crypter, clients(session))
+    return selection_list(clients(session))
 
 
-def selection_list_active(session, crypter):
+def selection_list_active(session):
     """
     return tabulated list of active clients
     :param session:
-    :param crypter:
+
     :return:
     """
-    return selection_list(crypter, clients_active(session))
+    return selection_list(clients_active(session))
 
 
 
-def selection_list_inactive(session, crypter):
+def selection_list_inactive(session):
     """
     return tabulated list of inactive clients
     :param session:
-    :param crypter:
+
     :return:
     """
-    return selection_list(crypter, clients_inactive(session))
+    return selection_list(clients_inactive(session))

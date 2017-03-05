@@ -8,13 +8,13 @@ from rrg.lib.archive import full_non_dated_xml_obj_path
 from rrg.utils import directory_date_dictionary
 
 
-def sync(session, data_dir, ep, model, crypter):
+def sync(session, data_dir, ep, model):
     """
     writes xml file for contract
     """
     f = full_non_dated_xml_obj_path(data_dir, ep)
     with open(f, 'w') as fh:
-        fh.write(ET.tostring(ep.to_xml(crypter)))
+        fh.write(ET.tostring(ep.to_xml()))
     session.query(model).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
 
@@ -41,7 +41,7 @@ def verify_dirs_ready(date_dict):
         mkdirs(os.path.dirname(d))
 
 
-def cache_non_date_parsed(session, datadir, model, crypter):
+def cache_non_date_parsed(session, datadir, model):
     disk_dict = directory_date_dictionary(datadir)
     # Make query, assemble lists
     date_dict, items = db_date_dictionary_model(session, model, datadir)
@@ -65,4 +65,4 @@ def cache_non_date_parsed(session, datadir, model, crypter):
                 to_sync.append(item)
     # Write out xml
     for item in to_sync:
-        sync(session, datadir, item, model, crypter)
+        sync(session, datadir, item, model)

@@ -4,7 +4,6 @@ from datetime import timedelta as td
 
 from flask import Flask
 from flask_script import Manager
-from keyczar import keyczar
 from s3_mysql_backup import YMD_FORMAT
 from tabulate import tabulate
 
@@ -57,29 +56,28 @@ def make_timecard_for_employee():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
-    employee_list = employees.selection_list_active(session, crypter)
+    employee_list = employees.selection_list_active(session)
     #
     # Select an Active Employee
     print(
         tabulate(
             employee_list, headers=[
                 'number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
-    selection = raw_input("Please select an employee or 'q' to quit: ")
+    selection = input("Please select an employee or 'q' to quit: ")
     if selection == 'q':
         quit()
     selected_employee = employee_list[int(selection)-1]
 
     employee = session.query(Employee).get(int(selected_employee[1]))
-    print '%s %s' % (employee.firstname, employee.lastname)
+    print('%s %s' % (employee.firstname, employee.lastname))
     #
     # Select an Active Contract of the Employee's
     contracts = []
     for i, c in enumerate(employee.contracts):
         if c.active:
             contracts.append([i + 1, c.id, c.client.name, c.startdate, c.enddate])
-    print tabulate(contracts, headers=['number', 'sqlid', 'client', 'title', 'startdate', 'enddate'])
-    selection = raw_input("Please select an employee's contract or 'q' to quit: ")
+    print(tabulate(contracts, headers=['number', 'sqlid', 'client', 'title', 'startdate', 'enddate']))
+    selection = input("Please select an employee's contract or 'q' to quit: ")
     if selection == 'q':
         quit()
     selected_contract = contracts[int(selection) - 1]
@@ -100,8 +98,8 @@ def make_timecard_for_employee():
     periods = []
     for i, p in enumerate(periods_for_contract):
         periods.append([i + 1, dt.strftime(p[0], YMD_FORMAT), dt.strftime(p[1], YMD_FORMAT)])
-    print tabulate(periods, headers=['number', 'period start', 'period end'])
-    selection = raw_input("Please select a period for timecard or 'q' to quit: ")
+    print(tabulate(periods, headers=['number', 'period start', 'period end']))
+    selection = input("Please select a period for timecard or 'q' to quit: ")
     if selection == 'q':
         quit()
     selected_period = periods[int(selection) - 1]
@@ -117,9 +115,8 @@ def edit_employee(number):
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
-    edit_employee_script(session, crypter, int(number))
+    edit_employee_script(session, int(number))
     session.commit()
 
 
@@ -136,7 +133,7 @@ def cached_employee(id):
     print('Archived Employee in %s' % app.config['DATADIR'])
     employee_dict = archive.employee(id, app.config['DATADIR'])
 
-    print format_employee(employee_dict)
+    print(format_employee(employee_dict))
 
 
 @manager.command
@@ -144,9 +141,8 @@ def cache_employee_memos():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
     print('Caching Employees-Memos %s into %s' % (app.config['DB'], utils.employees_memos_dir(app.config['DATADIR'])))
-    cache_non_date_parsed(session, utils.employees_memos_dir(app.config['DATADIR']), EmployeeMemo, crypter)
+    cache_non_date_parsed(session, utils.employees_memos_dir(app.config['DATADIR']), EmployeeMemo)
     session.commit()
 
 
@@ -155,9 +151,8 @@ def cache_employees():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
     print('Caching Employees %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'employees')))
-    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'employees'), Employee, crypter)
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'employees'), Employee)
     session.commit()
 
 
@@ -166,11 +161,11 @@ def cache_employees_payments():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
+    
     print(
         'Caching Employees-Payments %s into %s' % (
             app.config['DB'], os.path.join(app.config['DATADIR'], 'employees', 'payments')))
-    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'employees', 'payments'), EmployeePayment, crypter)
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'employees', 'payments'), EmployeePayment)
     session.commit()
 
 @manager.command
@@ -192,11 +187,10 @@ def list_all_employees():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
         tabulate(
-            employees.selection_list_all(session, crypter),
+            employees.selection_list_all(session),
             headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
 
 
@@ -209,11 +203,10 @@ def list_active_employees():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
         tabulate(
-            employees.selection_list_active(session, crypter),
+            employees.selection_list_active(session),
             headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
 
 
@@ -226,11 +219,10 @@ def list_inactive_employees():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
 
     print(
         tabulate(
-            employees.selection_list_inactive(session, crypter),
+            employees.selection_list_inactive(session),
             headers=['number', 'sqlid', 'employee', 'ssn', 'bankaccountnumber', 'bankroutingnumber']))
 
 

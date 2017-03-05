@@ -32,7 +32,7 @@ def contracts_items_inactive(session):
     return session.query(Contract).filter(Contract.active==False)
 
 
-def selection_list(crypter, contracts):
+def selection_list(contracts):
     tbl = []
     for i, c in enumerate(contracts):
 
@@ -46,24 +46,24 @@ def selection_list(crypter, contracts):
     return tbl
 
 
-def selection_list_all(session, crypter):
+def selection_list_all(session):
     """
     return tabulated list of all contracts
     :param session:
-    :param crypter:
+
     :return:
     """
-    return selection_list(crypter, contracts(session))
+    return selection_list(contracts(session))
 
 
-def selection_list_active(session, crypter):
+def selection_list_active(session):
     """
     return tabulated list of active contracts
     :param session:
-    :param crypter:
+
     :return:
     """
-    return selection_list(crypter, contracts_items_active(session))
+    return selection_list(contracts_items_active(session))
 
 
 def deactivate_items_of_deactivated_contracts(session):

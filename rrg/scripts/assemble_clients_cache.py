@@ -1,15 +1,10 @@
-import argparse
+
 import os
 
 from flask import Flask
 from flask_script import Manager
 
 from rrg.lib import archive
-
-parser = argparse.ArgumentParser(description='RRG Assemble Clients Cache')
-
-parser.add_argument('--datadir', required=True, help='clients dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -28,18 +23,6 @@ if os.path.isfile(settings_file):
         quit(1)
 else:
     print('settings file %s does not exits' % settings_file)
-
-
-def assemble_clients_cache_ep():
-    """
-    gathers contracts for clients
-    :param data_dir:
-    :return:
-    entrypoint use rrg-assemble-clients --datadir /php-apps/cake.rocketsredglare.com/biz/data/
-    """
-    args = parser.parse_args()
-    print('Assembling Clients in %s' % args.datadir)
-    archive.cached_clients_collect_contracts(args.datadir)
 
 
 manager = Manager(app)

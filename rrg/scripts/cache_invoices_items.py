@@ -1,6 +1,5 @@
 import os
 import argparse
-from keyczar import keyczar
 
 from flask_script import Manager
 from flask import Flask
@@ -49,9 +48,8 @@ def cache_invoices_items_ep():
     """
     args = parser.parse_args()
     session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-    crypter = keyczar.Crypter.Read(args.keyczardir)
     print('Caching Invoices-Items %s into %s' % (args.db, transactions_invoice_items_dir(args.datadir)))
-    routine(session, transactions_invoice_items_dir(args.datadir), Iitem, crypter)
+    routine(session, transactions_invoice_items_dir(args.datadir), Iitem)
     session.commit()
 
 
@@ -63,10 +61,9 @@ def cache_invoices_items():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    crypter = keyczar.Crypter.Read(app.config['KEYZCAR_DIR'])
     print(
         'Caching Invoices-Items %s into %s' % (app.config['DB'], transactions_invoice_items_dir(app.config['DATADIR'])))
-    routine(session, transactions_invoice_items_dir(app.config['DATADIR']), Iitem, crypter)
+    routine(session, transactions_invoice_items_dir(app.config['DATADIR']), Iitem)
     session.commit()
 
 

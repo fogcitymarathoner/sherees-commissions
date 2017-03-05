@@ -106,7 +106,7 @@ class EmployeePayment(Base):
                    self.id, self.employee.firstname, self.employee.lastname, self.invoice_id, self.invoice.period_start,
                    self.invoice.period_end, self.date, self.amount)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('employee-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
         eattributes = {'fullname': '%s %s' % (self.employee.firstname, self.employee.lastname)}
@@ -141,7 +141,7 @@ class EmployeeMemo(Base):
             self.id, self.employee.firstname, self.employee.lastname, dt.strftime(self.date, TIMESTAMP_FORMAT),
             self.notes)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
@@ -218,19 +218,10 @@ class Employee(Base):
         return "<Employee(id='%s', firstname='%s', lastname='%s')>" % (
             self.id, self.firstname, self.lastname)
 
-    def to_xml(self, crypter):
-        if self.ssn_crypto:
-            ssn_crypto = crypter.Decrypt(self.ssn_crypto)
-        else:
-            ssn_crypto = None
-        if self.bankaccountnumber_crypto:
-            bankaccountnumber_crypto = crypter.Decrypt(self.bankaccountnumber_crypto)
-        else:
-            bankaccountnumber_crypto = None
-        if self.bankroutingnumber_crypto:
-            bankroutingnumber_crypto = crypter.Decrypt(self.bankroutingnumber_crypto)
-        else:
-            bankroutingnumber_crypto = None
+    def to_xml(self):
+        ssn_crypto = self.ssn_crypto
+        bankaccountnumber_crypto = self.bankaccountnumber_crypto
+        bankroutingnumber_crypto = self.bankroutingnumber_crypto
 
         doc = ET.Element('employee')
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -280,26 +271,26 @@ class Employee(Base):
 
         checks = ET.Element('employee-payments')
         for o in self.checks:
-            checks.append(o.to_xml(crypter))
+            checks.append(o.to_xml())
         doc.append(checks)
         memos = ET.Element('memos')
         for o in self.memos:
-            memos.append(o.to_xml(crypter))
+            memos.append(o.to_xml())
         doc.append(memos)
 
         ET.SubElement(doc, 'contracts')
 
         comm_items = ET.Element('employee-commissions-items')
         for o in self.comm_items:
-            comm_items.append(o.to_xml(crypter))
+            comm_items.append(o.to_xml())
         doc.append(comm_items)
         cnotes = ET.Element('employee-commissions-notes')
         for o in self.cnotes:
-            cnotes.append(o.to_xml(crypter))
+            cnotes.append(o.to_xml())
         doc.append(cnotes)
         notes_payments = ET.Element('employee-notes-payments')
         for o in self.notes_payments:
-            notes_payments.append(o.to_xml(crypter))
+            notes_payments.append(o.to_xml())
         doc.append(notes_payments)
 
         return doc
@@ -311,21 +302,13 @@ class Employee(Base):
         """
         return ET.parse(xml_file_name).getroot()
 
-    def update_from_xml_doc(self, emp_doc, crypter):
+    def update_from_xml_doc(self, emp_doc):
         self.firstname = emp_doc.findall('firstname')[0].text
         self.lastname = emp_doc.findall('lastname')[0].text
-        if emp_doc.findall('ssn_crypto')[0].text:
-            self.ssn_crypto = crypter.Encrypt(emp_doc.findall('ssn_crypto')[0].text)
-        else:
-            self.ssn_crypto = crypter.Encrypt('N/A')
-        if emp_doc.findall('bankaccountnumber_crypto')[0].text:
-            self.bankaccountnumber_crypto = crypter.Encrypt(emp_doc.findall('bankaccountnumber_crypto')[0].text)
-        else:
-            self.bankaccountnumber_crypto = crypter.Encrypt('N/A')
-        if emp_doc.findall('bankroutingnumber_crypto')[0].text:
-            self.bankroutingnumber_crypto = crypter.Encrypt(emp_doc.findall('bankroutingnumber_crypto')[0].text)
-        else:
-            self.bankroutingnumber_crypto = crypter.Encrypt('N/A')
+        self.ssn_crypto = emp_doc.findall('ssn_crypto')[0].text
+        self.bankaccountnumber_crypto = emp_doc.findall('bankaccountnumber_crypto')[0].text
+        self.bankroutingnumber_crypto = emp_doc.findall('bankroutingnumber_crypto')[0].text
+
 
 
 def delete_employee(session, delemp):
@@ -362,7 +345,7 @@ class NotePayment(Base):
             self.check_number, self.date, self.amount,
             self.notes)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('notes-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
@@ -398,7 +381,7 @@ class Note(Base):
     modified_user_id = Column(Integer)
     created_user_id = Column(Integer)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('note')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT) if self.date else dt.strftime(
@@ -435,7 +418,7 @@ class CommPayment(Base):
                    self.check_number, self.date, self.amount,
                    self.description)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('commissions-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee.id)
@@ -485,7 +468,7 @@ class Client(Base):
         return "<Client(id='%s', name='%s', street1='%s', street2='%s', state_id='%s', zip='%s', terms='%s', active='%s'" \
                ")>" % (self.id, self.name, self.street1, self.street2, self.state_id, self.zip, self.terms, self.active)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('client')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'name').text = self.name
@@ -498,11 +481,11 @@ class Client(Base):
 
         checks = ET.Element('checks')
         for o in self.checks:
-            checks.append(o.to_xml(crypter))
+            checks.append(o.to_xml())
         doc.append(checks)
         memos = ET.Element('memos')
         for o in self.memos:
-            memos.append(o.to_xml(crypter))
+            memos.append(o.to_xml())
         doc.append(memos)
         ET.SubElement(doc, 'contracts')
         return doc
@@ -528,7 +511,7 @@ class ClientMemo(Base):
         return "<ClientMemo(id='%s', client='%s', date='%s', notes='%s')>" % (
             self.id, self.client.name, dt.strftime(self.date, TIMESTAMP_FORMAT), self.notes)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
@@ -562,7 +545,7 @@ class ClientManager(Base):
         return "<ClientManager(id='%s', client='%s', firstname='%s', lastname='%s')>" % (
             self.id, self.client.name, self.firstname, self.lastname)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('manager')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
@@ -600,7 +583,7 @@ class ClientCheck(Base):
         return "<ClientCheck(id='%s', client='%s', amount='%s', number='%s', date='%s')>" % (
             self.id, self.client.name, self.amount, self.number, self.date)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('check')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
@@ -636,7 +619,7 @@ class ContractItemCommItem(Base):
                    self.id, self.contract_item.contract.title,
                    '%s %s' % (self.employee.firstname, self.employee.lastname))
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('contract-commissions-item')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
@@ -675,7 +658,7 @@ class ContractItem(Base):
     def __repr__(self):
         return "<ContractItem(id='%s', description='%s')>" % (self.id, self.description)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('contract-item')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'active').text = str(self.active)
@@ -687,7 +670,7 @@ class ContractItem(Base):
         ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         con_comm_items = ET.Element('contract-commissions-items')
         for o in self.contract_comm_items:
-            con_comm_items.append(o.to_xml(crypter))
+            con_comm_items.append(o.to_xml())
         doc.append(con_comm_items)
         return doc
 
@@ -727,7 +710,7 @@ class Contract(Base):
                 self.id, self.client.name, self.title, self.employee.firstname,
                 self.employee.lastname, self.startdate)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('contract')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'title').text = re.sub(r'[^\x00-\x7F]', ' ', self.title) if self.title else ''
@@ -746,7 +729,7 @@ class Contract(Base):
         ET.SubElement(doc, 'invoices')
         contract_items = ET.Element('contract-items')
         for o in self.contract_items:
-            contract_items.append(o.to_xml(crypter))
+            contract_items.append(o.to_xml())
         doc.append(contract_items)
         return doc
 
@@ -775,7 +758,7 @@ class InvoicePayment(Base):
         return "<InvoicePayment(id='%s', invoice='%s', amount='%s', number='%s', date='%s')>" % (
             self.id, self.invoice_id, self.amount, self.check.number, self.check.date)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('invoice-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
@@ -838,7 +821,7 @@ class Invoice(Base):
     def duedate(self):
         return date_to_datetime(self.date) + td(days=self.terms)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('invoice')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -870,13 +853,13 @@ class Invoice(Base):
                                               (self.contract.employee.firstname, self.contract.employee.lastname)
         iitems = ET.SubElement(doc, 'invoice-items')
         for i in self.invoice_items:
-            iitems.append(i.to_xml(crypter))
+            iitems.append(i.to_xml())
         ipayments = ET.SubElement(doc, 'invoice-payments')
         for i in self.invoice_payments:
-            ipayments.append(i.to_xml(crypter))
+            ipayments.append(i.to_xml())
         epayments = ET.SubElement(doc, 'employee-payments')
         for i in self.employee_payments:
-            epayments.append(i.to_xml(crypter))
+            epayments.append(i.to_xml())
         return doc
 
     def amount_calc(self):
@@ -947,7 +930,7 @@ class State(Base):
     def __repr__(self):
         return "<State(id='%s', name='%s', post_ab='%s')>" % (self.id, self.name, self.post_ab)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('state')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -1000,7 +983,7 @@ class Iitem(Base):
             self.id, self.description, self.amount, self.quantity,
             self.invoice_id)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('invoice-item')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -1012,7 +995,7 @@ class Iitem(Base):
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         commitems = ET.SubElement(doc, 'commissions-items')
         for i in self.comm_items:
-            commitems.append(i.to_xml(crypter))
+            commitems.append(i.to_xml())
         return doc
 
     def update_from_xml_doc(self, iitem_ele):
@@ -1058,7 +1041,7 @@ class Citem(Base):
                    self.modified_date, self.invoices_item_id, self.invoices_item.invoice.id,
                    self.invoices_item.invoice.contract.title, self.invoices_item.invoice.contract.id)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         if self.invoices_item.amount and self.invoices_item.quantity:
             iitemamount = self.invoices_item.amount * self.invoices_item.quantity
         else:
@@ -1134,7 +1117,7 @@ class Payroll(Base):
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('payroll')
         ET.SubElement(doc, 'id').text = str(self.id)
 
@@ -1144,7 +1127,7 @@ class Payroll(Base):
 
         checks = ET.Element('checks')
         for o in self.checks:
-            checks.append(o.to_xml(crypter))
+            checks.append(o.to_xml())
         doc.append(checks)
         return doc
 
@@ -1155,7 +1138,7 @@ class ExpenseCategory(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(22))
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('expense-category')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'name').text = str(self.name)
@@ -1187,7 +1170,7 @@ class Expense(Base):
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('expense')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -1249,7 +1232,7 @@ class Vendor(Base):
     modified_user_id = Column(Integer)
     last_sync_time = Column(DateTime)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('vendor')
         ET.SubElement(doc, 'id').text = str(self.id)
 
@@ -1284,7 +1267,7 @@ class Vendor(Base):
 
         memos = ET.SubElement(doc, 'memo')
         for o in self.memos:
-            memos.append(o.to_xml(crypter))
+            memos.append(o.to_xml())
         doc.append(memos)
         return doc
 
@@ -1309,7 +1292,7 @@ class VendorMemo(Base):
         return "<VendorMemo(id='%s', vendor='%s', date='%s', notes='%s')>" % (
             self.id, self.vendor.name, dt.strftime(self.date, TIMESTAMP_FORMAT), self.notes)
 
-    def to_xml(self, crypter):
+    def to_xml(self):
         doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'vendor_id').text = str(self.vendor_id)
@@ -1431,7 +1414,7 @@ def tabulate_invoices(invoices):
     return tabulate(tbl, headers=['number', 'sqlid', 'client', 'employee', 'start', 'end', 'date', 'duedate', 'amount'])
 
 
-def edit_invoice(session, crypter, phase, number):
+def edit_invoice(session, phase, number):
 
     if phase == 'open':
         winvoices = invoices.sa_open_invoices(session)
@@ -1442,7 +1425,7 @@ def edit_invoice(session, crypter, phase, number):
             invoice = picked_open_invoice(session, number)
         elif phase =='timecard':
             invoice = picked_timecard(session, number)
-        xml = xml_pp.parseString(ET.tostring(invoice.to_xml(crypter)))
+        xml = xml_pp.parseString(ET.tostring(invoice.to_xml()))
         temp_file = os.path.join(
             os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
         with open(temp_file, 'w+b') as f:
@@ -1494,11 +1477,11 @@ def picked_employee(session, number):
     return all_employees[number-1]
 
 
-def edit_employee_script(session, crypter, number):
+def edit_employee_script(session, number):
     """
     Running dialog script for editing an employee
     :param session:
-    :param crypter:
+
     :param number:
     :return:
     """
@@ -1507,7 +1490,7 @@ def edit_employee_script(session, crypter, number):
     if number in range(1, w_employees.count() + 1):
 
         employee = employees.picked_employee(session, number)
-        xml = xml_pp.parseString(ET.tostring(employee.to_xml(crypter)))
+        xml = xml_pp.parseString(ET.tostring(employee.to_xml()))
         temp_file = os.path.join(
             os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
         with open(temp_file, 'w+b') as f:
@@ -1515,7 +1498,7 @@ def edit_employee_script(session, crypter, number):
         call(["vi", temp_file])
         whole_emp_xml = Employee.from_xml(temp_file)
 
-        employee.update_from_xml_doc(whole_emp_xml, crypter)
+        employee.update_from_xml_doc(whole_emp_xml)
 
         session.commit()
     else:

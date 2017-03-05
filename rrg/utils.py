@@ -149,5 +149,5 @@ def download_last_database_backup(aws_access_key_id, aws_secret_access_key, buck
                     last_backup['key'].get_contents_to_file(f)
             return last_backup['key']
         else:
-            print 'There is no S3 backup history for project %s' % project_name
-            print 'In ANY Folder of bucket %s' % bucket_name
+            print('There is no S3 backup history for project %s' % project_name)
+            print('In ANY Folder of bucket %s' % bucket_name)
