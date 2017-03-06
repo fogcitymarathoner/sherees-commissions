@@ -8,7 +8,6 @@ from rrg.models import State
 from rrg.models import User
 from rrg.models import Invoice
 
-from rrg.lib.archive import date_to_datetime
 from rrg.helpers import MissingEnvVar
 from rrg.utils import clients_ar_xml_file
 

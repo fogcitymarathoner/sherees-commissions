@@ -38,7 +38,6 @@ from rrg.helpers import read_inv_xml_file
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import YMD_FORMAT
 
-from rrg.lib.archive import date_to_datetime
 from rrg import utils
 from rrg import invoices
 
@@ -824,7 +823,7 @@ class Invoice(Base):
                    self.period_start, self.period_end, self.date, self.voided)
 
     def duedate(self):
-        return date_to_datetime(self.date) + td(days=self.terms)
+        return dt(year=date.year, month=date.month, day=date.day) + td(days=self.terms)
 
     def to_xml(self):
         doc = ET.Element('invoice')
