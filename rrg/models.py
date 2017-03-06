@@ -259,16 +259,16 @@ class Employee(Base):
         ET.SubElement(doc, 'indust').text = str(self.indust)
         ET.SubElement(doc, 'info').text = str(self.info)
         ET.SubElement(doc, 'phone').text = re.sub(r'[^\x00-\x7F]', ' ', self.phone) if self.phone else ''
-        ET.SubElement(doc, 'dob').text = dt.strftime(self.dob, TIMESTAMP_FORMAT) if self.dob else dt.strftime(dt.now(),
-                                                                                                              TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate,
-                                                           TIMESTAMP_FORMAT) if self.startdate else dt.strftime(
-            dt.now(),
-            TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
-                                                         TIMESTAMP_FORMAT) if self.enddate else dt.strftime(
-            dt.now(), TIMESTAMP_FORMAT)
-
+        ET.SubElement(doc, 'dob').text = dt.strftime(
+            self.dob, TIMESTAMP_FORMAT) if self.dob else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'modified_date').text = dt.strftime(
+            self.modified_date, TIMESTAMP_FORMAT) if self.modified_date else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'created_date').text = dt.strftime(
+            self.created_date, TIMESTAMP_FORMAT) if self.created_date else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'startdate').text = dt.strftime(
+            self.startdate, TIMESTAMP_FORMAT) if self.startdate else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'enddate').text = dt.strftime(
+            self.enddate, TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
         checks = ET.Element('employee-payments')
         for o in self.checks:
             checks.append(o.to_xml())
@@ -295,12 +295,51 @@ class Employee(Base):
 
         return doc
 
-    @staticmethod
-    def from_xml(xml_file_name):
+    def from_xml(self, doc):
         """                                                                                                                    
         returns DOM of comm item from file                                                                                     
         """
-        return ET.parse(xml_file_name).getroot()
+
+        self.firstname = doc.findall('firstname')[0].text
+        self.lastname = doc.findall('lastname')[0].text
+        self.street1 = doc.findall('street1')[0].text
+        self.street2 = doc.findall('street2')[0].text
+        self.city = doc.findall('city')[0].text
+        self.state_id = int(doc.findall('state_id')[0].text)
+        self.zip = doc.findall('zip')[0].text
+
+        if doc.findall('active')[0].text == 'True':
+            self.active = True
+        else:
+            self.active = False
+        self.ssn_crypto  = doc.findall('ssn_crypto')[0].text
+        self.bankaccountnumber_crypto  = doc.findall('bankaccountnumber_crypto')[0].text
+        self.bankaccounttype  = doc.findall('bankaccounttype')[0].text
+        self.bankname = doc.findall('bankname')[0].text
+        self.bankroutingnumber_crypto = doc.findall('bankroutingnumber_crypto')[0].text
+        self.directdeposit = int(doc.findall('directdeposit')[0].text)
+        self.allowancefederal = int(doc.findall('allowancefederal')[0].text)
+        self.allowancestate = int(doc.findall('allowancestate')[0].text)
+        self.extradeductionfed  = int(doc.findall('extradeductionfed')[0].text)
+        self.extradeductionstate = int(doc.findall('extradeductionstate')[0].text)
+        self.maritalstatusfed = doc.findall('maritalstatusfed')[0].text
+        self.maritalstatusstate = doc.findall('maritalstatusstate')[0].text
+        self.usworkstatus = int(doc.findall('usworkstatus')[0].text)
+        self.notes = doc.findall('notes')[0].text
+        self.tcard = int(doc.findall('tcard')[0].text)
+        self.voided = int(doc.findall('voiced')[0].text)
+        self.w4 = int(doc.findall('w4')[0].text)
+        self.de34 = int(doc.findall('de34')[0].text)
+        self.i9 = int(doc.findall('i9')[0].text)
+        self.medical = int(doc.findall('medical')[0].text)
+        self.indust = int(doc.findall('indust')[0].text)
+        self.info = int(doc.findall('info')[0].text)
+        self.phone = doc.findall('phone')[0].text
+        self.dob = dt.strptime(doc.findall('dob')[0].text, TIMESTAMP_FORMAT)
+        self.startdate = dt.strptime(doc.findall('startdate')[0].text, TIMESTAMP_FORMAT)
+        self.endate = dt.strptime(doc.findall('endate')[0].text, TIMESTAMP_FORMAT)
+        self.created_date = dt.strptime(doc.findall('created_date')[0].text, TIMESTAMP_FORMAT)
+        self.modified_date = dt.strptime(doc.findall('modified_date')[0].text, TIMESTAMP_FORMAT)
 
     def update_from_xml_doc(self, emp_doc):
         self.firstname = emp_doc.findall('firstname')[0].text
@@ -430,13 +469,6 @@ class CommPayment(Base):
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
 
-    @staticmethod
-    def from_xml(xml_file_name):
-        """
-        returns DOM of comm item from file
-        """
-        return ET.parse(xml_file_name).getroot()
-
 
 class Client(Base):
     __tablename__ = 'clients'
@@ -480,7 +512,30 @@ class Client(Base):
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'active').text = str(self.active)
-
+        ET.SubElement(doc, 'ssn_crypto').text = str(self.ssn_crypto)
+        ET.SubElement(doc, 'bankaccountnumber_crypto').text = str(self.bankaccountnumber_crypto)
+        ET.SubElement(doc, 'bankaccounttype').text = str(self.bankaccounttype)
+        ET.SubElement(doc, 'bankname').text = str(self.bankname)
+        ET.SubElement(doc, 'bankroutingnumber_crypto').text = str(self.bankroutingnumber_crypto)
+        ET.SubElement(doc, 'directdeposit').text = str(self.directdeposit)
+        ET.SubElement(doc, 'allowancefederal').text = str(self.allowancefederal)
+        ET.SubElement(doc, 'allowancestate').text = str(self.allowancestate)
+        ET.SubElement(doc, 'extradeductionfed').text = str(self.extradeductionfed)
+        ET.SubElement(doc, 'extradeductionstate').text = str(self.extradeductionstate)
+        ET.SubElement(doc, 'maritalstatusfed').text = str(self.maritalstatusfed)
+        ET.SubElement(doc, 'maritalstatusstate').text = str(self.maritalstatusstate)
+        ET.SubElement(doc, 'usworkstatus').text = str(self.usworkstatus)
+        ET.SubElement(doc, 'notes').text = str(self.notes)
+        ET.SubElement(doc, 'tcard').text = str(self.tcard)
+        ET.SubElement(doc, 'voided').text = str(self.voided)
+        ET.SubElement(doc, 'w4').text = str(self.w4)
+        ET.SubElement(doc, 'de34').text = str(self.de34)
+        ET.SubElement(doc, 'i9').text = str(self.i9)
+        ET.SubElement(doc, 'medical').text = str(self.medical)
+        ET.SubElement(doc, 'indust').text = str(self.indust)
+        ET.SubElement(doc, 'info').text = str(self.info)
+        ET.SubElement(doc, 'phone').text = str(self.phone)
+        ET.SubElement(doc, 'dob').text = str(self.dob)
         checks = ET.Element('checks')
         for o in self.checks:
             checks.append(o.to_xml())
@@ -496,6 +551,15 @@ class Client(Base):
         ET.SubElement(doc, 'contracts')
         return doc
 
+    def from_xml(self, doc):
+        self.id = int(doc.findall('id')[0].text)
+        self.name = doc.findall('name')[0].text
+        self.street1 = doc.findall('street1')[0].text
+        self.street2 = doc.findall('street2')[0].text
+        self.city = doc.findall('city')[0].text
+        self.state_id = int(doc.findall('state_id')[0].text)
+        self.zip = doc.findall('zip')[0].text
+        self.terms = int(doc.findall('terms')[0].text)
 
 class ClientMemo(Base):
     __tablename__ = 'clients_memos'
@@ -885,13 +949,6 @@ class Invoice(Base):
                 commissions_item.amount = commissions_calculation(inv_item_quantity, inv_item_amount, inv_item_cost,
                                                                   employerexpenserate, percent)
 
-    @staticmethod
-    def from_xml(xml_file_name):
-        """
-        returns DOM of Invoice from file
-        """
-        return ET.parse(xml_file_name).getroot()
-
     def update_from_xml_doc(self, inv_doc):
         self.date = inv_doc.findall('date')[0].text
         self.notes = inv_doc.findall('notes')[0].text
@@ -949,6 +1006,18 @@ class State(Base):
         ET.SubElement(doc, 'state_no').text = str(self.state_no)
         return doc
 
+    def from_xml(self, doc):
+        """
+        fill model from xtree doc
+        :param doc:
+        :return:
+        """
+        self.name = doc.findall('name')[0].text
+        self.post_ab = doc.findall('post_ab')[0].text
+        self.capital = doc.findall('capital')[0].text
+        self.date = doc.findall('date')[0].text
+        self.flower = doc.findall('flower')[0].text
+        self.state_no = doc.findall('state_no')[0].text
 
 class User(Base):
     __tablename__ = 'users'
@@ -1097,13 +1166,6 @@ class Citem(Base):
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
         return doc
-
-    @staticmethod
-    def from_xml(xml_file_name):
-        """
-        returns DOM of comm item from file
-        """
-        return ET.parse(xml_file_name).getroot()
 
 
 class Payroll(Base):

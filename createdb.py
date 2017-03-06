@@ -23,6 +23,11 @@ print(database_exists(engine.url))
 
 Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)
+#
+# Create User
+#
+user = User(firstname='Marc', lastname='Condon')
+session.add(user)
 
 sdir = os.path.join('datadir', 'biz', 'states')
 
@@ -30,52 +35,52 @@ for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
     for f in filelist:
         state = State()
         doc = ET.parse(os.path.join('datadir', 'biz', 'states', f))
-        state.name = doc.findall('name')[0].text
-        state.post_ab = doc.findall('post_ab')[0].text
-        state.capital = doc.findall('capital')[0].text
-        state.date = doc.findall('date')[0].text
-        state.flower = doc.findall('flower')[0].text
+        state.created_user_id = user.id
+        state.modified_user_id = user.id
+        state.from_xml(doc)
         session.add(state)
 
 for c in session.query(State):
     print(c)
-
+#
+# Employee
+#
 f = os.path.join('datadir', 'biz', 'employees', '01479.xml')
 print(f)
 
 if os.path.isfile(f):
     doc = ET.parse(f)
+else:
+    print('%s not arround cannot import employee')
+    quit(1)
+
+doc = ET.parse(os.path.join(f))
 employee = Employee()
-employee.firstname = doc.findall('firstname')[0].text
-employee.lastname = doc.findall('lastname')[0].text
-employee.street1 = doc.findall('street1')[0].text
-employee.street2 = doc.findall('street2')[0].text
-employee.city = doc.findall('city')[0].text
-employee.state_id = int(doc.findall('state_id')[0].text)
-employee.zip = doc.findall('zip')[0].text
+employee.from_xml(doc)
+employee.created_user_id = user.id
+employee.modified_user_id = user.id
 session.add(employee)
+
+#
+# Clients
+#
 clientsx = ['00062.xml', '00116.xml', '00185.xml']
-session.add(User(firstname='Marc', lastname='Condon'))
 for c in session.query(Employee):
     print(c)
 for c in clientsx:
     f = os.path.join('datadir', 'biz', 'clients', c)
-    print(f)
-
     if os.path.isfile(f):
         doc = ET.parse(f)
-
+    else:
+        print('problem with client file %s' % f)
+        quit(1)
     print(doc.findall('name')[0].text)
     client = Client()
-    client.id = int(doc.findall('id')[0].text)
-    client.name = doc.findall('name')[0].text
-    client.street1 = doc.findall('street1')[0].text
-    client.street2 = doc.findall('street2')[0].text
-    client.city = doc.findall('city')[0].text
-    client.state_id = int(doc.findall('state_id')[0].text)
-    client.zip = doc.findall('zip')[0].text
-    client.terms = int(doc.findall('terms')[0].text)
+    client.from_xml(doc)
+    client.created_user_id = user.id
+    client.modified_user_id = user.id
     session.add(client)
+
 for c in session.query(Client):
     print(c)
 

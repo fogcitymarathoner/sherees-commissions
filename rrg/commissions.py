@@ -525,7 +525,6 @@ def total_monies_owed(session, employee, datadir, cache, format):
 def comm_item_xml_to_dict(citem):
     """
     returns dictionary from xml comm doc root
-    generated from from_xml(xml_file_name)
     this function does not work in models??? date is casted as a VisitableType from SQLAlchemy
     """
     date_str = citem.findall('date')[0].text
@@ -602,7 +601,7 @@ def employee_comm_payments_year_month(session, employee, datadir, year, month, c
         for dirName, subdirList, fileList in os.walk(dirname, topdown=False):
             for fn in fileList:
                 fullname = os.path.join(dirName, fn)
-                doc = CommPayment.from_xml(fullname)
+                doc = ET.parse(fullname).getroot()
                 amount = float(doc.findall('amount')[0].text)
                 check_number = doc.findall('check_number')[0].text
                 description = doc.findall('description')[0].text
@@ -646,7 +645,7 @@ def employee_comm_items_year_month(employee, datadir, year, month):
             if re.search(
                     'transactions/invoices/invoice_items/commissions_items/[0-9]{5}/[0-9]{4}/[0-9]{0,1}[0-9]{0,1}/'
                     '[0-9]{5}\.xml$', filename):
-                xml_comm_items.append(Citem.from_xml(filename))
+                xml_comm_items.append(ET.parse(filename).getroot())
     return xml_comm_items
 
 
