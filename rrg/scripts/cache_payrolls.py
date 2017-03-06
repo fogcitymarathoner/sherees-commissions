@@ -4,7 +4,7 @@ import os
 from flask import Flask
 from flask_script import Manager
 
-from rrg import utils
+from rrg.models import cache_objs
 from rrg.models import Payroll
 from rrg.models import session_maker
 
@@ -37,7 +37,7 @@ def cache_payrolls():
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     print('Caching Payrolls %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'payrolls')))
     payrolls = session.query(Payroll).all()
-    utils.cache_objs(app.config['DATADIR'], payrolls)
+    cache_objs(app.config['DATADIR'], payrolls)
     session.commit()
 
 

@@ -8,6 +8,8 @@ from rrg import utils
 from rrg.models import Vendor
 from rrg.models import session_maker
 
+from rrg.models import cache_objs
+
 app = Flask(__name__, instance_relative_config=True)
 
 # Load the default configuration
@@ -25,21 +27,6 @@ if os.path.isfile(settings_file):
         quit(1)
 else:
     print('settings file %s does not exits' % settings_file)
-
-
-def cache_vendors_ep():
-    """
-    replaces cake cache_vendors
-    :param data_dir:
-    :return:
-    """
-    args = parser.parse_args()
-    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-
-    print('Caching Vendors %s into %s' % (args.db, os.path.join(args.datadir, 'vendors')))
-    vendors = session.query(Vendor).all()
-    utils.cache_objs(args.datadir, vendors)
-    session.commit()
 
 
 manager = Manager(app)

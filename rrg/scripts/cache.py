@@ -9,6 +9,8 @@ from rrg.models import Client
 from rrg.models import Contract
 from rrg.models import Invoice
 from rrg.models import State
+from rrg.models import cache_objs
+
 
 from rrg import cache_clients_ar
 
@@ -88,7 +90,7 @@ def states():
 
     print('Caching States %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'states')))
     states = session.query(State).all()
-    utils.cache_objs(app.config['DATADIR'], states)
+    cache_objs(app.config['DATADIR'], states)
     session.commit()
 if __name__ == "__main__":
     manager.run()

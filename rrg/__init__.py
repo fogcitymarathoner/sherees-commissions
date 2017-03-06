@@ -9,7 +9,7 @@ from rrg.models import User
 from rrg.models import Invoice
 
 from rrg.helpers import MissingEnvVar
-from rrg.utils import clients_ar_xml_file
+from rrg.models import clients_ar_xml_file
 
 parser = argparse.ArgumentParser(description='Rockets Redglare CLI.')
 parser.add_argument('reminders', metavar='N', type=int, nargs='+', help='setup reminders for timecards')

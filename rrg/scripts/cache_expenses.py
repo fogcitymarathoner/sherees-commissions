@@ -7,7 +7,7 @@ from flask_script import Manager
 from rrg.models import Expense
 from rrg.models import session_maker
 
-from rrg import utils
+from rrg.models import cache_objs
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -38,7 +38,7 @@ def cache_expenses():
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     print('Caching Expenses %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'expenses')))
     expenses = session.query(Expense).all()
-    utils.cache_objs(app.config['DATADIR'], expenses)
+    cache_objs(app.config['DATADIR'], expenses)
     session.commit()
 
 

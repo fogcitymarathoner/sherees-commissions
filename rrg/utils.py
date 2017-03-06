@@ -1,7 +1,5 @@
-import os
-import re
+
 import time
-from datetime import datetime as dt
 
 from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
 from s3_mysql_backup import mkdirs
@@ -9,7 +7,7 @@ from s3_mysql_backup import s3_bucket
 
 from sqlalchemy import create_engine
 
-from rrg.lib import archive
+from models import obj_dir
 
 monthy_statement_ym_header = '%s/%s - #########################################################'
 
@@ -74,10 +72,6 @@ def clients_statements_dir(datadir):
     return os.path.join(os.path.join(datadir, 'clients'), 'statements')
 
 
-def clients_ar_xml_file(datadir):
-    return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'ar.xml')
-
-
 def clients_managers_dir(datadir):
     return os.path.join(os.path.join(datadir, 'clients'), 'managers')
 
@@ -93,9 +87,6 @@ def commissions_item_fullpathname(datadir, comm_item):
         datadir,
         'transactions', 'invoices', 'invoice_items', 'commissions_items', commissions_item_reldir(comm_item), xfilename)
 
-
-def commissions_payment_dir(datadir, comm_payment):
-    return archive.obj_dir(datadir, comm_payment) + archive.employee_dated_object_reldir(comm_payment)
 
 
 def employees_memos_dir(datadir):
@@ -587,25 +578,3 @@ def cached_contracts_collect_invoices_and_items(datadir):
                 with open(fullpath, 'w') as fh:
                     fh.write(ET.tostring(doc))
                 print('wrote %s' % fullpath)
-
-
-def cache_obj(obj, full_path):
-    if not os.path.isdir(os.path.dirname(full_path)):
-        os.makedirs(os.path.dirname(full_path))
-    with open(full_path, 'w') as fh:
-        fh.write(ET.tostring(obj.to_xml()))
-    obj.last_sync_time = dt.now()
-    print('%s written' % full_path)
-
-
-def cache_objs(datadir, objs):
-    for obj in objs:
-
-        full_path = full_non_dated_xml_obj_path(archive.obj_dir(datadir, obj), obj)
-        if os.path.isfile(full_path):
-            if obj.last_sync_time is None or obj.modified_date is None:
-                cache_obj(obj, full_path)
-            elif obj.modified_date > obj.last_sync_time:
-                cache_obj(obj, full_path)
-        else:
-            cache_obj(obj, full_path)

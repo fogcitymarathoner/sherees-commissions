@@ -33,6 +33,8 @@ import xml.etree.ElementTree as ET
 import xml.dom.minidom as xml_pp
 
 from tabulate import tabulate
+
+from rrg.lib.archive import full_non_dated_xml_obj_path
 from rrg.helpers import read_inv_xml_file
 
 from s3_mysql_backup import TIMESTAMP_FORMAT
@@ -1351,25 +1353,6 @@ def obj_dir(datadir, obj):
         return os.path.join(datadir, 'vendors')
 
 
-def generate_ar_report(app, type):
-    print('Generating %s Report' % type)
-    infile = utils.clients_ar_xml_file(app.config['DATADIR'])
-    print('Parsing %s' % infile)
-    results = []
-    if os.path.isfile(infile):
-        tree = ET.parse(infile)
-        root = tree.getroot()
-        recs = invoice_archives(root, type)
-        for i in recs:
-            xmlpath = os.path.join(obj_dir(app.config['DATADIR'], Invoice()), '%05d.xml' % int(i))
-            date, amount, employee, voided, terms, sqlid, client, duedate = read_inv_xml_file(xmlpath)
-            if voided == 'False':
-                results.append([amount, date, voided, employee, terms, sqlid, client, duedate])
-    else:
-        print('No AR.xml file found')
-    return tabulate(results, headers=['amount', 'date', 'voided', 'employee', 'terms', 'sqlid', 'client', 'duedate'])
-
-
 """
 Basic functions for Invoice Model
 """
@@ -1526,3 +1509,52 @@ def void_timecard(session, number):
     timecards = session.query(Invoice).filter(Invoice.voided==False, Invoice.posted==False)
     timecard_to_void = timecards[number-1]
     timecard_to_void.voided = True
+
+def _clients_ar_xml_file(datadir):
+    return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'ar.xml')
+
+
+def commissions_payment_dir(datadir, comm_payment):
+    return obj_dir(datadir, comm_payment) + archive.employee_dated_object_reldir(comm_payment)
+
+
+def generate_ar_report(app, type):
+    print('Generating %s Report' % type)
+    infile = _clients_ar_xml_file(app.config['DATADIR'])
+    print('Parsing %s' % infile)
+    results = []
+    if os.path.isfile(infile):
+        tree = ET.parse(infile)
+        root = tree.getroot()
+        recs = invoice_archives(root, type)
+        for i in recs:
+            xmlpath = os.path.join(obj_dir(app.config['DATADIR'], Invoice()), '%05d.xml' % int(i))
+            date, amount, employee, voided, terms, sqlid, client, duedate = read_inv_xml_file(xmlpath)
+            if voided == 'False':
+                results.append([amount, date, voided, employee, terms, sqlid, client, duedate])
+    else:
+        print('No AR.xml file found')
+    return tabulate(results, headers=['amount', 'date', 'voided', 'employee', 'terms', 'sqlid', 'client', 'duedate'])
+
+
+
+def _cache_obj(obj, full_path):
+    if not os.path.isdir(os.path.dirname(full_path)):
+        os.makedirs(os.path.dirname(full_path))
+    with open(full_path, 'w') as fh:
+        fh.write(ET.tostring(obj.to_xml()))
+    obj.last_sync_time = dt.now()
+    print('%s written' % full_path)
+
+
+def cache_objs(datadir, objs):
+    for obj in objs:
+
+        full_path = full_non_dated_xml_obj_path(obj_dir(datadir, obj), obj)
+        if os.path.isfile(full_path):
+            if obj.last_sync_time is None or obj.modified_date is None:
+                _cache_obj(obj, full_path)
+            elif obj.modified_date > obj.last_sync_time:
+                _cache_obj(obj, full_path)
+        else:
+            _cache_obj(obj, full_path)
