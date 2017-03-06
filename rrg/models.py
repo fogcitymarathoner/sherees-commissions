@@ -238,6 +238,7 @@ class Employee(Base):
         ET.SubElement(doc, 'bankaccountnumber_crypto').text = bankaccountnumber_crypto
         ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
         ET.SubElement(doc, 'bankroutingnumber_crypto').text = bankroutingnumber_crypto
+        ET.SubElement(doc, 'bankname').text = bankname
         ET.SubElement(doc, 'directdeposit').text = str(self.directdeposit)
         ET.SubElement(doc, 'allowancefederal').text = str(self.allowancefederal)
         ET.SubElement(doc, 'allowancestate').text = str(self.allowancestate)
