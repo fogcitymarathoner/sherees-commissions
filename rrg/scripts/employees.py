@@ -9,7 +9,6 @@ from tabulate import tabulate
 
 from rrg import utils
 from rrg.billing import cache_non_date_parsed
-from rrg.lib import archive
 from rrg.lib import reminders
 from rrg.lib import reminders_generation
 from rrg.models import Contract
@@ -20,6 +19,7 @@ from rrg.models import edit_employee_script
 from rrg.models import session_maker
 from rrg.models import employees
 from rrg.renderers import format_employee
+from rrg import utils
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -175,7 +175,7 @@ def assemble_employees_cache():
     :return:
     """
     print('Assembling Employees in %s' % os.path.join(app.config['DATADIR'], 'employees'))
-    archive.cached_employees_collect_contracts(app.config['DATADIR'])
+    utils.cached_employees_collect_contracts(app.config['DATADIR'])
 
 
 @manager.command

@@ -4,7 +4,7 @@ import os
 from flask import Flask
 from flask_script import Manager
 
-from rrg.lib import archive
+from rrg import utils
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -31,7 +31,7 @@ manager = Manager(app)
 @manager.command
 def assemble_clients_cache():
     print('Assembling Clients in %s' % app.config['DATADIR'])
-    archive.cached_clients_collect_contracts(app.config['DATADIR'])
+    utils.cached_clients_collect_contracts(app.config['DATADIR'])
 
 if __name__ == "__main__":
     manager.run()

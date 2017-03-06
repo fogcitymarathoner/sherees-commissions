@@ -4,23 +4,9 @@ import os
 from flask import Flask
 from flask_script import Manager
 
-from rrg.lib import archive
+from rrg import utils
 from rrg.models import Vendor
 from rrg.models import session_maker
-
-parser = argparse.ArgumentParser(description='RRG Vendors')
-
-parser.add_argument(
-    '--datadir', required=True,
-    help='datadir dir',
-    default='/php-apps/cake.rocketsredglare.com/rrg/data/')
-
-
-parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
-parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
-parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
-parser.add_argument('--db', required=True, help='d', default='rrg')
-parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -52,7 +38,7 @@ def cache_vendors_ep():
 
     print('Caching Vendors %s into %s' % (args.db, os.path.join(args.datadir, 'vendors')))
     vendors = session.query(Vendor).all()
-    archive.cache_objs(args.datadir, vendors)
+    utils.cache_objs(args.datadir, vendors)
     session.commit()
 
 
@@ -66,7 +52,7 @@ def cache_vendors():
 
     print('Caching Vendors %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'vendors')))
     vendors = session.query(Vendor).all()
-    archive.cache_objs(app.config['DATADIR'], vendors)
+    utils.cache_objs(app.config['DATADIR'], vendors)
     session.commit()
 
 

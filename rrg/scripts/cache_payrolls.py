@@ -1,21 +1,12 @@
-import argparse
+
 import os
 
 from flask import Flask
 from flask_script import Manager
 
-from rrg.lib import archive
+from rrg import utils
 from rrg.models import Payroll
 from rrg.models import session_maker
-
-parser = argparse.ArgumentParser(description='RRG Employees')
-
-parser.add_argument('--datadir', required=True, help='datadir dir', default='/php-apps/cake.rocketsredglare.com/rrg/data/')
-parser.add_argument('--db-user', required=True, help='database user', default='marcdba')
-parser.add_argument('--mysql-host', required=True, help='database host - MYSQL_PORT_3306_TCP_ADDR', default='marcdba')
-parser.add_argument('--mysql-port', required=True, help='database port - MYSQL_PORT_3306_TCP_PORT', default=3306)
-parser.add_argument('--db', required=True, help='d', default='rrg')
-parser.add_argument('--db-pass', required=True, help='database pw', default='deadbeef')
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -36,20 +27,6 @@ else:
     print('settings file %s does not exits' % settings_file)
 
 
-def cache_payrolls_ep():
-    """
-    replaces cake cache_payrolls
-    :param data_dir:
-    :return:
-    """
-    args = parser.parse_args()
-    session = session_maker(args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db)
-    print('Caching Payrolls %s into %s' % (args.db, os.path.join(args.datadir, 'payrolls')))
-    payrolls = session.query(Payroll).all()
-    archive.cache_objs(args.datadir, payrolls)
-    session.commit()
-
-
 manager = Manager(app)
 
 
@@ -60,7 +37,7 @@ def cache_payrolls():
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
     print('Caching Payrolls %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'payrolls')))
     payrolls = session.query(Payroll).all()
-    archive.cache_objs(app.config['DATADIR'], payrolls)
+    utils.cache_objs(app.config['DATADIR'], payrolls)
     session.commit()
 
 

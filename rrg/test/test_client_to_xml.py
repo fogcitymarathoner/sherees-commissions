@@ -6,7 +6,7 @@ from datetime import timedelta as td
 
 from freezegun import freeze_time
 
-from rrg.lib.archive import doc_attach_collected_contracts
+from rrg.utils import doc_attach_collected_contracts
 from rrg.lib.reminders import biweeks_between_dates
 from rrg.lib.reminders import current_semimonth
 from rrg.lib.reminders import months_between_dates
