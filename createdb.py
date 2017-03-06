@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 
 from rrg.models import Base
 from rrg.models import Client
+from rrg.models import Employee
 from rrg.models import State
 from rrg.models import User
 
@@ -39,8 +40,24 @@ for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
 for c in session.query(State):
     print(c)
 
+f = os.path.join('datadir', 'biz', 'employees', '01479.xml')
+print(f)
+
+if os.path.isfile(f):
+    doc = ET.parse(f)
+employee = Employee()
+employee.firstname = doc.findall('firstname')[0].text
+employee.lastname = doc.findall('lastname')[0].text
+employee.street1 = doc.findall('street1')[0].text
+employee.street2 = doc.findall('street2')[0].text
+employee.city = doc.findall('city')[0].text
+employee.state_id = int(doc.findall('state_id')[0].text)
+employee.zip = doc.findall('zip')[0].text
+session.add(employee)
 clientsx = ['00062.xml', '00116.xml', '00185.xml']
 session.add(User(firstname='Marc', lastname='Condon'))
+for c in session.query(Employee):
+    print(c)
 for c in clientsx:
     f = os.path.join('datadir', 'biz', 'clients', c)
     print(f)

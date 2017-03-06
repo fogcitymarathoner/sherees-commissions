@@ -6,13 +6,16 @@ from rrg import utils
 from rrg.billing import cache_non_date_parsed
 from rrg.models import session_maker
 from rrg.models import Client
+from rrg.models import ClientMemo
+from rrg.models import ClientManager
 from rrg.models import Contract
 from rrg.models import Employee
 from rrg.models import Invoice
 from rrg.models import State
 from rrg.models import cache_objs
 
-
+from rrg.utils import clients_memos_dir
+from rrg.utils import clients_managers_dir
 from rrg import cache_clients_ar
 
 app = Flask(__name__, instance_relative_config=True)
@@ -45,6 +48,27 @@ def clients():
     print('Caching Clients %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'clients')))
     cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'clients'), Client)
     session.commit()
+
+
+@manager.command
+def client_memos():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print('Caching Clients-Memos %s into %s' % (app.config['DB'], clients_memos_dir(app.config['DATADIR'])))
+    cache_non_date_parsed(session, clients_memos_dir(app.config['DATADIR']), ClientMemo)
+    session.commit()
+
+
+@manager.command
+def client_managers():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print('Caching Clients-Managers %s into %s' % (app.config['DB'], clients_managers_dir(app.config['DATADIR'])))
+    cache_non_date_parsed(session, clients_managers_dir(app.config['DATADIR']), ClientManager)
+    session.commit()
+
 
 @manager.command
 def invoices():

@@ -74,6 +74,10 @@ def clients_managers_dir(datadir):
     return os.path.join(os.path.join(datadir, 'clients'), 'managers')
 
 
+def clients_memos_dir(datadir):
+    return os.path.join(os.path.join(datadir, 'clients'), 'managers')
+
+
 def commissions_item_reldir(comm_item):
     return archive.employee_dated_object_reldir(comm_item)[1:len(archive.employee_dated_object_reldir(comm_item))]
 

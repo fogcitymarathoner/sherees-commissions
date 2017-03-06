@@ -41,7 +41,7 @@ def ar_report(type):
     :param type:
     :return:
     """
-    print generate_ar_report(app, type)
+    print(generate_ar_report(app, type))
 
 if __name__ == "__main__":
     manager.run()
