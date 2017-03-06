@@ -825,7 +825,7 @@ class Invoice(Base):
                    self.period_start, self.period_end, self.date, self.voided)
 
     def duedate(self):
-        return dt(year=date.year, month=date.month, day=date.day) + td(days=self.terms)
+        return dt(year=self.date.year, month=self.date.month, day=self.date.day) + td(days=self.terms)
 
     def to_xml(self):
         doc = ET.Element('invoice')
