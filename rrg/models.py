@@ -475,6 +475,7 @@ class Client(Base):
         ET.SubElement(doc, 'name').text = self.name
         ET.SubElement(doc, 'street1').text = self.street1
         ET.SubElement(doc, 'street2').text = self.street2
+        ET.SubElement(doc, 'city').text = self.city
         ET.SubElement(doc, 'state_id').text = str(self.state_id)
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'terms').text = str(self.terms)
