@@ -139,7 +139,7 @@ def cache_comm_payments(session, datadir, cache):
                     filename, pay_m_y = archive.full_dated_obj_xml_path(datadir, pay)
                     if not os.path.isdir(os.path.dirname(filename)):
                         mkdirs(os.path.dirname(filename))
-                    with open(filename, 'w') as fh:
+                    with open(filename, 'wb') as fh:
                         fh.write(ET.tostring(pay.to_xml()))
                     print('%s written' % filename)
 
@@ -208,7 +208,7 @@ def cache_invoices_items(datadir, session, employee, cache):
     for ix in iex:
         ET.SubElement(doc, 'hash').text = str(ix)
     ex_inv_filename = os.path.join(datadir, 'excludes.xml')
-    with open(ex_inv_filename, 'w') as fh:
+    with open(ex_inv_filename, 'wb') as fh:
         fh.write(ET.tostring(doc))
     print('%s written' % ex_inv_filename)
 

@@ -60,7 +60,7 @@ def recover_joomla_documents_ep():
         outfile = os.path.join(args.datadir, f.realname)
         for chunk in chunks:
             print(chunk)
-            with open(outfile, 'w') as fh:
+            with open(outfile, 'wb') as fh:
                 fh.write(chunk.datachunk)
         print('Wrote file %s' % outfile)
 
@@ -80,7 +80,7 @@ def recover_joomla_documents():
         outfile = os.path.join(app.config['DATADIR'], f.realname)
         for chunk in chunks:
             print(chunk)
-            with open(outfile, 'w') as fh:
+            with open(outfile, 'wb') as fh:
                 fh.write(chunk.datachunk)
         print('Wrote file %s' % outfile)
 

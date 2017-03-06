@@ -453,7 +453,7 @@ def cached_employees_collect_contracts(datadir):
                     cdoc = doc_attach_collected_contracts(attach_contracts)
                     doc.append(cdoc)
 
-                with open(fullpath, 'w') as fh:
+                with open(fullpath, 'wb') as fh:
                     fh.write(ET.tostring(doc))
                 print('wrote %s' % fullpath)
 
@@ -512,7 +512,7 @@ def cached_clients_collect_contracts(datadir):
                     print('%s contracts found to add' % len(attach_contracts))
                     cdoc = doc_attach_collected_contracts(attach_contracts)
                     doc.append(cdoc)
-                with open(fullpath, 'w') as fh:
+                with open(fullpath, 'wb') as fh:
                     fh.write(ET.tostring(doc))
                 print('wrote %s' % fullpath)
 
@@ -577,6 +577,6 @@ def cached_contracts_collect_invoices_and_items(datadir):
                     cdoc = contract_attach_collected_contract_items(attach_items)
                     doc.append(cdoc)
 
-                with open(fullpath, 'w') as fh:
+                with open(fullpath, 'wb') as fh:
                     fh.write(ET.tostring(doc))
                 print('wrote %s' % fullpath)

@@ -1601,7 +1601,7 @@ def generate_ar_report(app, type):
 def _cache_obj(obj, full_path):
     if not os.path.isdir(os.path.dirname(full_path)):
         os.makedirs(os.path.dirname(full_path))
-    with open(full_path, 'w') as fh:
+    with open(full_path, 'wb') as fh:
         fh.write(ET.tostring(obj.to_xml()))
     obj.last_sync_time = dt.now()
     print('%s written' % full_path)
