@@ -13,6 +13,7 @@ from rrg.models import Employee
 from rrg.models import Invoice
 from rrg.models import State
 from rrg.models import cache_objs
+from rrg.models import clients_ar_xml_file
 
 from rrg.utils import clients_memos_dir
 from rrg.utils import clients_managers_dir
@@ -92,7 +93,7 @@ def client_accounts_receivable():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    print('Caching Clients AR into %s' % utils.clients_ar_xml_file(app.config['DATADIR']))
+    print('Caching Clients AR into %s' % clients_ar_xml_file(app.config['DATADIR']))
     cache_clients_ar(session, app.config['DATADIR'])
 
 
