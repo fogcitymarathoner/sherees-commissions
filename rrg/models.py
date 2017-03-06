@@ -300,7 +300,7 @@ class Employee(Base):
         """                                                                                                                    
         returns DOM of comm item from file                                                                                     
         """
-
+        self.id = int(doc.findall('id')[0].text)
         self.firstname = doc.findall('firstname')[0].text
         self.lastname = doc.findall('lastname')[0].text
         self.street1 = doc.findall('street1')[0].text
@@ -309,16 +309,14 @@ class Employee(Base):
         self.state_id = int(doc.findall('state_id')[0].text)
         self.zip = doc.findall('zip')[0].text
 
-        if doc.findall('active')[0].text == 'True':
-            self.active = True
-        else:
-            self.active = False
+        self.active = True if doc.findall('active')[0].text == 'True' else False
+
         self.ssn_crypto  = doc.findall('ssn_crypto')[0].text
         self.bankaccountnumber_crypto  = doc.findall('bankaccountnumber_crypto')[0].text
         self.bankaccounttype  = doc.findall('bankaccounttype')[0].text
         self.bankname = doc.findall('bankname')[0].text
         self.bankroutingnumber_crypto = doc.findall('bankroutingnumber_crypto')[0].text
-        self.directdeposit = int(doc.findall('directdeposit')[0].text)
+        self.directdeposit = True if doc.findall('directdeposit')[0].text == 'True' else False
         self.allowancefederal = int(doc.findall('allowancefederal')[0].text)
         self.allowancestate = int(doc.findall('allowancestate')[0].text)
         self.extradeductionfed  = int(doc.findall('extradeductionfed')[0].text)
@@ -327,18 +325,18 @@ class Employee(Base):
         self.maritalstatusstate = doc.findall('maritalstatusstate')[0].text
         self.usworkstatus = int(doc.findall('usworkstatus')[0].text)
         self.notes = doc.findall('notes')[0].text
-        self.tcard = int(doc.findall('tcard')[0].text)
-        self.voided = int(doc.findall('voiced')[0].text)
-        self.w4 = int(doc.findall('w4')[0].text)
-        self.de34 = int(doc.findall('de34')[0].text)
-        self.i9 = int(doc.findall('i9')[0].text)
-        self.medical = int(doc.findall('medical')[0].text)
-        self.indust = int(doc.findall('indust')[0].text)
-        self.info = int(doc.findall('info')[0].text)
+        self.tcard = True if doc.findall('tcard')[0].text == 'True' else False
+        self.voided = True if doc.findall('voided')[0].text == 'True' else False
+        self.w4 = True if doc.findall('w4')[0].text == 'True' else False
+        self.de34 = True if doc.findall('de34')[0].text == 'True' else False
+        self.medical = True if doc.findall('medical')[0].text == 'True' else False
+        self.indust = True if doc.findall('indust')[0].text == 'True' else False
+        self.info = True if doc.findall('info')[0].text == 'True' else False
+
         self.phone = doc.findall('phone')[0].text
         self.dob = dt.strptime(doc.findall('dob')[0].text, TIMESTAMP_FORMAT)
         self.startdate = dt.strptime(doc.findall('startdate')[0].text, TIMESTAMP_FORMAT)
-        self.endate = dt.strptime(doc.findall('endate')[0].text, TIMESTAMP_FORMAT)
+        self.enddate = dt.strptime(doc.findall('enddate')[0].text, TIMESTAMP_FORMAT)
         self.created_date = dt.strptime(doc.findall('created_date')[0].text, TIMESTAMP_FORMAT)
         self.modified_date = dt.strptime(doc.findall('modified_date')[0].text, TIMESTAMP_FORMAT)
 
@@ -670,10 +668,11 @@ class ContractItemCommItem(Base):
         doc = ET.Element('contract-commissions-item')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-        ET.SubElement(doc,
-                      'employee_firstname').text = self.employee.firstname if self.employee and self.employee.firstname else ''
-        ET.SubElement(doc,
-                      'employee_lastname').text = self.employee.lastname if self.employee and self.employee.lastname else ''
+        ET.SubElement(
+            doc,
+            'employee_firstname').text = self.employee.firstname if self.employee and self.employee.firstname else ''
+        ET.SubElement(
+            doc, 'employee_lastname').text = self.employee.lastname if self.employee and self.employee.lastname else ''
         ET.SubElement(doc, 'contract_item_id').text = str(self.contract_item_id)
         ET.SubElement(doc, 'percent').text = str(self.percent)
         return doc
@@ -721,6 +720,18 @@ class ContractItem(Base):
         doc.append(con_comm_items)
         return doc
 
+
+    def from_xml(self, doc):
+        """
+        returns DOM of comm item from file
+        """
+        self.id = int(doc.findall('id')[0].text)
+        self.active = True if doc.findall('active')[0].text == 'True' else False
+        self.contract_id = int(doc.findall('contract_id')[0].text)
+        self.amt = float(doc.findall('amt')[0].text)
+        self.cost = float(doc.findall('cost')[0].text)
+        self.description = doc.findall('description')[0].text
+        self.notes = doc.findall('notes')[0].text
 
 class Contract(Base):
     __tablename__ = 'clients_contracts'
@@ -770,9 +781,8 @@ class Contract(Base):
         ET.SubElement(doc, 'active').text = str(self.active)
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'enddate').text = dt.strftime(self.enddate,
-                                                         TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(),
-                                                                                                            TIMESTAMP_FORMAT)
+        ET.SubElement(doc, 'enddate').text = dt.strftime(
+            self.enddate,TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'invoices')
         contract_items = ET.Element('contract-items')
         for o in self.contract_items:
@@ -780,6 +790,17 @@ class Contract(Base):
         doc.append(contract_items)
         return doc
 
+
+    def from_xml(self, doc):
+        self.id = int(doc.findall('id')[0].text)
+        self.title = doc.findall('title')[0].text
+        self.notes = doc.findall('notes')[0].text
+        self.client_id = int(doc.findall('client_id')[0].text)
+        self.employee_id = int(doc.findall('employee_id')[0].text)
+        self.period_id = int(doc.findall('period_id')[0].text)
+        self.terms = int(doc.findall('terms')[0].text)
+        self.startdate = dt.strptime(doc.findall('startdate')[0].text, TIMESTAMP_FORMAT)
+        self.enddate = dt.strptime(doc.findall('enddate')[0].text, TIMESTAMP_FORMAT)
 
 class InvoicePayment(Base):
     __tablename__ = 'invoices_payments'

@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 
 from rrg.models import Base
 from rrg.models import Client
+from rrg.models import Contract
+from rrg.models import ContractItem
 from rrg.models import Employee
 from rrg.models import State
 from rrg.models import User
@@ -28,7 +30,9 @@ Base.metadata.create_all(engine)
 #
 user = User(firstname='Marc', lastname='Condon')
 session.add(user)
-
+#
+# States
+#
 sdir = os.path.join('datadir', 'biz', 'states')
 
 for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
@@ -65,6 +69,8 @@ session.add(employee)
 # Clients
 #
 clientsx = ['00062.xml', '00116.xml', '00185.xml']
+# collect list of contracts for selecting transactions
+contractsx = []
 for c in session.query(Employee):
     print(c)
 for c in clientsx:
@@ -80,6 +86,35 @@ for c in clientsx:
     client.created_user_id = user.id
     client.modified_user_id = user.id
     session.add(client)
+    #
+    # contracts
+    #
+    contracts = doc.findall('contracts')[0]
+    for con_ele in contracts.findall('contract'):
+        if int(con_ele.findall('employee_id')[0].text) == employee.id:
+            print(employee.id)
+            print(con_ele.findall('id')[0].text)
+            contract = Contract()
+            contract.from_xml(con_ele)
+            session.add(contract)
+            print('contract id %s' % contract.id)
+            contractsx.append(contract.id)
+            items = con_ele.findall('contract-items')[0]
+            print(len(items))
+            #
+            #  contract items
+            #
+            print(ET.tostring(items))
+            print(items.findall('contract-item'))
+            for item_ele in items.findall('contract-item'):
+                print(ET.tostring(item_ele))
+                quit()
+                print(item_ele.findall('id')[0].text)
+                item = ContractItem()
+                item.from_xml(item_ele)
+                item.created_user_id = user.id
+                item.modified_user_id = user.id
+                session.add(item)
 
 for c in session.query(Client):
     print(c)

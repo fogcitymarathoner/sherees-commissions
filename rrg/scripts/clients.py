@@ -91,7 +91,6 @@ def ar():
     client = session.query(Client).get(int(selected_client[1]))
     print('%s' % client.name)
 
-
     selection = input("Please select an ar report type [all, cleared, pastdue, open] or 'q' to quit: ")
     if selection == 'q':
         quit()
