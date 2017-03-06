@@ -40,7 +40,6 @@ from rrg.helpers import read_inv_xml_file
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import YMD_FORMAT
 
-from rrg import utils
 from rrg import invoices
 
 
@@ -1510,7 +1509,7 @@ def void_timecard(session, number):
     timecard_to_void = timecards[number-1]
     timecard_to_void.voided = True
 
-def _clients_ar_xml_file(datadir):
+def clients_ar_xml_file(datadir):
     return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'ar.xml')
 
 
@@ -1520,7 +1519,7 @@ def commissions_payment_dir(datadir, comm_payment):
 
 def generate_ar_report(app, type):
     print('Generating %s Report' % type)
-    infile = _clients_ar_xml_file(app.config['DATADIR'])
+    infile = clients_ar_xml_file(app.config['DATADIR'])
     print('Parsing %s' % infile)
     results = []
     if os.path.isfile(infile):
