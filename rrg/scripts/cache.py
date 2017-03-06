@@ -7,6 +7,7 @@ from rrg.billing import cache_non_date_parsed
 from rrg.models import session_maker
 from rrg.models import Client
 from rrg.models import Contract
+from rrg.models import Employee
 from rrg.models import Invoice
 from rrg.models import State
 from rrg.models import cache_objs
@@ -91,6 +92,21 @@ def states():
     print('Caching States %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'states')))
     states = session.query(State).all()
     cache_objs(app.config['DATADIR'], states)
+    session.commit()
+if __name__ == "__main__":
+    manager.run()
+
+
+
+@manager.command
+def employees():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
+    print('Caching States %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'states')))
+    employees = session.query(Employee).all()
+    cache_objs(app.config['DATADIR'], employees)
     session.commit()
 if __name__ == "__main__":
     manager.run()

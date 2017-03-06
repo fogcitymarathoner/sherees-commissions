@@ -50,11 +50,12 @@ for c in clientsx:
 
     print(doc.findall('name')[0].text)
     client = Client()
+    client.id = int(doc.findall('id')[0].text)
     client.name = doc.findall('name')[0].text
     client.street1 = doc.findall('street1')[0].text
     client.street2 = doc.findall('street2')[0].text
     client.city = doc.findall('city')[0].text
-    client.state = doc.findall('stare')[0].text
+    client.state_id = int(doc.findall('state_id')[0].text)
     client.zip = doc.findall('zip')[0].text
     client.terms = int(doc.findall('terms')[0].text)
     session.add(client)
