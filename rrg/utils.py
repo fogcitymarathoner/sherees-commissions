@@ -7,8 +7,6 @@ from s3_mysql_backup import s3_bucket
 
 from sqlalchemy import create_engine
 
-from models import obj_dir
-
 monthy_statement_ym_header = '%s/%s - #########################################################'
 
 
