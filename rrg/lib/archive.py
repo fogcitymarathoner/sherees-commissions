@@ -5,6 +5,7 @@ from tabulate import tabulate
 import xml.etree.ElementTree as ET
 import logging
 
+from rrg.lib import archive
 from s3_mysql_backup import TIMESTAMP_FORMAT
 from s3_mysql_backup import YMD_FORMAT
 
@@ -446,7 +447,7 @@ def cache_obj(obj, full_path):
 def cache_objs(datadir, objs):
     for obj in objs:
 
-        full_path = full_non_dated_xml_obj_path(obj_dir(datadir, obj), obj)
+        full_path = full_non_dated_xml_obj_path(archive.obj_dir(datadir, obj), obj)
         if os.path.isfile(full_path):
             if obj.last_sync_time is None or obj.modified_date is None:
                 cache_obj(obj, full_path)
