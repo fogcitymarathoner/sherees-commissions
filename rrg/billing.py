@@ -13,7 +13,7 @@ def sync(session, data_dir, ep, model):
     writes xml file for contract
     """
     f = full_non_dated_xml_obj_path(data_dir, ep)
-    with open(f, 'w') as fh:
+    with open(f, 'wb') as fh:
         fh.write(ET.tostring(ep.to_xml()))
     session.query(model).filter_by(id=ep.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)

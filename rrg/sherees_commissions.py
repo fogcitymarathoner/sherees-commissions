@@ -72,7 +72,7 @@ def sync_comm_item(session, f, comm_item):
     """
     writes xml file for commissions item
     """
-    with open(f, 'w') as fh:
+    with open(f, 'wb')() as fh:
         fh.write(ET.tostring(comm_item.to_xml()))
     session.query(Citem).filter_by(id=comm_item.id).update({"last_sync_time": dt.now()})
     print('%s written' % f)
@@ -185,7 +185,7 @@ def cache_invoice(datadir, inv):
     full_path = os.path.join(datadir, rel_dir)
     if not os.path.isdir(full_path):
         os.makedirs(full_path)
-    with open(f, 'w') as fh:
+    with open(f, 'wb')() as fh:
         fh.write(ET.tostring(inv.to_xml()))
 
     print('%s written' % f)
@@ -200,7 +200,7 @@ def cache_invoices_items(datadir, session, employee, cache):
     for inv in sales_person_invoices_of_interest(session, employee):
         for iitem in inv.invoice_items:
             f = archive.full_non_dated_xml_obj_path(datadir, iitem)
-            with open(f, 'w') as fh:
+            with open(f, 'wb')() as fh:
                 fh.write(iitem_xml_pretty_str(iitem))
             print('%s written' % f)
     iex = iitem_exclude(session, employee, datadir, cache)
