@@ -117,9 +117,6 @@ def states():
     states = session.query(State).all()
     cache_objs(app.config['DATADIR'], states)
     session.commit()
-if __name__ == "__main__":
-    manager.run()
-
 
 
 @manager.command
