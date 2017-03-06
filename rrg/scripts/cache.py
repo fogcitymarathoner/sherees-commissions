@@ -2,11 +2,13 @@ import os
 
 from flask_script import Manager
 from flask import Flask
+from rrg.lib import archive
 from rrg.billing import cache_non_date_parsed
 from rrg.models import session_maker
 from rrg.models import Client
 from rrg.models import Contract
 from rrg.models import Invoice
+from rrg.models import State
 
 from rrg import cache_clients_ar
 
@@ -79,5 +81,16 @@ def contracts():
     cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'contracts'), Contract)
     session.commit()
 
+
+@manager.command
+def states():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+
+    print('Caching States %s into %s' % (app.config['DB'], os.path.join(app.config['DATADIR'], 'states')))
+    states = session.query(State).all()
+    archive.cache_objs(app.config['DATADIR'], states)
+    session.commit()
 if __name__ == "__main__":
     manager.run()
