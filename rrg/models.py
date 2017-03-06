@@ -234,11 +234,11 @@ class Employee(Base):
         ET.SubElement(doc, 'city').text = self.city
         ET.SubElement(doc, 'state').text = str(self.state.name)
         ET.SubElement(doc, 'zip').text = self.zip
-        ET.SubElement(doc, 'ssn_crypto').text = ssn_crypto
-        ET.SubElement(doc, 'bankaccountnumber_crypto').text = bankaccountnumber_crypto
+        ET.SubElement(doc, 'ssn_crypto').text = self.ssn_crypto
+        ET.SubElement(doc, 'bankaccountnumber_crypto').text = self.bankaccountnumber_crypto
         ET.SubElement(doc, 'bankaccounttype').text = self.bankaccounttype
-        ET.SubElement(doc, 'bankroutingnumber_crypto').text = bankroutingnumber_crypto
-        ET.SubElement(doc, 'bankname').text = bankname
+        ET.SubElement(doc, 'bankroutingnumber_crypto').text = self.bankroutingnumber_crypto
+        ET.SubElement(doc, 'bankname').text = self.bankname
         ET.SubElement(doc, 'directdeposit').text = str(self.directdeposit)
         ET.SubElement(doc, 'allowancefederal').text = str(self.allowancefederal)
         ET.SubElement(doc, 'allowancestate').text = str(self.allowancestate)
