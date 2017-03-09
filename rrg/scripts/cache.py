@@ -140,7 +140,7 @@ def contract_items():
     print(
         'Caching Contract Items %s into %s' % (
             app.config['DB'], os.path.join(app.config['DATADIR'], 'contracts', 'contract_items')))
-    routine(session, os.path.join(app.config['DATADIR'], 'contracts', 'contract_items'), ContractItem)
+    cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'contracts', 'contract_items'), ContractItem)
     session.commit()
 
 if __name__ == "__main__":
