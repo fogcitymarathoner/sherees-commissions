@@ -459,8 +459,16 @@ def cached_employees_collect_contracts(datadir):
 
 
 def cached_clients_collect_contracts(datadir):
+    """
+    attaches invoices to contract doc of client
+    :param datadir:
+    :return:
+    """
     contracts_directory = os.path.join(datadir, 'contracts')
     clients_directory = os.path.join(datadir, 'clients')
+    #
+    # gather contracts
+    #
     conttractsdocs = []
     for iroot, idirs, ifiles in os.walk(contracts_directory):
         if iroot == contracts_directory:
@@ -471,9 +479,10 @@ def cached_clients_collect_contracts(datadir):
                     invdoc = ET.parse(fullpath).getroot()
                     conttractsdocs.append(invdoc)
     print('%s contracts found' % len(conttractsdocs))
+    # memos
     clients_memos_directory = os.path.join(datadir, 'clients', 'memos')
     memossdocs = []
-    for iroot, idirs, ifiles in os.walk(contracts_directory):
+    for iroot, idirs, ifiles in os.walk(clients_memos_directory):
         if iroot == contracts_directory:
             print('Scanning %s for memos' % iroot)
             for invf in ifiles:
@@ -482,11 +491,12 @@ def cached_clients_collect_contracts(datadir):
                     memodoc = ET.parse(fullpath).getroot()
                     memossdocs.append(memodoc)
     print('%s memos found' % len(memossdocs))
+    # managers
     clients_managers_directory = os.path.join(datadir, 'clients', 'managers')
     managersdocs = []
     for iroot, idirs, ifiles in os.walk(clients_managers_directory):
         if iroot == clients_managers_directory:
-            print('Scanning %s for memos' % iroot)
+            print('Scanning %s for managers' % iroot)
             for invf in ifiles:
                 if re.search(pat, invf):
                     fullpath = os.path.join(iroot, invf)

@@ -130,5 +130,18 @@ def employees():
     employees = session.query(Employee).all()
     cache_objs(app.config['DATADIR'], employees)
     session.commit()
+
+
+@manager.command
+def contract_items():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    print(
+        'Caching Contract Items %s into %s' % (
+            app.config['DB'], os.path.join(app.config['DATADIR'], 'contracts', 'contract_items')))
+    routine(session, os.path.join(app.config['DATADIR'], 'contracts', 'contract_items'), ContractItem)
+    session.commit()
+
 if __name__ == "__main__":
     manager.run()
