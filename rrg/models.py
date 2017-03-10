@@ -522,7 +522,7 @@ class Client(Base):
         managers = ET.Element('managers')
         for o in self.managers:
             managers.append(o.to_xml())
-        doc.append(memos)
+        doc.append(managers)
         ET.SubElement(doc, 'contracts')
         return doc
 
@@ -564,6 +564,17 @@ class ClientMemo(Base):
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
 
+
+    def from_xml(self, doc):
+        """
+        fill model from xtree doc
+        :param doc:
+        :return:
+        """
+        self.id = int(doc.findall('id')[0].text)
+        self.client_id = int(doc.findall('client_id')[0].text)
+        self.notes = doc.findall('notes')[0].text
+        self.date = doc.findall('date')[0].text
 
 class ClientManager(Base):
     __tablename__ = 'clients_managers'

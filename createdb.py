@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 
 from rrg.models import Base
 from rrg.models import Client
+from rrg.models import ClientManager
+from rrg.models import ClientMemo
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import Employee
@@ -80,36 +82,44 @@ for c in clientsx:
     else:
         print('problem with client file %s' % f)
         quit(1)
-    print(doc.findall('name')[0].text)
+
     client = Client()
     client.from_xml(doc)
     client.created_user_id = user.id
     client.modified_user_id = user.id
     session.add(client)
+    memos = doc.findall('memos')[0]
+    for memo_ele in memos.findall('memo'):
+        memo = ClientMemo()
+        memo.from_xml(memo_ele)
+
+        memo.created_user_id = user.id
+        memo.modified_user_id = user.id
+        session.add(memo)
+    managers = doc.findall('client-managers')[0]
+    for man_ele in memos.findall('client-manager'):
+        manager = ClientManager()
+        manager.from_xml(man_ele)
+        session.add(manager)
     #
     # contracts
     #
     contracts = doc.findall('contracts')[0]
     for con_ele in contracts.findall('contract'):
         if int(con_ele.findall('employee_id')[0].text) == employee.id:
-            print(employee.id)
-            print(con_ele.findall('id')[0].text)
+
             contract = Contract()
             contract.from_xml(con_ele)
             session.add(contract)
-            print('contract id %s' % contract.id)
+
             contractsx.append(contract.id)
             items = con_ele.findall('contract-items')[0]
-            print(len(items))
+
             #
             #  contract items
             #
-            print(ET.tostring(items))
-            print(items.findall('contract-item'))
             for item_ele in items.findall('contract-item'):
-                print(ET.tostring(item_ele))
-                quit()
-                print(item_ele.findall('id')[0].text)
+
                 item = ContractItem()
                 item.from_xml(item_ele)
                 item.created_user_id = user.id
@@ -117,6 +127,8 @@ for c in clientsx:
                 session.add(item)
 
 for c in session.query(Client):
+    print(c)
+for c in session.query(ContractItem):
     print(c)
 
 session.commit()
