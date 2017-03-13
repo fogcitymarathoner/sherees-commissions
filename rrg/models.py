@@ -574,7 +574,7 @@ class ClientMemo(Base):
         self.id = int(doc.findall('id')[0].text)
         self.client_id = int(doc.findall('client_id')[0].text)
         self.notes = doc.findall('notes')[0].text
-        self.date = doc.findall('date')[0].text
+        self.date = dt.strptime(doc.findall('date')[0].text, TIMESTAMP_FORMAT)
 
 class ClientManager(Base):
     __tablename__ = 'clients_managers'
@@ -614,6 +614,22 @@ class ClientManager(Base):
         ET.SubElement(doc, 'phone2type').text = self.title
         return doc
 
+    def from_xml(self, doc):
+        """
+        fill model from xtree doc
+        :param doc:
+        :return:
+        """
+        self.id = int(doc.findall('id')[0].text)
+        self.client_id = int(doc.findall('client_id')[0].text)
+        self.title = doc.findall('title')[0].text
+        self.firstname = doc.findall('firstname')[0].text
+        self.lastname = doc.findall('lastname')[0].text
+        self.phone1 = doc.findall('phone1')[0].text
+        self.phone2 = doc.findall('phone2')[0].text
+        self.phone1type = doc.findall('phone1type')[0].text
+        self.phone2type = doc.findall('phone2type')[0].text
+
 
 class ClientCheck(Base):
     __tablename__ = 'clients_checks'
@@ -648,6 +664,14 @@ class ClientCheck(Base):
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
+
+    def from_xml(self, doc):
+        self.id = int(doc.findall('id')[0].text)
+        self.date = dt.strptime(doc.findall('date')[0].text, TIMESTAMP_FORMAT)
+        self.client_id = int(doc.findall('client_id')[0].text)
+        self.number = doc.findall('number')[0].text
+        self.amount = float(doc.findall('amount')[0].text)
+        self.notes = doc.findall('notes')[0].text
 
 
 class ContractItemCommItem(Base):
@@ -866,7 +890,7 @@ class Invoice(Base):
     employerexpenserate = Column(Float)
     terms = Column(Integer, nullable=False)
     timecard = Column(Boolean)
-    notes = Column(String(160))
+    notes = Column(TEXT)
     period_start = Column(Date, nullable=False)
     period_end = Column(Date, nullable=False)
 
@@ -941,6 +965,22 @@ class Invoice(Base):
             epayments.append(i.to_xml())
         return doc
 
+    def from_xml(self, doc):
+        self.id = int(doc.findall('id')[0].text)
+        self.contract_id = int(doc.findall('contract_id')[0].text)
+        self.date = dt.strptime(doc.findall('date')[0].text, TIMESTAMP_FORMAT)
+        self.po = doc.findall('po')[0].text
+        self.employerexpenserate = doc.findall('employerexpenserate')[0].text
+        self.terms = doc.findall('terms')[0].text
+        self.timecard = doc.findall('timecard')[0].text
+        self.notes = doc.findall('notes')[0].text
+        self.period_start = dt.strptime(doc.findall('period_start')[0].text, TIMESTAMP_FORMAT)
+        self.period_end = dt.strptime(doc.findall('period_end')[0].text, TIMESTAMP_FORMAT)
+        self.posted = doc.findall('posted')[0].text
+        self.cleared = doc.findall('cleared')[0].text
+        self.voided = doc.findall('voided')[0].text
+        self.prcleared = doc.findall('prcleared')[0].text
+        self.message = doc.findall('message')[0].text
     def amount_calc(self):
         amount = 0
         for iitem in self.invoice_items:

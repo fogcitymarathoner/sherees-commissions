@@ -2,7 +2,6 @@ import os
 
 from flask_script import Manager
 from flask import Flask
-from rrg import utils
 from rrg.billing import cache_non_date_parsed
 from rrg.models import session_maker
 from rrg.models import Client

@@ -7,11 +7,13 @@ import xml.etree.ElementTree as ET
 
 from rrg.models import Base
 from rrg.models import Client
+from rrg.models import ClientCheck
 from rrg.models import ClientManager
 from rrg.models import ClientMemo
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import Employee
+from rrg.models import Invoice
 from rrg.models import State
 from rrg.models import User
 
@@ -72,7 +74,7 @@ session.add(employee)
 #
 clientsx = ['00062.xml', '00116.xml', '00185.xml']
 # collect list of contracts for selecting transactions
-contractsx = []
+#contractsx = []
 for c in session.query(Employee):
     print(c)
 for c in clientsx:
@@ -92,27 +94,40 @@ for c in clientsx:
     for memo_ele in memos.findall('memo'):
         memo = ClientMemo()
         memo.from_xml(memo_ele)
-
         memo.created_user_id = user.id
         memo.modified_user_id = user.id
         session.add(memo)
-    managers = doc.findall('client-managers')[0]
-    for man_ele in memos.findall('client-manager'):
+
+    managers = doc.findall('managers')[0]
+    for man_ele in managers.findall('manager'):
         manager = ClientManager()
         manager.from_xml(man_ele)
+        manager.created_user_id = user.id
+        manager.modified_user_id = user.id
         session.add(manager)
+    #
+    # checks
+    #
+    checks = doc.findall('checks')[0]
+    for ck_ele in checks.findall('check'):
+        check = ClientCheck()
+        check.from_xml(ck_ele)
+        check.created_user_id = user.id
+        check.modified_user_id = user.id
+        session.add(check)
     #
     # contracts
     #
     contracts = doc.findall('contracts')[0]
     for con_ele in contracts.findall('contract'):
         if int(con_ele.findall('employee_id')[0].text) == employee.id:
-
             contract = Contract()
             contract.from_xml(con_ele)
+            contract.created_user_id = user.id
+            contract.modified_user_id = user.id
             session.add(contract)
 
-            contractsx.append(contract.id)
+            #contractsx.append(contract.id)
             items = con_ele.findall('contract-items')[0]
 
             #
@@ -126,9 +141,22 @@ for c in clientsx:
                 item.modified_user_id = user.id
                 session.add(item)
 
+            invoices = con_ele.findall('invoices')[0]
+            #
+            # invoices
+            #
+            for invoice_ele in invoices.findall('invoice'):
+                invoice = Invoice()
+                invoice.from_xml(invoice_ele)
+                invoice.created_user_id = user.id
+                invoice.modified_user_id = user.id
+                session.add(invoice)
+
 for c in session.query(Client):
     print(c)
 for c in session.query(ContractItem):
+    print(c)
+for c in session.query(ClientCheck):
     print(c)
 
 session.commit()
