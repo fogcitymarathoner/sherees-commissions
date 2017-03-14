@@ -1382,7 +1382,7 @@ class Vendor(Base):
         ET.SubElement(doc, 'created_user_id').text = str(self.created_user_id)
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
 
-        memos = ET.SubElement(doc, 'memo')
+        memos = ET.SubElement(doc, 'memos')
         for o in self.memos:
             memos.append(o.to_xml())
         doc.append(memos)
