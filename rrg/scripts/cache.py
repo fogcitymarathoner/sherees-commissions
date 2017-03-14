@@ -13,9 +13,11 @@ from rrg.models import Invoice
 from rrg.models import State
 from rrg.models import cache_objs
 from rrg.models import clients_ar_xml_file
+from rrg.models import Vendor
 
 from rrg.utils import clients_memos_dir
 from rrg.utils import clients_managers_dir
+
 from rrg import cache_clients_ar
 
 app = Flask(__name__, instance_relative_config=True)
@@ -141,6 +143,19 @@ def contract_items():
             app.config['DB'], os.path.join(app.config['DATADIR'], 'contracts', 'contract_items')))
     cache_non_date_parsed(session, os.path.join(app.config['DATADIR'], 'contracts', 'contract_items'), ContractItem)
     session.commit()
+
+
+@manager.command
+def vendors():
+    session = session_maker(
+        app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
+        app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
+    vendors_dir =  os.path.join(app.config['DATADIR'], 'vendors')
+    print('Caching Vendors %s into %s' % (app.config['DB'], vendors_dir))
+    vendors = session.query(Vendor).all()
+    cache_non_date_parsed(session, vendors_dir, Vendor)
+    session.commit()
+
 
 if __name__ == "__main__":
     manager.run()
