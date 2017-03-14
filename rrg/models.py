@@ -1359,7 +1359,8 @@ class Vendor(Base):
         ET.SubElement(doc, 'street1').text = self.street1
         ET.SubElement(doc, 'street2').text = self.street2
         ET.SubElement(doc, 'city').text = self.city
-        ele = ET.SubElement(doc, 'state_id').set('name', self.state.name)
+        ele = ET.SubElement(doc, 'state_id')\
+        ele.set('name', self.state.name)
         ele.text = str(self.state.id)
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'active').text = str(self.active)
