@@ -1359,7 +1359,8 @@ class Vendor(Base):
         ET.SubElement(doc, 'street1').text = self.street1
         ET.SubElement(doc, 'street2').text = self.street2
         ET.SubElement(doc, 'city').text = self.city
-        ET.SubElement(doc, 'state').text = str(self.state.name)
+        ele = ET.SubElement(doc, 'state_id').set('name', self.state.name)
+        ele.text = str(self.state.id)
         ET.SubElement(doc, 'zip').text = self.zip
         ET.SubElement(doc, 'active').text = str(self.active)
         ET.SubElement(doc, 'ssn').text = str(self.ssn)
@@ -1387,6 +1388,22 @@ class Vendor(Base):
             memos.append(o.to_xml())
         doc.append(memos)
         return doc
+
+
+    def from_xml(self, doc):
+        """
+        returns DOM of comm item from file
+        """
+        self.id = int(doc.findall('id')[0].text)
+        self.name = doc.findall('name')[0].text
+        self.purpose = doc.findall('purpose')[0].text
+        self.street1 = doc.findall('street1')[0].text
+        self.street2 = doc.findall('street2')[0].text
+        self.city = doc.findall('city')[0].text
+        self.state_id = int(doc.findall('state_id')[0].text)
+        self.zip = doc.findall('zip')[0].text
+        self.notes = doc.findall('notes')[0].text
+        self.accountnumber = doc.findall('accountnumber')[0].text
 
 
 class VendorMemo(Base):

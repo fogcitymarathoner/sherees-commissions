@@ -16,6 +16,8 @@ from rrg.models import Employee
 from rrg.models import Invoice
 from rrg.models import State
 from rrg.models import User
+from rrg.models import Vendor
+from rrg.models import VendorMemo
 
 engine = create_engine("postgres://postgres:mysecretpassword@192.168.99.100:32770/biz")
 
@@ -29,6 +31,16 @@ print(database_exists(engine.url))
 
 Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)
+
+sdir = os.path.join('datadir', 'biz', 'vendors')
+
+for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
+    print(filelist)
+    for f in filelist:
+        vendor = Vendor()
+        doc = ET.parse(os.path.join(sdir, f))
+        vendor.from_xml(doc)
+quit()
 #
 # Create User
 #
