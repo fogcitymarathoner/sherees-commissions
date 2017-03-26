@@ -38,17 +38,15 @@ root.title('Invoices For Payment')
 root.geometry('500x%s' % 600) # Size 200, 200
 
 def button_callback():
-    global button, listbox, invoices
-
-    selected_invoices = listbox.curselection()
-    selected_invoices = [invoices[int(item)] for item in selected_invoices]
-    print('item selection %s' % selected_invoices )
-    print(listbox.curselection())
-    print('hi button-name %s' % button['text'])
+    global button, listbox, open_invoices
+    total = 0
     for s in listbox.curselection():
-        print(invoices[s])
+        total += open_invoices[s].camount()
+    print('Total credit to apply %s' % total)
 
-button = Button(root, text="Calculate Credit", name="calculate-credit-button",
+button = Button(root,
+                text="Calculate credit to apply to check",
+                name="calculate-credit-button",
                 command = button_callback,
                 padx=7, pady=2)
 button.pack()
@@ -58,19 +56,21 @@ scrollbar.pack(side=RIGHT, fill=Y)
 
 invoices = [c for c in session.query(Invoice).filter(Invoice.voided==False)]
 listbox = Listbox(
-    root, selectmode=EXTENDED, width=400, height=len(invoices), yscrollcommand=scrollbar.set)
+    root,
+    selectmode=EXTENDED,
+    width=400, height=len(invoices),
+    yscrollcommand=scrollbar.set
+)
 listbox.pack()
-print(session.query(Iitem).filter(Iitem.invoice_id==2988).first())
-print('%s invoices' % len(invoices))
+
+# fixme: remove amount field in Invoice model, change camount() to amount()
+#   setup a 'helper/lib' to be an API to models.py
+open_invoices = []
 for i in invoices:
-    print(i.id)
-    print(i.invoice_items)
-    for j in i.invoice_items:
-        print(j.amount)
-        print(j.quantity)
-    print(i.camount())
     if i.camount() > 0:
-        listbox.insert(END, i)
+        open_invoices.append(i)
+for i in open_invoices:
+    listbox.insert(END, i)
 
 scrollbar.config(command=listbox.yview)
 root.mainloop()
