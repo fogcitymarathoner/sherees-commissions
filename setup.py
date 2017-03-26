@@ -135,7 +135,6 @@ setup(
             'rrg-timecards=rrg.scripts.timecards:timecards_ep',
             'rrg-view-timecard=rrg.scripts.view_timecard:view_timecard_ep',
             'rrg-workers-comp-report=rrg.scripts.workers_comp_report:workers_comp_report_ep',
-            'rrg-create-test-db=rrg.utils:create_db',
 
         ],
     },

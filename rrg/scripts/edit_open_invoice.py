@@ -5,7 +5,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 from rrg.models_api import session_maker
-from rrg.utils import edit_invoice
+from rrg.xml_helpers import edit_invoice
 
 parser = argparse.ArgumentParser(description='RRG Edit Timecard')
 

@@ -4,7 +4,7 @@ import os
 from flask import Flask
 from flask_script import Manager
 
-from rrg import utils
+import rrg.xml_helpers
 
 
 app = Flask(__name__, instance_relative_config=True)
@@ -32,7 +32,7 @@ manager = Manager(app)
 @manager.command
 def assemble_contracts_cache():
     print('Assembling Contracts in %s' % os.path.join(app.config['DATADIR'], 'contracts'))
-    utils.cached_contracts_collect_invoices_and_items(app.config['DATADIR'])
+    rrg.xml_helpers.cached_contracts_collect_invoices_and_items(app.config['DATADIR'])
 
 if __name__ == "__main__":
     manager.run()

@@ -11,12 +11,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from tabulate import tabulate
 
+import rrg.xml_helpers
 from rrg.helpers import read_inv_xml_file
 from rrg.lib.archive import full_non_dated_xml_obj_path
 from rrg.models import Iitem, InvoicePayment, ClientManager, ClientCheck, ClientMemo, Employee, EmployeeMemo, \
     EmployeePayment, ContractItem, Citem, CommPayment, Expense, Payroll, Vendor
 from rrg.models import Invoice, Client, Contract, State
-from rrg import utils
 
 def obj_dir(datadir, obj):
     """
@@ -226,7 +226,7 @@ def clients_ar_xml_file(datadir):
 
 
 def commissions_payment_dir(datadir, comm_payment):
-    return obj_dir(datadir, comm_payment) + utils.employee_dated_object_reldir(comm_payment)
+    return obj_dir(datadir, comm_payment) + rrg.xml_helpers.employee_dated_object_reldir(comm_payment)
 
 
 def generate_ar_report(app, type):

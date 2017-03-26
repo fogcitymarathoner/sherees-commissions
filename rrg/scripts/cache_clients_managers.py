@@ -6,7 +6,7 @@ from flask import Flask
 from rrg.billing import cache_non_date_parsed as routine
 from rrg.models import ClientManager
 from rrg.models_api import session_maker
-from rrg.utils import clients_managers_dir
+from rrg.xml_helpers import clients_managers_dir
 
 parser = argparse.ArgumentParser(description='RRG Cache Clients Managers')
 

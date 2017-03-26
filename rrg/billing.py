@@ -5,7 +5,7 @@ from datetime import datetime as dt
 from s3_mysql_backup import mkdirs
 
 from rrg.lib.archive import full_non_dated_xml_obj_path
-from rrg.utils import directory_date_dictionary
+from rrg.xml_helpers import directory_date_dictionary
 
 
 def sync(session, data_dir, ep, model):

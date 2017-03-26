@@ -16,9 +16,7 @@ from rrg.lib import archive
 from rrg.models import Citem
 from rrg.models import Employee
 from rrg.models import Invoice
-from rrg.utils import commissions_item_fullpathname
-from rrg.utils import commissions_item_reldir
-from rrg.utils import directory_date_dictionary
+from rrg.xml_helpers import directory_date_dictionary, commissions_item_reldir, commissions_item_fullpathname
 
 
 def sa_sheree(session):

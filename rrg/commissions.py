@@ -19,7 +19,7 @@ from rrg.payroll import employee_payroll_due_report
 from rrg.payroll import remaining_payroll
 from rrg.queries import salespersons_notes_payments
 from rrg.sales import salespersons_notes
-from rrg.utils import monthy_statement_ym_header
+from rrg.xml_helpers import monthy_statement_ym_header
 
 ledger_line_format = '%s %s %s %s'
 monthly_statement_ym_header = '\n\n%s/%s - #########################################################\n'

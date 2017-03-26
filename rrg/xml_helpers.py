@@ -1,39 +1,16 @@
-
+import logging
+import os
+import re
 import time
+from datetime import datetime as dt
+from xml.etree import ElementTree as ET
 
-from s3_mysql_backup import DIR_CREATE_TIME_FORMAT
-from s3_mysql_backup import mkdirs
-from s3_mysql_backup import s3_bucket
+from s3_mysql_backup import DIR_CREATE_TIME_FORMAT, s3_bucket, mkdirs, TIMESTAMP_FORMAT, YMD_FORMAT
+from tabulate import tabulate
 
-from sqlalchemy import create_engine
+from rrg.lib import archive
 
 monthy_statement_ym_header = '%s/%s - #########################################################'
-
-
-class Args(object):
-    mysql_host = 'localhost'
-    mysql_port = 3306
-    db_user = 'root'
-    db_pass = 'my_very_secret_password'
-    db = 'rrg_test'
-
-
-def create_db():
-    """
-    this routine has a bug, DATABASE isn't fully integrated right, the line
-    DATABASE = 'rrg' in rrg/__init__.py has to be temporarily hardcoded to
-    'rrg_test' or whatever
-    :return:
-    """
-    args = Args()
-    if args.mysql_host == 'localhost':
-        engine = create_engine(
-            'mysql+mysqldb://%s:%s@%s:%s/%s' % (args.db_user, args.db_pass, args.mysql_host, args.mysql_port, args.db))
-
-        Base.metadata.drop_all(engine)
-        Base.metadata.create_all(engine)
-    else:
-        print('This routine only builds test databases on localhost')
 
 
 def directory_date_dictionary(data_dir):
@@ -55,27 +32,30 @@ def directory_date_dictionary(data_dir):
 
 
 def transactions_invoice_items_dir(datadir):
-    return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_items')
+    return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items')
 
 
 def transactions_invoice_payments_dir(datadir):
-    return os.path.join(os.path.join(datadir, 'transactions', 'invoices'), 'invoice_payments')
+    return os.path.join(datadir, 'transactions', 'invoices', 'invoice_payments')
 
 
 def clients_open_invoices_dir(datadir):
-    return os.path.join(os.path.join(datadir, 'clients'), 'open_invoices')
+    return os.path.join(datadir, 'clients', 'open_invoices')
 
 
 def clients_statements_dir(datadir):
-    return os.path.join(os.path.join(datadir, 'clients'), 'statements')
+    return os.path.join(datadir, 'clients', 'statements')
 
 
 def clients_managers_dir(datadir):
-    return os.path.join(os.path.join(datadir, 'clients'), 'managers')
+    return os.path.join(datadir, 'clients', 'managers')
 
 
 def clients_memos_dir(datadir):
-    return os.path.join(os.path.join(datadir, 'clients'), 'managers')
+    return os.path.join(datadir, 'clients', 'managers')
+
+def commissions_item_dir(datadir):
+    return os.path.join(datadir, 'transactions', 'invoices', 'invoice_items', 'commissions_items')
 
 
 def commissions_item_reldir(comm_item):
@@ -88,7 +68,6 @@ def commissions_item_fullpathname(datadir, comm_item):
     return os.path.join(
         datadir,
         'transactions', 'invoices', 'invoice_items', 'commissions_items', commissions_item_reldir(comm_item), xfilename)
-
 
 
 def employees_memos_dir(datadir):
@@ -145,22 +124,8 @@ def download_last_database_backup(aws_access_key_id, aws_secret_access_key, buck
             print('There is no S3 backup history for project %s' % project_name)
             print('In ANY Folder of bucket %s' % bucket_name)
 
-import os
-import re
-from datetime import datetime as dt
-from tabulate import tabulate
-import xml.etree.ElementTree as ET
-import logging
 
-from rrg.lib import archive
-from s3_mysql_backup import TIMESTAMP_FORMAT
-from s3_mysql_backup import YMD_FORMAT
-
-logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
-
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
 pat = '[0-9]{5}\.[xX][Mm][Ll]$'
 
 
@@ -247,6 +212,8 @@ def employee_dated_object_reldir(obj):
     return os.path.sep + os.path.join(str(obj.employee_id).zfill(5),
                                       str(obj.date.year),
                                       str(obj.date.month).zfill(2))
+
+
 def employees(datadir):
     """
     return tabulated list of archived employees

@@ -7,7 +7,7 @@ from flask_script import Manager
 from s3_mysql_backup import YMD_FORMAT
 from tabulate import tabulate
 
-from rrg import utils
+import rrg.xml_helpers
 from rrg.billing import cache_non_date_parsed
 from rrg.lib import reminders
 from rrg.lib import reminders_generation
@@ -19,7 +19,6 @@ from rrg.models import edit_employee_script
 from rrg.models import session_maker
 from rrg.models_api import employees, edit_employee_script, session_maker
 from rrg.renderers import format_employee
-from rrg import utils
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -141,8 +140,8 @@ def cache_employee_memos():
     session = session_maker(
         app.config['MYSQL_USER'], app.config['MYSQL_PASS'], app.config['MYSQL_SERVER_PORT_3306_TCP_ADDR'],
         app.config['MYSQL_SERVER_PORT_3306_TCP_PORT'], app.config['DB'])
-    print('Caching Employees-Memos %s into %s' % (app.config['DB'], utils.employees_memos_dir(app.config['DATADIR'])))
-    cache_non_date_parsed(session, utils.employees_memos_dir(app.config['DATADIR']), EmployeeMemo)
+    print('Caching Employees-Memos %s into %s' % (app.config['DB'], rrg.xml_helpers.employees_memos_dir(app.config['DATADIR'])))
+    cache_non_date_parsed(session, rrg.xml_helpers.employees_memos_dir(app.config['DATADIR']), EmployeeMemo)
     session.commit()
 
 
@@ -175,7 +174,7 @@ def assemble_employees_cache():
     :return:
     """
     print('Assembling Employees in %s' % os.path.join(app.config['DATADIR'], 'employees'))
-    utils.cached_employees_collect_contracts(app.config['DATADIR'])
+    rrg.xml_helpers.cached_employees_collect_contracts(app.config['DATADIR'])
 
 
 @manager.command

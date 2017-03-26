@@ -3,7 +3,7 @@ import os
 
 from flask_script import Manager
 from flask import Flask
-from rrg.utils import download_last_database_backup
+from rrg.xml_helpers import download_last_database_backup
 
 parser = argparse.ArgumentParser(description='S3 Download DB Backups')
 

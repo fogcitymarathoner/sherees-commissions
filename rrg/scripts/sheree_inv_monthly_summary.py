@@ -3,7 +3,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 from rrg.sherees_commissions import invoice_report_month_year
-from rrg.utils import monthy_statement_ym_header
+from rrg.xml_helpers import monthy_statement_ym_header
 
 parser = argparse.ArgumentParser(description='RRG Sherees Monthly Invoices Reports')
 parser.add_argument('year', type=int, help='commissions year')

@@ -15,8 +15,7 @@ from rrg.models_api import cache_objs, session_maker
 from rrg.models import clients_ar_xml_file
 from rrg.models import Vendor
 
-from rrg.utils import clients_memos_dir
-from rrg.utils import clients_managers_dir
+from rrg.xml_helpers import clients_managers_dir, clients_memos_dir
 
 from rrg import cache_clients_ar, clients_ar_xml_file
 
