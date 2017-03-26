@@ -32,20 +32,12 @@ print(database_exists(engine.url))
 Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)
 
-sdir = os.path.join('datadir', 'biz', 'vendors')
-
-for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
-    print(filelist)
-    for f in filelist:
-        vendor = Vendor()
-        doc = ET.parse(os.path.join(sdir, f))
-        vendor.from_xml(doc)
-quit()
 #
 # Create User
 #
 user = User(firstname='Marc', lastname='Condon')
 session.add(user)
+session.flush()
 #
 # States
 #
@@ -62,6 +54,31 @@ for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
 
 for c in session.query(State):
     print(c)
+#
+# Vendors
+#
+sdir = os.path.join('datadir', 'biz', 'vendors')
+
+for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
+    print(filelist)
+    for f in filelist:
+        vendor = Vendor()
+        doc = ET.parse(os.path.join(sdir, f))
+        vendor.from_xml(doc)
+        vendor.id = None
+        vendor.created_user_id = user.id
+        vendor.modified_user_id = user.id
+        session.add(vendor)
+        memos = doc.findall('memos')[0]
+        for memo_ele in memos.findall('memo'):
+            memo = VendorMemo()
+            memo.vendor = vendor
+            memo.from_xml(memo_ele)
+            memo.id = None
+            memo.created_user_id = user.id
+            memo.modified_user_id = user.id
+            session.add(memo)
+
 #
 # Employee
 #
@@ -158,6 +175,15 @@ for c in clientsx:
             # invoices
             #
             for invoice_ele in invoices.findall('invoice'):
+                invoice = Invoice()
+                invoice.from_xml(invoice_ele)
+                invoice.created_user_id = user.id
+                invoice.modified_user_id = user.id
+                session.add(invoice)
+            #
+            # invoices-items
+            #
+            for invoice_ele in invoices.findall('invoice-items'):
                 invoice = Invoice()
                 invoice.from_xml(invoice_ele)
                 invoice.created_user_id = user.id

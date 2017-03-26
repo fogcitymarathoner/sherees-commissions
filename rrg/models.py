@@ -914,17 +914,27 @@ class Invoice(Base):
     last_sync_time = Column(DateTime)
 
     def __repr__(self):
-        return "<Invoice(id='%s', client='%s', contract='%s', amount='%s', worker='%s', " \
+        return "<Invoice(id='%s', amount='%s', client='%s', contract='%s', amount='%s', worker='%s', " \
                "duedate='%s', period_start='%s', " \
                "period_end='%s', date='%s', voided='%s')>" % (
-                   self.id, self.contract.client.name, self.contract.title, self.amount, '%s %s' % (
+                   self.id, self.camount(), self.contract.client.name, self.contract.title, self.amount, '%s %s' % (
                        self.contract.employee.firstname, self.contract.employee.lastname), self.duedate(),
                    self.period_start, self.period_end, self.date, self.voided)
 
     def duedate(self):
         return dt(year=self.date.year, month=self.date.month, day=self.date.day) + td(days=self.terms)
 
+    def camount(self):
+        total = 0
+        for i in self.invoice_items:
+            total += i.amount * i.quantity
+        return total
+
     def to_xml(self):
+        """
+
+        :return:
+        """
         doc = ET.Element('invoice')
 
         ET.SubElement(doc, 'id').text = str(self.id)
@@ -952,8 +962,10 @@ class Invoice(Base):
         ET.SubElement(doc, 'modified_user_id').text = str(self.modified_user_id)
         ET.SubElement(doc, 'due_date').text = dt.strftime(self.duedate(), TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'date_generated').text = dt.strftime(dt.now(), TIMESTAMP_FORMAT)
-        ET.SubElement(doc, 'employee').text = '%s %s' % \
-                                              (self.contract.employee.firstname, self.contract.employee.lastname)
+        ET.SubElement(
+            doc, 'employee').text = '%s %s' % (
+            self.contract.employee.firstname,
+            self.contract.employee.lastname)
         iitems = ET.SubElement(doc, 'invoice-items')
         for i in self.invoice_items:
             iitems.append(i.to_xml())
@@ -1415,7 +1427,7 @@ class VendorMemo(Base):
     vendor_id = Column(Integer, ForeignKey('vendors.id'), nullable=False)
     vendor = relationship("Vendor")
 
-    notes = Column(String(100))
+    notes = Column(TEXT)
     date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
     modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
@@ -1434,6 +1446,18 @@ class VendorMemo(Base):
         ET.SubElement(doc, 'notes').text = re.sub(r'[^\x00-\x7F]', ' ', self.notes) if self.notes else ''
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
+
+    def from_xml(self, doc):
+        """
+        fill model from xtree doc
+        :param doc:
+        :return:
+        """
+        self.id = int(doc.findall('id')[0].text)
+        self.vendor_id = int(doc.findall('vendor_id')[0].text)
+        self.notes = doc.findall('notes')[0].text
+        self.date = dt.strptime(doc.findall('date')[0].text, TIMESTAMP_FORMAT)
+
 
 
 def obj_dir(datadir, obj):
