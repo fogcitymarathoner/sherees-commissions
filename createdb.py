@@ -13,13 +13,15 @@ from rrg.models import ClientMemo
 from rrg.models import Contract
 from rrg.models import ContractItem
 from rrg.models import Employee
+from rrg.models import Iitem
 from rrg.models import Invoice
+from rrg.models import InvoicePayment
 from rrg.models import State
 from rrg.models import User
 from rrg.models import Vendor
 from rrg.models import VendorMemo
 
-engine = create_engine("postgres://postgres:mysecretpassword@192.168.99.100:32770/biz")
+engine = create_engine("postgres://postgres:mysecretpassword@192.168.99.100:32771/biz")
 
 session = sessionmaker(bind=engine)
 session = session()
@@ -28,8 +30,9 @@ if not database_exists(engine.url):
     create_database(engine.url)
 
 print(database_exists(engine.url))
-
+print('Dropping Database Tables')
 Base.metadata.drop_all(engine)
+print('Creating Database Tables')
 Base.metadata.create_all(engine)
 
 #
@@ -58,7 +61,7 @@ for c in session.query(State):
 # Vendors
 #
 sdir = os.path.join('datadir', 'biz', 'vendors')
-
+print('Reading Vendors')
 for dirName, subdirList, filelist in os.walk(sdir, topdown=False):
     print(filelist)
     for f in filelist:
@@ -180,15 +183,24 @@ for c in clientsx:
                 invoice.created_user_id = user.id
                 invoice.modified_user_id = user.id
                 session.add(invoice)
-            #
-            # invoices-items
-            #
-            for invoice_ele in invoices.findall('invoice-items'):
-                invoice = Invoice()
-                invoice.from_xml(invoice_ele)
-                invoice.created_user_id = user.id
-                invoice.modified_user_id = user.id
-                session.add(invoice)
+                #
+                # invoices-items
+                #
+                for item_ele in invoice_ele.findall('invoice-items/invoice-item'):
+                    inv_item = Iitem()
+                    inv_item.from_xml(item_ele)
+                    inv_item.created_user_id = user.id
+                    inv_item.modified_user_id = user.id
+                    session.add(inv_item)
+                #
+                # invoices-payments
+                #
+                for inv_pay_ele in invoice_ele.findall('invoice-payments/invoice-payment'):
+                    inv_payment = InvoicePayment()
+                    inv_payment.from_xml(inv_pay_ele)
+                    inv_payment.created_user_id = user.id
+                    inv_payment.modified_user_id = user.id
+                    session.add(inv_payment)
 
 for c in session.query(Client):
     print(c)

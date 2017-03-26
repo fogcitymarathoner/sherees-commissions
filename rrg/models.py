@@ -870,6 +870,18 @@ class InvoicePayment(Base):
         ET.SubElement(doc, 'notes').text = str(self.notes)
         return doc
 
+    def from_xml(self, doc):
+        """
+        fill model from xtree doc
+        :param doc:
+        :return:
+        """
+        self.id = doc.findall('id')[0].text
+        self.invoice_id = doc.findall('invoice_id')[0].text
+        self.check_id = doc.findall('check_id')[0].text
+        self.amount = doc.findall('amount')[0].text
+        self.notes = doc.findall('notes')[0].text
+
 
 class Invoice(Base):
     __tablename__ = 'invoices'
@@ -928,6 +940,8 @@ class Invoice(Base):
         total = 0
         for i in self.invoice_items:
             total += i.amount * i.quantity
+        for p in self.invoice_payments:
+            total -= p.amount
         return total
 
     def to_xml(self):
@@ -1133,6 +1147,20 @@ class Iitem(Base):
         for i in self.comm_items:
             commitems.append(i.to_xml())
         return doc
+
+    def from_xml(self, doc):
+        """
+        fill model from xtree doc
+        :param doc:
+        :return:
+        """
+        self.id = doc.findall('id')[0].text
+        self.invoice_id = doc.findall('invoice_id')[0].text
+        self.description = doc.findall('description')[0].text
+        self.amount = doc.findall('amount')[0].text
+        self.cost = doc.findall('cost')[0].text
+        self.quantity = doc.findall('quantity')[0].text
+        self.cleared = doc.findall('cleared')[0].text
 
     def update_from_xml_doc(self, iitem_ele):
         self.quantity = iitem_ele.findall('quantity')[0].text
