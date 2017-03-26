@@ -11,14 +11,14 @@ from rrg.models import Contract
 from rrg.models import Employee
 from rrg.models import Invoice
 from rrg.models import State
-from rrg.models import cache_objs
+from rrg.models_api import cache_objs
 from rrg.models import clients_ar_xml_file
 from rrg.models import Vendor
 
 from rrg.utils import clients_memos_dir
 from rrg.utils import clients_managers_dir
 
-from rrg import cache_clients_ar
+from rrg import cache_clients_ar, clients_ar_xml_file
 
 app = Flask(__name__, instance_relative_config=True)
 

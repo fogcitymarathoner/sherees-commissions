@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 from rrg.models import session_maker
 from rrg.models import Client
-from rrg.models import generate_ar_report
+from rrg.models_api import generate_ar_report
 from rrg.clients import selection_list_all
 from rrg.clients import selection_list_active
 from rrg.clients import selection_list_inactive

@@ -5,7 +5,7 @@ from flask import Flask
 from datetime import datetime as dt
 from tabulate import tabulate
 
-from rrg.models import open_timecards
+from rrg.models_api import open_timecards
 from rrg.models import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Pending Invoices')

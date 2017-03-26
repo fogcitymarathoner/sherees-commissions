@@ -17,7 +17,7 @@ from rrg.models import EmployeeMemo
 from rrg.models import EmployeePayment
 from rrg.models import edit_employee_script
 from rrg.models import session_maker
-from rrg.models import employees
+from rrg.models_api import employees, edit_employee_script
 from rrg.renderers import format_employee
 from rrg import utils
 

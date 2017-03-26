@@ -2,7 +2,7 @@ import logging
 
 import string
 
-from rrg.models import employees
+from rrg.models_api import employees, employees_active, employees_inactive
 from rrg.models import employees_active
 from rrg.models import employees_inactive
 

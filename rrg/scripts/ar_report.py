@@ -4,7 +4,7 @@ import os
 from flask import Flask
 from flask_script import Manager
 
-from rrg.models import generate_ar_report
+from rrg.models_api import generate_ar_report
 
 app = Flask(__name__, instance_relative_config=True)
 
