@@ -5,7 +5,7 @@ from tabulate import tabulate
 from flask_script import Manager
 from flask import Flask
 from rrg.reports.invoices import invoices_year_month
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Invoices Year Month Report')
 

@@ -4,7 +4,7 @@ import os
 from flask import Flask
 from flask_script import Manager
 
-from rrg.models_api import cache_objs
+from rrg.models_api import cache_objs, session_maker
 from rrg.models import Payroll
 from rrg.models import session_maker
 

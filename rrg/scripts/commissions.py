@@ -5,7 +5,7 @@ from flask import Flask
 from rrg.commissions import salesperson_commissions_report
 from rrg.sherees_commissions import comm_latex_document_header
 from rrg.sherees_commissions import sa_sheree
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 app = Flask(__name__, instance_relative_config=True)
 

@@ -4,7 +4,7 @@ from flask_script import Manager
 from flask import Flask
 from rrg.sherees_commissions import comm_latex_document_header
 from rrg.commissions import employee_total_monies_owed
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.sherees_commissions import sa_sheree
 
 parser = argparse.ArgumentParser(description='RRG Money Due to Sheree Summary Report')

@@ -3,7 +3,7 @@ import argparse
 
 from flask_script import Manager
 from flask import Flask
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.maintenance import delete_old_zeroed_invoice_items as routine
 
 parser = argparse.ArgumentParser(description='RRG Delete Old Zero Invoice Items')

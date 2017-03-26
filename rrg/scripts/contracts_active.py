@@ -4,7 +4,7 @@ from flask_script import Manager
 from flask import Flask
 from tabulate import tabulate
 
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.contracts import selection_list_active as selection_list
 
 app = Flask(__name__, instance_relative_config=True)

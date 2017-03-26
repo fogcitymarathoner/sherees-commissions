@@ -3,7 +3,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 from rrg.sherees_commissions import invoices_items as sinvoices_items
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 parser = argparse.ArgumentParser(
     description='RRG Cache Sherees Commissions Invoices Items')

@@ -20,7 +20,7 @@ from rrg.models import ContractItem
 from rrg.models import ContractItemCommItem
 from rrg.models import Employee
 from rrg.models import periods
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.sherees_commissions import sa_sheree
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)

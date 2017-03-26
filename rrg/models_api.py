@@ -1,19 +1,22 @@
 import os
 import random
 import string
-from datetime import datetime as dt, timedelta
+from datetime import datetime as dt
+from datetime import timedelta as td
 from subprocess import call
 from xml.dom import minidom as xml_pp
 from xml.etree import ElementTree as ET
 
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from tabulate import tabulate
 
-from rrg import Invoice, Client, Contract, State, invoices
 from rrg.helpers import read_inv_xml_file
 from rrg.lib.archive import full_non_dated_xml_obj_path
 from rrg.models import Iitem, InvoicePayment, ClientManager, ClientCheck, ClientMemo, Employee, EmployeeMemo, \
-    EmployeePayment, ContractItem, Citem, CommPayment, Expense, Payroll, Vendor, invoice_archives
-
+    EmployeePayment, ContractItem, Citem, CommPayment, Expense, Payroll, Vendor
+from rrg.models import Invoice, Client, Contract, State
+from rrg import utils
 
 def obj_dir(datadir, obj):
     """
@@ -69,6 +72,15 @@ def open_invoices(session):
         Invoice.voided==False, Invoice.posted==True, Invoice.cleared==False, Invoice.mock == False, Invoice.amount > 0)
 
 
+
+def timecards(session):
+    """
+    return list of timecards pending posting
+    """
+    return session.query(Invoice).filter(
+        Invoice.voided==False, Invoice.posted==False, Invoice.cleared==False, Invoice.mock == False, Invoice.amount > 0)
+
+
 def pastdue_invoices(session):
     """
     return list of PastDue invoices
@@ -107,10 +119,10 @@ def tabulate_invoices(invoices):
 def edit_invoice(session, phase, number):
 
     if phase == 'open':
-        winvoices = invoices.sa_open_invoices(session)
+        winvoices = open_invoices(session)
     elif phase =='timecard':
-        winvoices = sa_timecards(session)
-    if number in xrange(1, winvoices.count() + 1):
+        winvoices = timecards(session)
+    if number in range(1, winvoices.count() + 1):
         if phase == 'open':
             invoice = picked_open_invoice(session, number)
         elif phase =='timecard':
@@ -214,7 +226,7 @@ def clients_ar_xml_file(datadir):
 
 
 def commissions_payment_dir(datadir, comm_payment):
-    return obj_dir(datadir, comm_payment) + archive.employee_dated_object_reldir(comm_payment)
+    return obj_dir(datadir, comm_payment) + utils.employee_dated_object_reldir(comm_payment)
 
 
 def generate_ar_report(app, type):
@@ -256,3 +268,33 @@ def cache_objs(datadir, objs):
                 _cache_obj(obj, full_path)
         else:
             _cache_obj(obj, full_path)
+
+
+def invoice_archives(root, invoice_state='pastdue'):
+    """
+    returns xml invoice id list for invoice states 'pastdue', 'open', 'cleared' and 'all'
+    """
+    res = []
+    for i in root.findall('./%s/invoice' % invoice_state):
+        res.append(i.text)
+    return res
+
+
+def session_maker(db_user, db_pass, mysql_host, mysql_port, db):
+    engine = create_engine(
+        'mysql+mysqldb://%s:%s@%s:%s/%s' % (db_user, db_pass, mysql_host, mysql_port, db))
+
+    session = sessionmaker(bind=engine)
+    return session()
+
+
+def delete_employee(session, delemp):
+    """
+    delete cascade to contracts does not work, contracts must be deleted first
+    :param session:
+    :param delemp:
+    :return:
+    """
+    for con in session.query(Contract).filter(Contract.employee_id == delemp.id):
+        session.delete(con)
+    session.delete(delemp)

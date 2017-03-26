@@ -2,7 +2,7 @@ import argparse
 import os
 from flask_script import Manager
 from flask import Flask
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.jos_models import DownloadFile
 from rrg.jos_models import DownloadBlob
 

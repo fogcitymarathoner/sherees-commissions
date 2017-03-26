@@ -11,7 +11,7 @@ from rrg.models import Contract
 from rrg.models import Employee
 from rrg.models import Invoice
 from rrg.models import State
-from rrg.models_api import cache_objs
+from rrg.models_api import cache_objs, session_maker
 from rrg.models import clients_ar_xml_file
 from rrg.models import Vendor
 

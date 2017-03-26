@@ -3,7 +3,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 
-from rrg.models_api import open_invoices as sa_open_invoices, tabulate_invoices
+from rrg.models_api import open_invoices as sa_open_invoices, tabulate_invoices, session_maker
 from rrg.models import session_maker
 from rrg.models import tabulate_invoices
 

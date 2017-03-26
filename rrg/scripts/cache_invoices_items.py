@@ -6,7 +6,7 @@ from flask import Flask
 from rrg.billing import cache_non_date_parsed as routine
 from rrg.models import Iitem
 from rrg.utils import transactions_invoice_items_dir
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Cache Invoices Items')
 

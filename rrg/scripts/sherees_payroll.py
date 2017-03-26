@@ -3,7 +3,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 from rrg.payroll import employee_payroll_due_report
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.sherees_commissions import comm_latex_document_header
 
 parser = argparse.ArgumentParser(description='RRG Sherees Commissions Report')

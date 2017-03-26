@@ -5,7 +5,7 @@ from flask import Flask
 from rrg.billing import cache_non_date_parsed as routine
 from rrg.models import InvoicePayment
 from rrg.utils import transactions_invoice_payments_dir
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 app = Flask(__name__, instance_relative_config=True)
 

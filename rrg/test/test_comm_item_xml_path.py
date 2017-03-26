@@ -27,7 +27,7 @@ from rrg.models import InvoicePayment
 from rrg.models import Payroll
 from rrg.models import State
 from rrg.models import periods
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.utils import commissions_item_dir
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)

@@ -2,7 +2,7 @@ import os
 import argparse
 from flask_script import Manager
 from flask import Flask
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.sherees_commissions import inv_report
 from rrg.sherees_commissions import sa_sheree
 

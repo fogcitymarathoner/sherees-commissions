@@ -4,7 +4,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 from rrg.sherees_commissions import cache_comm_items as cache_commissions_items
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Cache Commissions Items')
 

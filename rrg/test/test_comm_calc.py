@@ -12,7 +12,7 @@ from rrg.lib.reminders import months_between_dates
 from rrg.lib.reminders import semimonths_between_dates
 from rrg.lib.reminders import weeks_between_dates
 from rrg.lib.reminders_generation import create_invoice_for_period
-from rrg.models import Citem
+from rrg.models import Citem, commissions_calculation
 from rrg.models import Client
 from rrg.models import ClientCheck
 from rrg.models import ClientMemo
@@ -31,7 +31,7 @@ from rrg.models import Payroll
 from rrg.models import State
 from rrg.models import commissions_calculation
 from rrg.models import periods
-from rrg.models import session_maker
+from rrg.models_api import session_maker, commissions_calculation
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')

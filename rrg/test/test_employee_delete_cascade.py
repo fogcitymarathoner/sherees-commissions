@@ -26,7 +26,7 @@ from rrg.models import Note
 from rrg.models import NotePayment
 from rrg.models import Payroll
 from rrg.models import periods
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')

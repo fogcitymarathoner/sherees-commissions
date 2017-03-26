@@ -3,7 +3,7 @@ from flask_script import Manager
 from flask import Flask
 
 from rrg.models import void_timecard as process
-from rrg.models_api import open_timecards, void_timecard
+from rrg.models_api import open_timecards, void_timecard, session_maker
 from rrg.models import session_maker
 
 

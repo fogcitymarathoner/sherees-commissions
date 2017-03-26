@@ -4,7 +4,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 from rrg.commissions import monthly_detail
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Sales Person Monthly Commissions Reports')
 

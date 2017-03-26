@@ -5,7 +5,7 @@ from flask import Flask
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as xml_pp
 
-from rrg.models_api import open_timecards, picked_timecard
+from rrg.models_api import open_timecards, picked_timecard, session_maker
 from rrg.models import picked_timecard
 from rrg.models import session_maker
 

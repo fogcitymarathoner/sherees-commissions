@@ -4,10 +4,7 @@ from flask_script import Manager
 from flask import Flask
 
 from rrg import commissions
-from rrg.models import session_maker
-
-
-
+from rrg.models_api import session_maker
 
 app = Flask(__name__, instance_relative_config=True)
 

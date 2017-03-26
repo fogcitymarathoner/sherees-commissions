@@ -4,7 +4,7 @@ from flask_script import Manager
 from flask import Flask
 from rrg.sherees_commissions import sherees_notes_report_db
 from rrg.sherees_commissions import comm_latex_document_header
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 parser = argparse.ArgumentParser(description='RRG Sherees Notes Report From DB')
 

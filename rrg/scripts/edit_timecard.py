@@ -3,7 +3,7 @@ import os
 from flask_script import Manager
 from flask import Flask
 
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.utils import edit_invoice
 
 

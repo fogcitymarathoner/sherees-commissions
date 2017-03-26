@@ -7,7 +7,7 @@ from flask_script import Manager
 from rrg.models import Expense
 from rrg.models import session_maker
 
-from rrg.models_api import cache_objs
+from rrg.models_api import cache_objs, session_maker
 
 app = Flask(__name__, instance_relative_config=True)
 

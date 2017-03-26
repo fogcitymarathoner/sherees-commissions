@@ -3,7 +3,7 @@ import argparse
 from flask_script import Manager
 from flask import Flask
 from rrg.commissions import money_due
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 
 from rrg.sherees_commissions import sa_sheree
 

@@ -5,7 +5,7 @@ from flask_script import Manager
 from flask import Flask
 from rrg.sherees_commissions import \
     cache_invoices_items as cache_invoices_items_routine
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.sherees_commissions import sa_sheree
 
 parser = argparse.ArgumentParser(

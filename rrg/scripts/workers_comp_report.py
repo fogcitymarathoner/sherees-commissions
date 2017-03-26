@@ -5,7 +5,7 @@ from flask_script import Manager
 from flask import Flask
 from datetime import datetime as dt
 
-from rrg.models import session_maker
+from rrg.models_api import session_maker
 from rrg.workers_comp import wc_report
 
 def valid_date(s):
