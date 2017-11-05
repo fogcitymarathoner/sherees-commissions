@@ -647,7 +647,7 @@ class ApplicationReminder(object):
         contract = self.reminders[selected_reminders[0]][0]
         start = self.reminders[selected_reminders[0]][1]
         end = self.reminders[selected_reminders[0]][2]
-        lib.skip_contract_interval(contract, start, end)
+        lib.skip_contract_interval(contract.id, start, end)
         self.reminders.remove(self.reminders[selected_reminders[0]])
         self.listbox.delete(selected_reminders[0])
 

@@ -148,6 +148,7 @@ def open_invoices():
             models.Invoice.amount > 0)
         ]
 
+
 def pastdue_invoices():
     """
     return list of PastDue invoices
@@ -155,13 +156,14 @@ def pastdue_invoices():
 
     res = []
     for oi in session.query(models.Invoice).filter(
-            models.Invoice.voided == False,
-            models.Invoice.posted == True,
-            models.Invoice.cleared == False):
+                models.Invoice.voided == False,
+                models.Invoice.posted == True,
+                models.Invoice.cleared == False):
         if oi.duedate() <= dt.now() and \
-            oi.amount() > 0:
+                    oi.amount() > 0:
             res.append(oi.to_dict())
     return res
+
 
 def save_client_check(payload):
     """
@@ -387,8 +389,8 @@ def skip_contract_interval(contract_id, start, end):
     contract = session.query(models.Contract).get(contract_id)
     new_invoice = models.Invoice(
         contract=contract,
-        period_start=dt.strptime(start, api.DATE_ISO_FORMAT),
-        period_end=dt.strptime(end, api.DATE_ISO_FORMAT),
+        period_start=start,
+        period_end=end,
         timecard=True,
         date=dt.now(),
         terms=contract.terms,
@@ -410,29 +412,29 @@ def reminders(reminder_period_start, payroll_run_date, t_set, period):
     :return:
     """
     reminders_list = []
+    weeks_of_inspection = weeks_between_dates(reminder_period_start, payroll_run_date)
+    biweeks_of_inspection = biweeks_between_dates(reminder_period_start, payroll_run_date)
+    semimonths_of_inspection = semimonths_between_dates(date_to_datetime(c.startdate), payroll_run_date)
+    months_of_inspection = months_between_dates(reminder_period_start, payroll_run_date)
     for c, cl, em in contracts_per_period(session, period):
         if period == 'week':
-            for ws, we in weeks_between_dates(reminder_period_start,
-                                              payroll_run_date):
+            for ws, we in weeks_of_inspection:
                 if reminder_hash(c, ws, we) not in t_set:
                     reminders_list.append((c, ws, we))
         elif period == 'biweek':
-            for ws, we in biweeks_between_dates(reminder_period_start,
-                                                payroll_run_date):
+            for ws, we in biweeks_of_inspection:
                 if reminder_hash(c, ws, we) not in t_set:
                     reminders_list.append((c, ws, we))
         elif period == 'semimonth':
-            for ws, we in semimonths_between_dates(
-                  date_to_datetime(c.startdate), payroll_run_date):
+            for ws, we in semimonths_of_inspection:
                 if reminder_hash(c, ws, we) not in t_set:
                     reminders_list.append((c, ws, we))
         else:
-            for ws, we in months_between_dates(reminder_period_start,
-                                               payroll_run_date):
-                if reminder_hash(c, ws, we) not in t_set:
+            for ws, we in months_of_inspection:
+                rh = reminder_hash(c, ws, we)
+                if rh not in t_set:
                     reminders_list.append((c, ws, we))
     return reminders_list
-
 
 def timecard_hash(timecard):
     """"""
