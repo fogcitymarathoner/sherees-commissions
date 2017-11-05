@@ -778,7 +778,7 @@ class Contract(Base):
 
     def to_dict(self):
         """"""
-
+        # fixme: enddate can't be None, which is it is when active
         return {
             'id': self.id,
             'title': self.title,

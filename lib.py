@@ -414,7 +414,7 @@ def reminders(reminder_period_start, payroll_run_date, t_set, period):
     reminders_list = []
     weeks_of_inspection = weeks_between_dates(reminder_period_start, payroll_run_date)
     biweeks_of_inspection = biweeks_between_dates(reminder_period_start, payroll_run_date)
-    semimonths_of_inspection = semimonths_between_dates(date_to_datetime(c.startdate), payroll_run_date)
+    semimonths_of_inspection = semimonths_between_dates(reminder_period_start, payroll_run_date)
     months_of_inspection = months_between_dates(reminder_period_start, payroll_run_date)
     for c, cl, em in contracts_per_period(session, period):
         if period == 'week':

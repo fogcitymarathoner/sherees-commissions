@@ -761,7 +761,7 @@ class ApplicationTimecard(object):
                 tkinter.END, api.formatted_list_timecard_line(timecard))
 
     def post_btn(self):
-        """"""
+        """fixme: put due date in invoice"""
 
         if self.listbox.curselection() != ():
             selected_timecard = self.timecard_dicts[self.listbox.curselection()[0]]
