@@ -3,7 +3,7 @@ import sys
 from datetime import datetime as dt
 from datetime import timedelta as td
 
-from rrg.lib.reminders import biweeks_between_dates
+from lib import biweeks_between_dates, weeks_between_dates, months_between_dates, semimonths_between_dates
 from rrg.lib.reminders import current_semimonth
 from rrg.lib.reminders import months_between_dates
 from rrg.lib.reminders import semimonths_between_dates

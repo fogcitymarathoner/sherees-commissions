@@ -24,7 +24,8 @@ from rrg.models import Invoice
 from rrg.models import is_pastdue
 from rrg.models import periods
 from rrg.models_api import session_maker
-from rrg.queries import contracts_per_period
+from lib import contracts_per_period, biweeks_between_dates, weeks_between_dates, months_between_dates, \
+    semimonths_between_dates
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')

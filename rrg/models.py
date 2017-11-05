@@ -1,5 +1,5 @@
 """
-does not work on alpine because libmysqlclient-dev package is not available.
+All Models are here.
 """
 import re
 import xml.etree.ElementTree as ET
@@ -22,6 +22,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+import api
+
 periods = {
     'week': 1,
     'semimonth': 2,
@@ -30,7 +32,6 @@ periods = {
 }
 
 Base = declarative_base()
-
 
 
 def default_date():
@@ -43,10 +44,6 @@ def commissions_calculation(inv_item_quantity, inv_item_amount, inv_item_cost, e
     empexp = employerexpenserate * icost
     presplit_comm = iamount - icost - empexp
     return presplit_comm * percent / 100
-
-# Models for Commissions, Invoices, and Invoice Items are in
-# sherees_commissions
-
 
 
 class Employee(Base):
@@ -114,14 +111,21 @@ class Employee(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
+        """"""
+
         return "<Employee(id='%s', firstname='%s', lastname='%s')>" % (
             self.id, self.firstname, self.lastname)
 
-    def to_xml(self):
-        ssn_crypto = self.ssn_crypto
-        bankaccountnumber_crypto = self.bankaccountnumber_crypto
-        bankroutingnumber_crypto = self.bankroutingnumber_crypto
+    def to_dict(self):
+        """"""
 
+        return {
+            'id': self.id,
+            'first': self.firstname,
+            'last': self.lastname,
+        }
+
+    def to_xml(self):
         doc = ET.Element('employee')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'firstname').text = self.firstname
@@ -196,8 +200,8 @@ class Employee(Base):
         return doc
 
     def from_xml(self, doc):
-        """                                                                                                                    
-        returns DOM of comm item from file                                                                                     
+        """
+        returns DOM of employee from file
         """
         self.id = int(doc.findall('id')[0].text)
         self.firstname = doc.findall('firstname')[0].text
@@ -210,15 +214,15 @@ class Employee(Base):
 
         self.active = True if doc.findall('active')[0].text == 'True' else False
 
-        self.ssn_crypto  = doc.findall('ssn_crypto')[0].text
-        self.bankaccountnumber_crypto  = doc.findall('bankaccountnumber_crypto')[0].text
-        self.bankaccounttype  = doc.findall('bankaccounttype')[0].text
+        self.ssn_crypto = doc.findall('ssn_crypto')[0].text
+        self.bankaccountnumber_crypto = doc.findall('bankaccountnumber_crypto')[0].text
+        self.bankaccounttype = doc.findall('bankaccounttype')[0].text
         self.bankname = doc.findall('bankname')[0].text
         self.bankroutingnumber_crypto = doc.findall('bankroutingnumber_crypto')[0].text
         self.directdeposit = True if doc.findall('directdeposit')[0].text == 'True' else False
         self.allowancefederal = int(doc.findall('allowancefederal')[0].text)
         self.allowancestate = int(doc.findall('allowancestate')[0].text)
-        self.extradeductionfed  = int(doc.findall('extradeductionfed')[0].text)
+        self.extradeductionfed = int(doc.findall('extradeductionfed')[0].text)
         self.extradeductionstate = int(doc.findall('extradeductionstate')[0].text)
         self.maritalstatusfed = doc.findall('maritalstatusfed')[0].text
         self.maritalstatusstate = doc.findall('maritalstatusstate')[0].text
@@ -334,7 +338,6 @@ class Client(Base):
     street1 = Column(String(50))
     street2 = Column(String(50))
     city = Column(String(50))
-
     state_id = Column(Integer, ForeignKey('states.id'))
     state = relationship("State")
     zip = Column(String(50))
@@ -348,10 +351,31 @@ class Client(Base):
     last_sync_time = Column(Date)
 
     def __repr__(self):
-        return "<Client(id='%s', name='%s', street1='%s', street2='%s', state_id='%s', zip='%s', terms='%s', active='%s'" \
-               ")>" % (self.id, self.name, self.street1, self.street2, self.state_id, self.zip, self.terms, self.active)
+        return "<Client(id='%s', name='%s', street1='%s', street2='%s', city='%s', state_id='%s', zip='%s', terms='%s', active='%s'" \
+               ")>" % (self.id, self.name, self.street1, self.street2, self.city, self.state_id, self.zip, self.terms,
+                       self.active)
+
+    def to_dict(self):
+        """Client Dict"""
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'street1': self.street1,
+            'street2': self.street2,
+            'city': self.city,
+            'state': self.state.name,
+            'zip': self.zip,
+            'active': self.active,
+            'terms': self.terms,
+            'memos': [memo.to_dict() for memo in self.memos],
+            'modified_date': self.modified_date.strftime(api.DATE_ISO_FORMAT),
+            'created_date': self.created_date.strftime(api.DATE_ISO_FORMAT),
+        }
 
     def to_xml(self):
+        """Client to XML Doc Obj"""
+
         doc = ET.Element('client')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'name').text = self.name
@@ -412,7 +436,20 @@ class ClientCheck(Base):
         return "<ClientCheck(id='%s', client='%s', amount='%s', number='%s', date='%s')>" % (
             self.id, self.client.name, self.amount, self.number, self.date)
 
+    def to_dict(self):
+        """"""
+
+        return {
+            'id': self.id,
+            'client_id': self.client_id,
+            'number': self.number,
+            'amount': self.amount,
+            'notes': self.notes,
+            'date': self.date.strftime(api.DATE_ISO_FORMAT),
+        }
+
     def to_xml(self):
+        """"""
         doc = ET.Element('check')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
@@ -506,14 +543,26 @@ class ClientMemo(Base):
         return "<ClientMemo(id='%s', client='%s', date='%s', notes='%s')>" % (
             self.id, self.client.name, dt.strftime(self.date, TIMESTAMP_FORMAT), self.notes)
 
+    def to_dict(self):
+        """ClientMemo Dict"""
+
+        return {
+            'id': self.id,
+            'client_id': self.client.id,
+            'notes': self.notes,
+            'date': self.date.strftime("%m/%d/%Y"),
+            'modified_date': self.modified_date.strftime("%m/%d/%Y"),
+            'created_date': self.created_date.strftime("%m/%d/%Y"),
+        }
+
     def to_xml(self):
+        """ClientMemo to XML Doc Obj"""
         doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'client_id').text = str(self.client_id)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT)
         return doc
-
 
     def from_xml(self, doc):
         """
@@ -653,17 +702,16 @@ class CommPayment(Base):
         return doc
 
 
-
 class Contract(Base):
+    """"""
+
     __tablename__ = 'clients_contracts'
 
     id = Column(Integer, primary_key=True)
-
     client_id = Column(Integer, ForeignKey('clients.id'), nullable=False)
     client = relationship("Client")
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
     employee = relationship("Employee")
-
     invoices = relationship("Invoice", back_populates="contract", cascade="all, delete, delete-orphan")
     contract_items = relationship("ContractItem", back_populates="contract", cascade="all, delete, delete-orphan")
     period_id = Column(Integer)
@@ -680,6 +728,8 @@ class Contract(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
+        """"""
+
         if self.enddate:
             return "<Contract(id='%s', client=%s, title='%s', employee='%s %s', startdate='%s', enddate='%s')>" % (
                 self.id, self.client.name, self.title, self.employee.firstname,
@@ -690,6 +740,8 @@ class Contract(Base):
                 self.employee.lastname, self.startdate)
 
     def to_xml(self):
+        """"""
+
         doc = ET.Element('contract')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'title').text = re.sub(r'[^\x00-\x7F]', ' ', self.title) if self.title else ''
@@ -703,7 +755,7 @@ class Contract(Base):
         ET.SubElement(doc, 'terms').text = str(self.terms)
         ET.SubElement(doc, 'startdate').text = dt.strftime(self.startdate, TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'enddate').text = dt.strftime(
-            self.enddate,TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
+            self.enddate, TIMESTAMP_FORMAT) if self.enddate else dt.strftime(dt.now(), TIMESTAMP_FORMAT)
         ET.SubElement(doc, 'invoices')
         contract_items = ET.Element('contract-items')
         for o in self.contract_items:
@@ -711,8 +763,9 @@ class Contract(Base):
         doc.append(contract_items)
         return doc
 
-
     def from_xml(self, doc):
+        """"""
+
         self.id = int(doc.findall('id')[0].text)
         self.title = doc.findall('title')[0].text
         self.notes = doc.findall('notes')[0].text
@@ -722,6 +775,19 @@ class Contract(Base):
         self.terms = int(doc.findall('terms')[0].text)
         self.startdate = dt.strptime(doc.findall('startdate')[0].text, TIMESTAMP_FORMAT)
         self.enddate = dt.strptime(doc.findall('enddate')[0].text, TIMESTAMP_FORMAT)
+
+    def to_dict(self):
+        """"""
+
+        return {
+            'id': self.id,
+            'title': self.title,
+            'notes': self.notes,
+            'client': self.client.to_dict(),
+            'employee': self.employee.to_dict(),
+            'startdate': self.startdate.strftime(api.DATE_ISO_FORMAT),
+            'enddate': self.enddate.strftime(api.DATE_ISO_FORMAT),
+        }
 
 
 class ContractItem(Base):
@@ -819,44 +885,70 @@ class ContractItemCommItem(Base):
 
 
 class Expense(Base):
+    """"""
+
     __tablename__ = 'expenses'
 
     id = Column(Integer, primary_key=True)
-
     amount = Column(Float)
-
     category_id = Column(Integer, ForeignKey('expenses_categories.id'), nullable=False)
     category = relationship("ExpenseCategory")
-
     employee_id = Column(Integer, ForeignKey('employees.id'), nullable=False)
     employee = relationship("Employee")
-
     cleared = Column(Boolean, default=False)
     date = Column(Date, index=True, default=default_date)
-
     description = Column(String(45))
     notes = Column(String(200))
-
+    # fixme: standardize this to either date or datetime
     created_date = Column(Date, default=default_date)
     modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer, default=2)
     modified_user_id = Column(Integer, default=2)
     last_sync_time = Column(TIMESTAMP)
 
+    def __repr__(self):
+        return "<Expense(id='%s',date='%s', amount='%s'," \
+               " category='%s', description='%s')>" % (
+                   self.id, self.date, self.amount, self.category.name, self.description)
+
+    def from_xml(self, doc):
+        """
+        returns DOM of employee from file
+        """
+        self.id = int(doc.findall('id')[0].text)
+        self.description = doc.findall('description')[0].text
+        self.amount = doc.findall('amount')[0].text
+        self.category_id = doc.findall('category_id')[0].text
+        self.notes = doc.findall('notes')[0].text
+        self.date = dt.strptime(doc.findall('date')[0].text, TIMESTAMP_FORMAT)
+        self.created_date = dt.strptime(doc.findall('created_date')[0].text, TIMESTAMP_FORMAT)
+        self.modified_date = dt.strptime(doc.findall('modified_date')[0].text, TIMESTAMP_FORMAT)
+
+    def to_dict(self):
+        """"""
+
+        return {
+            'id': self.id,
+            'description': self.description,
+            'amount': self.amount,
+            'category': self.category.name,
+            'notes': self.notes,
+            'date': self.date,
+            'created_date': self.created_date,
+            'modified_date': self.modified_date,
+        }
+
     def to_xml(self):
+        """"""
+
         doc = ET.Element('expense')
-
         ET.SubElement(doc, 'id').text = str(self.id)
-
         ET.SubElement(doc, 'amount').text = str(self.amount)
-
         ET.SubElement(doc, 'category_id').text = str(self.category_id)
         ET.SubElement(doc, 'employee_id').text = str(self.employee_id)
-
         ET.SubElement(doc, 'cleared').text = str(self.cleared)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date, TIMESTAMP_FORMAT) if self.date else dt.strftime(
             dt.now(), TIMESTAMP_FORMAT)
-
         ET.SubElement(doc, 'description').text = str(self.description)
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'created_date').text = dt.strftime(self.created_date,
@@ -882,8 +974,14 @@ class ExpenseCategory(Base):
         ET.SubElement(doc, 'name').text = str(self.name)
         return doc
 
+    def __repr__(self):
+        return "<ExpenseCategory(id='%s', name='%s')>" % (
+            self.id, self.name)
+
 
 class InvoicePayment(Base):
+    """"""
+
     __tablename__ = 'invoices_payments'
 
     id = Column(Integer, primary_key=True)
@@ -904,10 +1002,24 @@ class InvoicePayment(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<InvoicePayment(id='%s', invoice='%s', amount='%s', number='%s', date='%s')>" % (
-            self.id, self.invoice_id, self.amount, self.check.number, self.check.date)
+        return "<InvoicePayment(id='%s', invoice='%s', amount='%s', number='%s', check_id='%s', date='%s')>" % (
+            self.id, self.invoice_id, self.amount, self.check.number, self.check.id, self.check.date)
+
+    def to_dict(self):
+        """"""
+
+        return {
+            'id': self.id,
+            'invoice_id': self.invoice_id,
+            'amount': self.amount,
+            'check': self.check.to_dict(),
+            'date': self.check.date.strftime(api.DATE_ISO_FORMAT),
+            'notes': self.notes,
+        }
 
     def to_xml(self):
+        """"""
+
         doc = ET.Element('invoice-payment')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'invoice_id').text = str(self.invoice_id)
@@ -930,20 +1042,17 @@ class InvoicePayment(Base):
 
 
 class Invoice(Base):
+    """"""
+
     __tablename__ = 'invoices'
 
     id = Column(Integer, primary_key=True)
-
     contract_id = Column(Integer, ForeignKey('clients_contracts.id'), nullable=False)
-
     contract = relationship("Contract", backref="clients_contracts")
-
     invoice_items = relationship("Iitem", back_populates="invoice", cascade="all, delete, delete-orphan")
     invoice_payments = relationship("InvoicePayment", back_populates="invoice", cascade="all, delete, delete-orphan")
     employee_payments = relationship("EmployeePayment", back_populates="invoice", cascade="all, delete, delete-orphan")
-
     date = Column(Date, nullable=False)
-
     po = Column(String(30))
     employerexpenserate = Column(Float)
     terms = Column(Integer, nullable=False)
@@ -951,17 +1060,13 @@ class Invoice(Base):
     notes = Column(TEXT)
     period_start = Column(Date, nullable=False)
     period_end = Column(Date, nullable=False)
-
     posted = Column(Boolean)
     cleared = Column(Boolean, default=False)
     cleared_date = Column(Date)
     prcleared = Column(Boolean, default=False)
     timecard_receipt_sent = Column(Boolean)
     message = Column(TEXT)
-
-    amount = Column(Float)
     voided = Column(Boolean, default=False)
-
     token = Column(String(64))
     view_count = Column(Integer)
     mock = Column(Boolean)
@@ -972,23 +1077,72 @@ class Invoice(Base):
     last_sync_time = Column(DateTime)
 
     def __repr__(self):
-        return "<Invoice(id='%s', amount='%s', client='%s', contract='%s', amount='%s', worker='%s', " \
+        return "<Invoice(id='%s', balance='%s', client='%s', contract='%s', amount='%s', worker='%s', " \
                "duedate='%s', period_start='%s', " \
-               "period_end='%s', date='%s', voided='%s')>" % (
-                   self.id, self.camount(), self.contract.client.name, self.contract.title, self.amount, '%s %s' % (
+               "period_end='%s', date='%s', cleared='%s', voided='%s')>" % (
+                   self.id, self.balance(), self.contract.client.name, self.contract.title, self.amount(), '%s %s' % (
                        self.contract.employee.firstname, self.contract.employee.lastname), self.duedate(),
-                   self.period_start, self.period_end, self.date, self.voided)
+                   self.period_start, self.period_end, self.date, self.cleared, self.voided)
+
+    def amount(self):
+        """"""
+
+        amount = 0
+        for iitem in self.invoice_items:
+            amount += iitem.amount * iitem.quantity
+        return round(amount, 2)
+
+    def balance(self):
+        """"""
+
+        balance = self.amount()
+        for p in self.invoice_payments:
+            balance -= p.amount
+        return round(balance, 2)
 
     def duedate(self):
         return dt(year=self.date.year, month=self.date.month, day=self.date.day) + td(days=self.terms)
 
-    def camount(self):
-        total = 0
-        for i in self.invoice_items:
-            total += i.amount * i.quantity
-        for p in self.invoice_payments:
-            total -= p.amount
-        return total
+    def from_xml(self, doc):
+        self.id = int(doc.findall('id')[0].text)
+        self.contract_id = int(doc.findall('contract_id')[0].text)
+        self.date = dt.strptime(doc.findall('date')[0].text, TIMESTAMP_FORMAT)
+        self.po = doc.findall('po')[0].text
+        self.employerexpenserate = doc.findall('employerexpenserate')[0].text
+        self.terms = doc.findall('terms')[0].text
+        self.timecard = doc.findall('timecard')[0].text
+        self.notes = doc.findall('notes')[0].text
+        self.period_start = dt.strptime(doc.findall('period_start')[0].text, TIMESTAMP_FORMAT)
+        self.period_end = dt.strptime(doc.findall('period_end')[0].text, TIMESTAMP_FORMAT)
+        self.posted = doc.findall('posted')[0].text
+        self.cleared = doc.findall('cleared')[0].text
+        self.voided = doc.findall('voided')[0].text
+        self.prcleared = doc.findall('prcleared')[0].text
+        self.message = doc.findall('message')[0].text
+
+    def to_dict(self):
+        """"""
+
+        return {
+            'id': self.id,
+            'balance': self.balance(),
+            'contract': self.contract.to_dict(),
+            'date': self.date.strftime(api.DATE_ISO_FORMAT),
+            'po': self.po,
+            'employerexpenserate': self.employerexpenserate,
+            'terms': self.terms,
+            'timecard': self.timecard,
+            'notes': self.notes,
+            'period_start': self.period_start.strftime(api.DATE_ISO_FORMAT),
+            'period_end': self.period_end.strftime(api.DATE_ISO_FORMAT),
+            'posted': self.posted,
+            'cleared': self.cleared,
+            'voided': self.voided,
+            'prcleared': self.prcleared,
+            'message': self.message,
+            'invoice_items': [iitem.to_dict() for iitem in self.invoice_items],
+            'invoice_payments': [ipay.to_dict() for ipay in self.invoice_payments],
+        }
 
     def to_xml(self):
         """
@@ -1037,28 +1191,6 @@ class Invoice(Base):
             epayments.append(i.to_xml())
         return doc
 
-    def from_xml(self, doc):
-        self.id = int(doc.findall('id')[0].text)
-        self.contract_id = int(doc.findall('contract_id')[0].text)
-        self.date = dt.strptime(doc.findall('date')[0].text, TIMESTAMP_FORMAT)
-        self.po = doc.findall('po')[0].text
-        self.employerexpenserate = doc.findall('employerexpenserate')[0].text
-        self.terms = doc.findall('terms')[0].text
-        self.timecard = doc.findall('timecard')[0].text
-        self.notes = doc.findall('notes')[0].text
-        self.period_start = dt.strptime(doc.findall('period_start')[0].text, TIMESTAMP_FORMAT)
-        self.period_end = dt.strptime(doc.findall('period_end')[0].text, TIMESTAMP_FORMAT)
-        self.posted = doc.findall('posted')[0].text
-        self.cleared = doc.findall('cleared')[0].text
-        self.voided = doc.findall('voided')[0].text
-        self.prcleared = doc.findall('prcleared')[0].text
-        self.message = doc.findall('message')[0].text
-    def amount_calc(self):
-        amount = 0
-        for iitem in self.invoice_items:
-            amount += iitem.amount * iitem.quantity
-        return amount
-
     def update_commissions(self):
         employerexpenserate = self.employerexpenserate
         for invoice_item in self.invoice_items:
@@ -1067,8 +1199,12 @@ class Invoice(Base):
             inv_item_quantity = invoice_item.quantity
             for commissions_item in invoice_item.comm_items:
                 percent = commissions_item.percent
-                commissions_item.amount = commissions_calculation(inv_item_quantity, inv_item_amount, inv_item_cost,
-                                                                  employerexpenserate, percent)
+                commissions_item.amount = commissions_calculation(
+                    inv_item_quantity,
+                    inv_item_amount,
+                    inv_item_cost,
+                    employerexpenserate,
+                    percent)
 
     def update_from_xml_doc(self, inv_doc):
         self.date = inv_doc.findall('date')[0].text
@@ -1108,9 +1244,25 @@ class Iitem(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
-        return "<InvoiceItem(id='%s', description='%s', amount='%s', quantity='%s', invoice.id='%s')>" % (
-            self.id, self.description, self.amount, self.quantity,
+        return "<InvoiceItem(id='%s', description='%s', amount='%s', quantity='%s', subtotal='%s', invoice.id='%s')>" % (
+            self.id, self.description, self.amount, self.quantity, self.subtotal(),
             self.invoice_id)
+
+    def subtotal(self):
+        return self.amount * self.quantity
+
+    def to_dict(self):
+        """"""
+
+        return {
+            'id': self.id,
+            'invoice_id': self.invoice_id,
+            'description': self.description,
+            'amount': self.amount,
+            'cost': self.cost,
+            'quantity': self.quantity,
+            'cleared': self.cleared,
+        }
 
     def to_xml(self):
         doc = ET.Element('invoice-item')
@@ -1298,6 +1450,7 @@ class State(Base):
         self.flower = doc.findall('flower')[0].text
         self.state_no = doc.findall('state_no')[0].text
 
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -1306,32 +1459,31 @@ class User(Base):
 
     lastname = Column(String(60))
 
+
 class Vendor(Base):
     __tablename__ = 'vendors'
 
     id = Column(Integer, primary_key=True)
-    memos = relationship("VendorMemo", back_populates="vendor", cascade="all, delete, delete-orphan")
+    memos = relationship(
+        "VendorMemo",
+        back_populates="vendor",
+        cascade="all, delete, delete-orphan")
     name = Column(String(40))
     purpose = Column(String(60))
     street1 = Column(String(30))
     street2 = Column(String(30))
     city = Column(String(20))
-
     state_id = Column(Integer, ForeignKey('states.id'))
     state = relationship("State")
-
     zip = Column(String(50))
     active = Column(Boolean)
-
     ssn = Column(String(11))
-
     apfirstname = Column(String(31))
     aplastname = Column(String(11))
-
     apphonetype1 = Column(Integer)
-    apphone1 = Column(String(32))
+    apphone1 = Column(String(64))
     apphonetype2 = Column(Integer)
-    apphone2 = Column(String(32))
+    apphone2 = Column(String(64))
     accountnumber = Column(String(65))
     notes = Column(String(183))
     secretbits = Column(TEXT)
@@ -1341,7 +1493,38 @@ class Vendor(Base):
     modified_user_id = Column(Integer)
     last_sync_time = Column(DateTime)
 
-    def to_xml(self):
+    def __repr__(self):
+        return "<Vendor(id='%s', name='%s', purpose='%s', city='%s', state='%s)>" % (
+            self.id, self.name, self.purpose, self.city, self.state.name)
+
+    def to_dict(self):
+        """"""
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'purpose': self.purpose,
+            'street1': self.street1,
+            'street2': self.street2,
+            'city': self.city,
+            'state': self.state.name,
+            'zip': self.zip,
+            'notes': self.notes,
+            'active': self.active,
+            'accountnumber': self.accountnumber,
+            'apphone1': self.apphone1,
+            'apphone2': self.apphone2,
+            'apfirstname': self.apfirstname,
+            'aplastname': self.aplastname,
+            'secretbits': self.secretbits,
+            'memos': [iitem.to_dict() for iitem in self.memos],
+            'created_date': self.created_date.strftime("%m/%d/%Y"),
+            'modified_date': self.modified_date.strftime("%m/%d/%Y"),
+        }
+
+        def to_xml(self):
+            """"""
+
         doc = ET.Element('vendor')
         ET.SubElement(doc, 'id').text = str(self.id)
 
@@ -1382,7 +1565,6 @@ class Vendor(Base):
         doc.append(memos)
         return doc
 
-
     def from_xml(self, doc):
         """
         returns DOM of comm item from file
@@ -1396,17 +1578,23 @@ class Vendor(Base):
         self.state_id = int(doc.findall('state_id')[0].text)
         self.zip = doc.findall('zip')[0].text
         self.notes = doc.findall('notes')[0].text
+        self.active = True if doc.findall('active')[0].text == 'True' else False
         self.accountnumber = doc.findall('accountnumber')[0].text
+        self.apphone1 = doc.findall('apphone1')[0].text
+        self.apphone2 = doc.findall('apphone2')[0].text
+        self.apfirstname = doc.findall('apfirstname')[0].text
+        self.aplastname = doc.findall('aplastname')[0].text
+        self.secretbits = doc.findall('secretbits')[0].text
 
 
 class VendorMemo(Base):
+    """"""
+
     __tablename__ = 'vendors_memos'
 
     id = Column(Integer, primary_key=True)
-
     vendor_id = Column(Integer, ForeignKey('vendors.id'), nullable=False)
     vendor = relationship("Vendor")
-
     notes = Column(TEXT)
     date = Column(Date, nullable=False)
     created_date = Column(Date, default=default_date)
@@ -1416,10 +1604,25 @@ class VendorMemo(Base):
     last_sync_time = Column(TIMESTAMP)
 
     def __repr__(self):
+        """"""
+
         return "<VendorMemo(id='%s', vendor='%s', date='%s', notes='%s')>" % (
             self.id, self.vendor.name, dt.strftime(self.date, TIMESTAMP_FORMAT), self.notes)
 
+    def to_dict(self):
+        """VendorMemo Dict"""
+
+        return {
+            'id': self.id,
+            'vendor_id': self.vendor_id,
+            'notes': self.notes,
+            'date': self.date.strftime(api.DATE_ISO_FORMAT),
+            'modified_date': self.modified_date.strftime(api.DATE_ISO_FORMAT),
+            'created_date': self.created_date.strftime(api.DATE_ISO_FORMAT),
+        }
+
     def to_xml(self):
+        """VendorMemo to XML Doc Obj"""
         doc = ET.Element('memo')
         ET.SubElement(doc, 'id').text = str(self.id)
         ET.SubElement(doc, 'vendor_id').text = str(self.vendor_id)

@@ -1,22 +1,14 @@
-import hashlib
 import logging
 from datetime import datetime as dt
 
-from s3_mysql_backup import YMD_FORMAT
-from sqlalchemy import and_
-
+from lib import contracts_per_period, biweeks_between_dates, weeks_between_dates, months_between_dates, \
+    semimonths_between_dates, reminder_hash, create_invoice_for_period
 from rrg.lib.archive import date_to_datetime
 from rrg.lib.reminders import biweeks_between_dates
 from rrg.lib.reminders import months_between_dates
 from rrg.lib.reminders import semimonths_between_dates
 from rrg.lib.reminders import weeks_between_dates
 from rrg.models import Citem
-from rrg.models import Client
-from rrg.models import Contract
-from rrg.models import Employee
-from rrg.models import Iitem
-from rrg.models import Invoice
-from rrg.queries import contracts_per_period
 
 logging.basicConfig(filename='testing.log', level=logging.DEBUG)
 logger = logging.getLogger('test')
@@ -26,39 +18,6 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 """
 this module differs from reminders in that it depends on models
 """
-
-
-def reminder_hash(contract, start, end):
-    """
-    from the point of view of contract generate hash for contract-pay-period
-    :param contract:
-    :param start:
-    :param end:
-    :return:
-    """
-
-    return hashlib.sha224('%s %s %s' % (
-        contract.id, dt.strftime(start, YMD_FORMAT),
-        dt.strftime(end, YMD_FORMAT))).hexdigest()
-
-
-def timecard_hash(timecard):
-    return hashlib.sha224('%s %s %s' % (
-        timecard.contract.id, dt.strftime(timecard.period_start, YMD_FORMAT),
-        dt.strftime(timecard.period_end, YMD_FORMAT))).hexdigest()
-
-
-def timecards(session):
-    """
-    returns set of timecard hashs of contract.id+startdate+enddate
-    timecard not used
-    :return:
-    """
-    with session.no_autoflush:
-        return session.query(Invoice, Contract, Employee, Client).join(
-            Contract).join(Employee).join(Client).filter(
-            and_(Client.active == 1, Contract.active == 1,
-                 Employee.active == 1)).all()
 
 
 def reminders_set(session, period, payroll_run_date):
@@ -90,41 +49,6 @@ def reminders_set(session, period, payroll_run_date):
     return reminders_set
 
 
-def reminders(session, reminder_period_start, payroll_run_date, t_set, period):
-    """
-    generate list of reminders in a period for a period type [week, biweek, semimonth, month]
-    :param session:
-    :param reminder_period_start:
-    :param payroll_run_date:
-    :param t_set:
-    :param period:
-    :return:
-    """
-
-    reminders_list = []
-    for c, cl, em in contracts_per_period(session, period):
-        if period == 'week':
-            for ws, we in weeks_between_dates(reminder_period_start,
-                                              payroll_run_date):
-                if reminder_hash(c, ws, we) not in t_set:
-                    reminders_list.append((c, ws, we))
-        elif period == 'biweek':
-            for ws, we in biweeks_between_dates(date_to_datetime(c.startdate),
-                                                payroll_run_date):
-                if reminder_hash(c, ws, we) not in t_set:
-                    reminders_list.append((c, ws, we))
-        elif period == 'semimonth':
-            for ws, we in semimonths_between_dates(
-                    date_to_datetime(c.startdate), payroll_run_date):
-                if reminder_hash(c, ws, we) not in t_set:
-                    reminders_list.append((c, ws, we))
-        else:
-            for ws, we in months_between_dates(date_to_datetime(c.startdate),
-                                               payroll_run_date):
-                if reminder_hash(c, ws, we) not in t_set:
-                    reminders_list.append((c, ws, we))
-
-    return reminders_list
 
 
 def reminder_to_timecard(session, reminder_period_start, payroll_run_date, t_set, period, number):
@@ -150,13 +74,6 @@ def forget_reminder(session, reminder_period_start, payroll_run_date, t_set, per
     contract, start, end = reminders_tbs[number - 1]
     new_inv = create_invoice_for_period(session, contract, start, end)
     new_inv.voided = True
-
-
-def timecards_set(session):
-    timecards_set = set()
-    for t in timecards(session):
-        timecards_set.add(timecard_hash(t[0]))
-    return timecards_set
 
 
 def rebuild_empty_invoice_commissions(session, inv):
@@ -196,29 +113,3 @@ def rebuild_empty_invoice_commissions(session, inv):
         session.add(ci)
 
 
-def create_invoice_for_period(session, contract, period_start, period_end, date=None):
-    if not date:
-        date = dt.now()
-    new_inv = Invoice(contract_id=contract.id, period_start=period_start,
-                      period_end=period_end, date=date,
-                      employerexpenserate=.10, terms=contract.terms, 
-                      posted=False, prcleared=False, timecard=False,
-                      cleared=False, timecard_receipt_sent=False,
-                      message='Thank you for your business!', amount=0,
-                      voided=False)
-    session.add(new_inv)
-    session.flush()
-    for citem in contract.contract_items:
-        new_iitem = Iitem(invoice_id=new_inv.id, description=citem.description,
-                          quantity=0.0, cleared=False,
-                          cost=citem.cost, amount=citem.amt)
-        session.add(new_iitem)
-        session.flush()
-        for comm_item in citem.contract_comm_items:
-            new_sales_comm_item = Citem(invoices_item_id=new_iitem.id,
-                                        employee_id=comm_item.employee_id,
-                                        percent=comm_item.percent,
-                                        cleared=False, amount=0,
-                                        description=new_iitem.description)
-            session.add(new_sales_comm_item)
-    return new_inv

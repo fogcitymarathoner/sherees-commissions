@@ -64,40 +64,6 @@ def obj_dir(datadir, obj):
         return os.path.join(datadir, 'vendors')
 
 
-def open_invoices(session):
-    """
-    return list of OPEN invoices
-    """
-    return session.query(Invoice).filter(
-        Invoice.voided==False, Invoice.posted==True, Invoice.cleared==False, Invoice.mock == False, Invoice.amount > 0)
-
-
-
-def timecards(session):
-    """
-    return list of timecards pending posting
-    """
-    return session.query(Invoice).filter(
-        Invoice.voided==False, Invoice.posted==False, Invoice.cleared==False, Invoice.mock == False, Invoice.amount > 0)
-
-
-def pastdue_invoices(session):
-    """
-    return list of PastDue invoices
-    """
-    res = []
-    oinvs = open_invoices(session)
-    for oi in oinvs:
-        if Invoice.duedate(oi) <= dt.now():
-            res.append(oi)
-    return res
-
-
-def picked_open_invoice(session, args):
-    o_invoices = open_invoices(session)
-    return o_invoices[args.number-1]
-
-
 def tabulate_invoices(invoices):
     """
     Return given invoices list tabulated
@@ -114,38 +80,6 @@ def tabulate_invoices(invoices):
              r.date, r.date + td(days=r.contract.terms), r.amount])
         i += 1
     return tabulate(tbl, headers=['number', 'sqlid', 'client', 'employee', 'start', 'end', 'date', 'duedate', 'amount'])
-
-
-def edit_invoice(session, phase, number):
-
-    if phase == 'open':
-        winvoices = open_invoices(session)
-    elif phase =='timecard':
-        winvoices = timecards(session)
-    if number in range(1, winvoices.count() + 1):
-        if phase == 'open':
-            invoice = picked_open_invoice(session, number)
-        elif phase =='timecard':
-            invoice = picked_timecard(session, number)
-        xml = xml_pp.parseString(ET.tostring(invoice.to_xml()))
-        temp_file = os.path.join(
-            os.path.sep, 'tmp', ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40)))
-        with open(temp_file, 'w+b') as f:
-            f.write(xml.toprettyxml())
-        call(["vi", temp_file])
-        whole_inv_xml = Invoice.from_xml(temp_file)
-
-        invoice.update_from_xml_doc(whole_inv_xml)
-
-        for iitem in whole_inv_xml.iter('invoice-item'):
-            iid = int(iitem.findall('id')[0].text)
-            sa_item = session.query(Iitem).get(iid)
-            sa_item.update_from_xml_doc(iitem)
-
-        session.commit()
-    else:
-        print('Invoice number is not in range')
-        quit()
 
 
 def employees(session):

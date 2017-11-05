@@ -2,17 +2,12 @@
 """
 """
 import os
-import traceback
+
 from flask import Flask
-from flask import request
 from flask import render_template
-from flask import redirect
-from flask import url_for
-from flask import send_from_directory
-from werkzeug import secure_filename
 
 app = Flask(__name__, instance_relative_config=True)
-
+# fixme: delete this file, opting for app_engine
 # Load the default configuration
 if os.environ.get('RRG_SETTINGS'):
     settings_file = os.environ.get('RRG_SETTINGS')

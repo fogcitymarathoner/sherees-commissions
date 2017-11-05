@@ -11,9 +11,7 @@ class Args(object):
 
 def create_db():
     """
-    this routine has a bug, DATABASE isn't fully integrated right, the line
-    DATABASE = 'rrg' in rrg/__init__.py has to be temporarily hardcoded to
-    'rrg_test' or whatever
+
     :return:
     """
     args = Args()

@@ -1,6 +1,7 @@
+import calendar
 from datetime import datetime as dt
 from datetime import timedelta as td
-import calendar
+
 """
 Python utility library for payroll calendars - weekly, biweekly, semimonthly
 and monthly
@@ -142,61 +143,4 @@ def current_biweek(date):
             
     return start, end
 
-
-def biweeks_between_dates(start, end):
-    if start > end:
-        print('biweek start date is greater than end date')
-        return None
-    biweek = current_biweek(start)
-
-    biweeks = [biweek]
-    while biweek[1] < end:
-        biweek = next_biweek(*biweek)
-        biweeks.append(biweek)
-
-    return biweeks
-
-
-def weeks_between_dates(start, end):
-
-    if start > end:
-        print('week start date %s is greater than end date %s' % (start, end))
-        return None
-    week = current_week(start)
-
-    weeks = [week]
-    while week[1] < end:
-        week = next_week(*week)
-        weeks.append(week)
-
-    return weeks
-
-
-def months_between_dates(start, end):
-
-    if start > end:
-        print('month start date is greater than end date')
-        return None
-    month = current_month(start)
-
-    months = [month]
-    while month[1] < end:
-        month = next_month(*month)
-        months.append(month)
-
-    return months
-
-
-def semimonths_between_dates(start, end):
-
-    if start > end:
-        print('semimonth start date is greater than end date')
-        return None
-    semimonth = current_semimonth(start)
-
-    semimonths = [semimonth]
-    while semimonth[1] < end:
-        semimonth = next_semimonth(*semimonth)
-        semimonths.append(semimonth)
-
-    return semimonths
+# todo: write unittest for weeks_between_dates

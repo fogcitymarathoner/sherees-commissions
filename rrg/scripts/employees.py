@@ -7,6 +7,7 @@ from flask_script import Manager
 from s3_mysql_backup import YMD_FORMAT
 from tabulate import tabulate
 
+import lib
 import rrg.xml_helpers
 from rrg.billing import cache_non_date_parsed
 from rrg.lib import reminders
@@ -83,16 +84,16 @@ def make_timecard_for_employee():
     contract = session.query(Contract).get(int(selected_contract[1]))
     # Weekly Contract
     if contract.period_id == 1:
-        periods_for_contract = reminders.weeks_between_dates(dt.now() - td(days=90), dt.now())
+        periods_for_contract = lib.weeks_between_dates(dt.now() - td(days=90), dt.now())
     # Bi-Weekly Contract
     elif contract.period_id == 2:
-        periods_for_contract = reminders.biweeks_between_dates(dt.now() - td(days=90), dt.now())
+        periods_for_contract = lib.biweeks_between_dates(dt.now() - td(days=90), dt.now())
     # Semi-Monthly Contract
     elif contract.period_id == 3:
-        periods_for_contract = reminders.semimonths_between_dates(dt.now() - td(days=90), dt.now())
+        periods_for_contract = lib.semimonths_between_dates(dt.now() - td(days=90), dt.now())
     # Monthly Contract
     elif contract.period_id == 4:
-        periods_for_contract = reminders.months_between_dates(dt.now() - td(days=90), dt.now())
+        periods_for_contract = lib.months_between_dates(dt.now() - td(days=90), dt.now())
     # Tabulate the periods for selection
     periods = []
     for i, p in enumerate(periods_for_contract):
@@ -102,7 +103,7 @@ def make_timecard_for_employee():
     if selection == 'q':
         quit()
     selected_period = periods[int(selection) - 1]
-    new_inv = reminders_generation.create_invoice_for_period(session, contract, selected_period[1], selected_period[2])
+    new_inv = lib.create_invoice_for_period(session, contract, selected_period[1], selected_period[2])
     new_inv.voided = False
     new_inv.mock = False
     new_inv.timecard = True
