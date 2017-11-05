@@ -18,7 +18,7 @@ def past_due_invoices():
     """Print past due invoices"""
 
     for inv in lib.pastdue_invoices():
-        print('%s %s %s' % (inv['id'], inv['date'], inv['contract']['client']['name']))
+        print('%s %s %s %s' % (inv['id'], inv['date'], inv['contract']['client']['name'], inv['balance']))
 
 @manager.command
 def generate_mileage():
