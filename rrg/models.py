@@ -33,7 +33,7 @@ periods = {
 
 Base = declarative_base()
 
-
+DATE_OUTPUT_READABLE_FORMAT = '%m/%d/%Y'
 def default_date():
     return date.today()
 
@@ -1497,6 +1497,35 @@ class Vendor(Base):
         return "<Vendor(id='%s', name='%s', purpose='%s', city='%s', state='%s)>" % (
             self.id, self.name, self.purpose, self.city, self.state.name)
 
+    @classmethod
+    def header(self):
+        return ['Id', 'Name', 'Purpose', 'Secret Bits', 'Account Number',
+                'Street1', 'Street2',
+                'City', 'State', 'Zip', 'Tags', 'Notes', 'Phone1', 'Phone2',
+                'Website',
+                'Modified Date', 'Created Date']
+
+    def to_array(self):
+        """Vendor to array"""
+
+        return [
+            self.id,
+            self.name,
+            self.purpose,
+            self.secretbits,
+            self.accountnumber,
+            self.street1,
+            self.street2,
+            self.city,
+            self.state.name,
+            self.zip,
+            self.notes,
+            self.apphone1,
+            self.apphone2,
+            self.modified_date.strftime(DATE_OUTPUT_READABLE_FORMAT),
+            self.created_date.strftime(DATE_OUTPUT_READABLE_FORMAT),
+        ]
+
     def to_dict(self):
         """"""
 
@@ -1522,8 +1551,8 @@ class Vendor(Base):
             'modified_date': self.modified_date.strftime("%m/%d/%Y"),
         }
 
-        def to_xml(self):
-            """"""
+    def to_xml(self):
+        """"""
 
         doc = ET.Element('vendor')
         ET.SubElement(doc, 'id').text = str(self.id)

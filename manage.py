@@ -5,6 +5,7 @@ from flask_script import Manager
 
 from app import app
 import lib
+import sheets_lib
 from rrg import models
 
 from app import session
@@ -19,6 +20,11 @@ def past_due_invoices():
 
     for inv in lib.pastdue_invoices():
         print('%s %s %s %s' % (inv['id'], inv['date'], inv['contract']['client']['name'], inv['balance']))
+
+@manager.command
+def update_vendors_sheet():
+    """Update vendor sheet at google """
+    sheets_lib.update_vendors_sheet()
 
 @manager.command
 def generate_mileage():

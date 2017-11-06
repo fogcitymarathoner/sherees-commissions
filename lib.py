@@ -1,6 +1,5 @@
 """Library routines for interacting with models"""
 import hashlib
-import logging
 from datetime import datetime as dt
 
 from s3_mysql_backup import YMD_FORMAT
@@ -15,7 +14,6 @@ from sqlalchemy.sql.expression import true
 
 import api
 from rrg import models
-from rrg.lib.archive import date_to_datetime
 from rrg.lib import reminders as reminders_lib
 from rrg.queries import periods
 

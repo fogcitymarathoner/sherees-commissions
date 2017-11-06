@@ -9,7 +9,7 @@ from oauth2client import tools
 from oauth2client.file import Storage
 
 import data_helpers
-import models
+from rrg import models
 
 VALUE_INPUT_OPTION = 'RAW'
 
@@ -46,41 +46,51 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def update_last_vendor_batch(service, spreadsheetId):
+def update_last_vendor_batch(service, spreadsheetId, page):
     """"""
-
-    offset = int(data_helpers.count_vendors() / 30)
-    values = data_helpers.list_page_contacts_arrays(offset=offset, page_size=30)
-
-    rangeName = 'VENDORS!A%s:X%s' % (offset*30 + 2, (offset+1)*30 + 2)
+    page_size = 30
+    values = data_helpers.list_page_vendors_arrays(page=page, page_size=page_size)
+    # fixme: why is Vendor different, .all() not showing all recs, weird adjust below
+    page -= 1
+    rangeName = 'VENDORS!A%s:%s%s' % (page * page_size + 6,
+                                      chr(ord('A') + len(models.Vendor.header()) + 1),
+                                      page * (page_size + 6) + len(values))
+    print(rangeName)
+    service.spreadsheets().values().clear(
+        spreadsheetId=spreadsheetId, range=rangeName, body={}).execute()
+    values.insert(0, models.Vendor.header())
+    values[0][0] = 'page: %s : %s' % (page, values[0][0])
     body = {
-      'values': values,
+        'values': values,
         "majorDimension": "ROWS",
     }
     result = service.spreadsheets().values().update(
         spreadsheetId=spreadsheetId, range=rangeName,
         valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
-    print('update result %s' % result)
+    print('page %s\nupdate result %s' % (page, result))
 
 def update_vendors(service, spreadsheetId):
     """"""
-
-    for rng in range(0, int(data_helpers.count_vendors()/30)):
-        rangeName = 'VENDORS!A%s:X%s' % (rng*30 + 2, (rng+1)*30 + 2)
+    pagesize = 30
+    for rng in range(0, int(data_helpers.count_vendors() / 30)):
+        rangeName = 'VENDORS!A%s:%s%s' % (rng * pagesize + 1 + rng,
+                                          chr(ord('A') + len(models.Vendor.header()) + 1),
+                                          (rng + 1) * (pagesize + 1) + 1)
+        print(rangeName)
         service.spreadsheets().values().clear(
             spreadsheetId=spreadsheetId, range=rangeName, body={}).execute()
-        values = data_helpers.list_page_vendors_arrays(offset=rng, page_size=30)
+        values = data_helpers.list_page_vendors_arrays(page=rng + 1, page_size=30)
+        values.insert(0, models.Vendor.header())
+        values[0][0] = 'page: %s : %s' % (rng + 1, values[0][0])
         body = {
-          'values': values,
-          "majorDimension": "ROWS",
+            'values': values,
+            "majorDimension": "ROWS",
         }
         result = service.spreadsheets().values().update(
             spreadsheetId=spreadsheetId, range=rangeName,
             valueInputOption=VALUE_INPUT_OPTION, body=body).execute()
-        print('update result %s' % result)
-        print(rng)
-    update_last_vendor_batch(service, spreadsheetId)
-
+        print('page %s\nupdate result %s' % (rng + 1, result))
+    update_last_vendor_batch(service, spreadsheetId, int(data_helpers.count_vendors() / 30) + 1)
 
 def update_vendors_sheet():
     """Dumps the vendors table into contacts sheet at google
@@ -93,5 +103,5 @@ def update_vendors_sheet():
     service = discovery.build('sheets', 'v4', http=http,
                               discoveryServiceUrl=discoveryUrl)
 
-    spreadsheetId = '17ti0hGxmD-68XSX_EiS7zKBkg4K_GjHzGvixEuF8O6I/edit#gid=0'
+    spreadsheetId = '17ti0hGxmD-68XSX_EiS7zKBkg4K_GjHzGvixEuF8O6I'
     update_vendors(service, spreadsheetId)
