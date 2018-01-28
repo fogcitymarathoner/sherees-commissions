@@ -111,16 +111,22 @@ def next_month(start, end):
 
 def next_semimonth(start, end):
     if end.day == 15:
-        return (dt(year=start.year, month=start.month, day=16),
-                dt(year=end.year, month=end.month + 1, day=1) -
-                td(days=1))
+
+        if end.month < 12:
+            return (dt(year=start.year, month=start.month, day=16),
+                    dt(year=end.year, month=end.month + 1 if end.month < 12 else 1, day=1) -
+                    td(days=1))
+        else:
+            if end.day < 16:
+                return (dt(year=end.year, month=end.month, day=16),
+                        dt(year=end.year, month=end.month, day=calendar.monthrange(end.year, end.month)[1]))
     else:
         if end.month < 12:
             return (dt(year=start.year, month=start.month + 1, day=1),
                     dt(year=end.year, month=end.month + 1, day=15))
         else:
             return (dt(year=start.year + 1, month=1, day=1),
-                    dt(year=end.year + 1, month=1, day=15))
+                    dt(year=start.year + 1, month=1, day=15))
 
 
 def current_semimonth(date):

@@ -1,3 +1,4 @@
+"""This is only used with the manage.py"""
 from flask import Flask
 from flask_alembic import Alembic
 from flask_sqlalchemy import SQLAlchemy
@@ -12,10 +13,6 @@ session = sessionMaker()
 db = SQLAlchemy(app)
 alembic = Alembic()
 alembic.init_app(app)
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
 
 
 if __name__ == '__main__':

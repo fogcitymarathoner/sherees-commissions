@@ -1,6 +1,5 @@
 import datetime as dt
 
-from flask_alembic import alembic_script
 from flask_script import Manager
 
 from app import app
@@ -11,8 +10,6 @@ from rrg import models
 from app import session
 
 manager = Manager(app)
-
-manager.add_command('db', alembic_script)
 
 @manager.command
 def past_due_invoices():

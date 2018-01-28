@@ -1,8 +1,10 @@
 from datetime import datetime as dt
-
+from datetime import timedelta as td
 import tkinter
 from tkinter import messagebox
 
+from rrg import models
+from app import session
 import api
 import lib
 
@@ -98,6 +100,7 @@ class AppletCreateExpense(object):  # pylint: disable=too-many-instance-attribut
         self.desc.set('')
         self.amt.set('')
         self.cat.set('')
+        self.notes_entry.delete(1.0, tkinter.END)
 
     def save_btn(self):
         """Save new expense"""
@@ -217,6 +220,39 @@ class AppletEditExpense(object):  # pylint: disable=too-many-instance-attributes
             self.parent.load()
 
 
+class ApplicationGenerateMileage(object):
+    """Runs the Mileage Generating Routine"""
+
+    def __init__(self, parent, title='Generate Mileage'):
+        """"""
+        self.parent = parent
+        self.root = tkinter.Tk()
+        self.root.title(title)
+        self.root.iconify()
+
+    def generate(self):
+        """"""
+        description = 'IDC-Google 53 miles x 2 @ $.54/mile (2017)'
+        contract = session.query(models.Contract).get(1664)
+        employee = session.query(models.Employee).get(1479)
+        mileage_cat = session.query(models.ExpenseCategory).get(2)
+        startdate = dt(year=contract.startdate.year, month=contract.startdate.month,
+                                day=contract.startdate.day)
+        delta = dt.now() - startdate
+        for i in range(delta.days + 1):
+            day = startdate + td(days=i)
+            if day.weekday() in range(0, 5):
+                exp_count = session.query(models.Expense).filter(models.Expense.category == mileage_cat,
+                                                                 models.Expense.description == description,
+                                                                 models.Expense.date == day).count()
+                if exp_count == 0:
+                    exp = models.Expense(category=mileage_cat, description=description, amount=53 * 2 * .54, date=day,
+                                         employee=employee)
+                    session.add(exp)
+                    session.commit()
+        self.root.iconify()
+
+
 class ApplicationExpense(object):  # pylint: disable=too-many-instance-attributes
     """"""
 
@@ -231,6 +267,7 @@ class ApplicationExpense(object):  # pylint: disable=too-many-instance-attribute
         self.select_msg = "Error", "Please select an expense."
         self.root = tkinter.Tk()
         self.root.title('Expenses')
+        self.generate_mileage_app = None
         self.messagebox = messagebox
         search_frame = tkinter.Frame(self.root)
         search_frame.pack(side='top')
@@ -248,6 +285,14 @@ class ApplicationExpense(object):  # pylint: disable=too-many-instance-attribute
             text="Add",
             name="add-button",
             command=self.add_btn,
+            padx=7, pady=2
+        )
+        add_button.pack(side='left')
+        add_button = tkinter.Button(
+            button_frame,
+            text="Generate Mileage",
+            name="generate-mileage",
+            command=self.generate_mileage,
             padx=7, pady=2
         )
         add_button.pack(side='left')
@@ -362,6 +407,13 @@ class ApplicationExpense(object):  # pylint: disable=too-many-instance-attribute
                 "Please select an expense.",
                 icon='warning'
             )
+
+    def generate_mileage(self):
+        """"""
+
+        if self.generate_mileage_app is None:
+            self.generate_mileage_app = ApplicationGenerateMileage(self, self.exp_cats)
+        self.generate_mileage_app.generate()
 
     def load(self):
         """"""

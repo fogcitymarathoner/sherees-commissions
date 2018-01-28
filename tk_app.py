@@ -12,6 +12,7 @@ from tkinter import messagebox
 
 import api
 import lib
+import sheets_lib
 import tk_applets
 import tk_expenses
 import tk_forms
@@ -659,6 +660,21 @@ class ApplicationReminder(object):
         self.root.iconify()
 
 
+class ApplicationSheet(object):
+    """Sheet uploading Application"""
+
+    def __init__(self, parent, title='Update Sheets'):
+        """Render Restaurants Application"""
+        self.parent = parent
+        self.root = tkinter.Tk()
+        self.root.title(title)
+        self.root.iconify()
+
+    def load(self):
+        """Update Google Sheets"""
+        sheets_lib.update_vendors_sheet()
+        self.root.iconify()
+
 class ApplicationTimecard(object):
     """"""
 
@@ -738,7 +754,8 @@ class ApplicationTimecard(object):
         """"""
 
         if self.listbox.curselection() != ():
-            self.edit_app = tk_applets.AppletEditTimecard(self)
+            if self.edit_app is None:
+                self.edit_app = tk_applets.AppletEditTimecard(self)
             self.edit_app.set_edit_form(
                 self.timecard_dicts[self.listbox.curselection()[0]])
             self.edit_app.root.deiconify()
@@ -953,6 +970,7 @@ class Gui(object):  # pylint: disable=too-many-instance-attributes
         self.client_app = None
         self.expense_app = None
         self.remind_app = None
+        self.sheet_app = None
         self.tc_app = None
         self.v_app = None
         self.exp_cats = lib.list_dropdown_expense_categories()
@@ -960,6 +978,14 @@ class Gui(object):  # pylint: disable=too-many-instance-attributes
         self.root.title('Home Business')
         self.states = lib.get_states()
         button_frame = tkinter.Frame(self.root).pack(side='top')
+        sheets_app_btn = tkinter.Button(
+            button_frame,
+            text="Update Sheets",
+            name="sheets-PERS_APP-btn",
+            command=self.sheet_btn,
+            padx=7, pady=2
+        )
+        sheets_app_btn.pack(side='left')
         tkinter.Button(
             button_frame,
             text="Clients",
@@ -1007,6 +1033,13 @@ class Gui(object):  # pylint: disable=too-many-instance-attributes
         """"""
 
         self.root.mainloop()
+        self.sheet_app = ApplicationSheet(self, title='Upload Sheets')
+        self.client_app = ApplicationClient(self, self.states)
+        self.expense_app = tk_expenses.ApplicationExpense(self, self.exp_cats)
+        self.remind_app = ApplicationReminder(self)
+        self.tc_app = ApplicationTimecard(self)
+        self.v_app = ApplicationVendor(self, self.states)
+
 
     def clients_btn(self):
         """"""
@@ -1046,6 +1079,13 @@ class Gui(object):  # pylint: disable=too-many-instance-attributes
             self.tc_app = ApplicationTimecard(self)
         self.tc_app.root.deiconify()
         self.tc_app.load()
+
+    def sheet_btn(self):
+        """Show posts PERS_APP."""
+        if self.sheet_app is None:
+            self.sheet_app = ApplicationSheet(self, title='Upload Sheets')
+        self.sheet_app.root.deiconify()
+        self.sheet_app.load()
 
     def vendors_btn(self):
         """"""

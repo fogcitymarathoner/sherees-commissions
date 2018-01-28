@@ -647,6 +647,7 @@ class AppletEditClientMemo(object):
             self.parent.root.deiconify()
             self.parent.load()
 
+
 class AppletEditTimecard(object):  # pylint: disable=too-many-instance-attributes
     """"""
 
@@ -732,8 +733,8 @@ class AppletEditTimecard(object):  # pylint: disable=too-many-instance-attribute
 
     def edit_amounts_btn_cb(self):
         """"""
-
-        self.edit_amt_app = AppletEditTimecardAmounts(self)
+        if self.edit_amt_app is None:
+            self.edit_amt_app = AppletEditTimecardAmounts(self)
         self.root.iconify()
         self.edit_amt_app.root.deiconify()
         self.edit_amt_app.set_edit_form(self.timecard_obj)
@@ -768,7 +769,9 @@ class AppletEditTimecard(object):  # pylint: disable=too-many-instance-attribute
 
         self.timecard_obj = api.Timecard(**timecard_dict)
         self.root.title('Edit Timecard Number %s' % self.timecard_obj.id)
-        self.date.set(dt.now().strftime(api.DATE_INPUT_FORMAT))
+        self.date.set(dt.strptime(
+                self.timecard_obj.date,
+                api.DATE_ISO_FORMAT).strftime(api.DATE_INPUT_FORMAT))
         self.notes_entry.delete('1.0', tkinter.END)
         self.notes_entry.insert(
             tkinter.END, self.timecard_obj.notes if self.timecard_obj.notes else '')
@@ -790,6 +793,7 @@ class AppletEditTimecard(object):  # pylint: disable=too-many-instance-attribute
         """"""
 
         set_edit_timecard_msg(self.msgvar, self.timecard_obj)
+
 
 class AppletEditTimecardAmounts(object):  # pylint: disable=too-many-instance-attributes
     """"""
@@ -864,7 +868,8 @@ class AppletEditTimecardAmounts(object):  # pylint: disable=too-many-instance-at
 
     def set_edit_form(self, timecard_obj):
         """"""
-
+        for f in self.frames:
+            f.destroy()
         self.timecard_obj = timecard_obj
         self.items = []
         self.items_amounts_vars = []
