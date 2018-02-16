@@ -344,9 +344,7 @@ class AppletCreateVendor(object):  # pylint: disable=too-many-instance-attribute
         self.vendor_obj.secretbits = self.secretbits_entry.get('1.0', 'end-1c')
         self.vendor_obj.notes = self.notes_entry.get('1.0', 'end-1c')
         self.vendor_obj.active = True if self.active.get() == 1 else False
-        self.vendor_obj.state = session.query(
-            models.State).\
-            filter(models.State.name == self.state.get()).first()
+        self.vendor_obj.state = self.state.get()
 
     def save_btn(self):
         """"""
