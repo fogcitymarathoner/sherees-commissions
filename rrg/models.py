@@ -1372,15 +1372,12 @@ class NotePayment(Base):
 
 class Payroll(Base):
     __tablename__ = 'payrolls'
-
     id = Column(Integer, primary_key=True)
     name = Column(String(72), nullable=False)
-
     checks = relationship("EmployeePayment", back_populates="payroll", cascade="all, delete, delete-orphan")
     notes = Column(TEXT, nullable=False)
     amount = Column(Float, nullable=False)
     date = Column(Date, index=True, nullable=False, default=default_date, onupdate=default_date)
-
     created_date = Column(Date, default=default_date)
     modified_date = Column(DateTime, default=func.now(), onupdate=func.now())
     created_user_id = Column(Integer, default=2)
@@ -1390,7 +1387,6 @@ class Payroll(Base):
     def to_xml(self):
         doc = ET.Element('payroll')
         ET.SubElement(doc, 'id').text = str(self.id)
-
         ET.SubElement(doc, 'notes').text = str(self.notes)
         ET.SubElement(doc, 'amount').text = str(self.amount)
         ET.SubElement(doc, 'date').text = dt.strftime(self.date if self.date else dt.now(), TIMESTAMP_FORMAT)
@@ -1507,7 +1503,6 @@ class Vendor(Base):
 
     def to_array(self):
         """Vendor to array"""
-
         return [
             self.id,
             self.name,

@@ -45,6 +45,25 @@ def generate_mileage():
                 session.add(exp)
                 session.commit()
 
+def _invoices_report(contract):
+    invoices = session.query(models.Invoice).filter(models.Invoice.contract == contract, models.Invoice.voided == False).order_by(models.Invoice.period_end.asc())
+    for i in invoices:
+        print('id: %s, start: %s end: %s amount: %s cleared: %s' % (i.id, i.period_start, i.period_end, i.amount(), i.cleared))
+
+@manager.command
+def tobias_invoices():
+    """"""
+    print('Tobias Invoice')
+    contract = session.query(models.Contract).get(2)
+    _invoices_report(contract)
+
+
+@manager.command
+def jmp_invoices():
+    """"""
+    print('JMP Invoice')
+    contract = session.query(models.Contract).get(1479)
+    _invoices_report(contract)
 
 if __name__ == "__main__":
     manager.run()

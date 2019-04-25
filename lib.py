@@ -97,7 +97,7 @@ def list_page_clients_memos(client_id, offset=0, page_size=30):
         ]
 
 
-def list_page_expenses(offset=0, page_size=30):
+def list_page_expenses(offset=0, page_size=100):
     """Get list of expenses dictionaries."""
 
     # fixme: this filter should be models.Expense.cleared is False, per lint
@@ -375,7 +375,6 @@ def set_invoice_posted(id, posted=True):
     invoice.posted = posted
     session.commit()
 
-
 def skip_contract_interval(contract_id, start, end):
     """
 
@@ -397,6 +396,15 @@ def skip_contract_interval(contract_id, start, end):
     session.add(new_invoice)
     session.commit()
 
+def void_invoice(invoice_id):
+    """
+    Sets invoice to voided
+    :param invoice_id:
+    :return:
+    """
+    invoice = session.query(models.Invoice).get(invoice_id)
+    invoice.voided=True
+    session.commit()
 
 def reminders(reminder_period_start, payroll_run_date, t_set, period):
     """
@@ -451,8 +459,11 @@ def timecards():
     """
 
     with session.no_autoflush:
-        return session.query(models.Invoice, models.Contract, models.Employee, models.Client).join(
-            models.Contract).join(models.Employee).join(models.Client).filter(
+        return session.query(
+            models.Invoice, models.Contract, models.Employee, models.Client).join(
+            models.Contract, models.Invoice.contract_id == models.Contract.id).join(
+            models.Employee, models.Contract.employee_id == models.Employee.id).join(
+            models.Client, models.Contract.client_id == models.Client.id).filter(
             and_(models.Client.active == True, models.Contract.active == True,
                  models.Employee.active == True)).all()
 

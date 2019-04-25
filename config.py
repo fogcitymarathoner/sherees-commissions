@@ -1,6 +1,9 @@
 import os
 
-SQLALCHEMY_DATABASE_URI = 'postgres://marc:flaming@localhost:5432/biz'
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    'BUSINESS_DATABASE_URI',
+    "sqlite:////biz.db"
+)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 if os.environ.get('AWS_ACCESS_KEY_ID'):

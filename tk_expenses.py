@@ -83,24 +83,21 @@ class AppletCreateExpense(object):  # pylint: disable=too-many-instance-attribut
 
         self.expense_obj.amount = self.amt.get()
         self.expense_obj.description = self.desc.get()
-        print(self.date_entry.get())
-        print(dt.strptime(self.date_entry.get(), api.DATE_INPUT_FORMAT))
-        print(type(dt.strptime(self.date_entry.get(), api.DATE_INPUT_FORMAT)))
         self.expense_obj.date = self.date.get()
         self.expense_obj.category = self.cat.get()
-        self.expense_obj.notes = self.notes_entry.get('1.0', 'end-1c')
+        self.expense_obj.notes = self.notes_entry.get('1.0', tkinter.END)
 
     def initialize(self):
         """"""
 
-        self.expense_obj = api.Expense(created_date=dt.now(),
-                                       modified_date=dt.now())
+        self.expense_obj = api.Expense(created_date=dt.now(), modified_date=dt.now())
         self.msgvar.set('Add new expense')
         self.date.set(dt.now().strftime(api.DATE_INPUT_FORMAT))
         self.desc.set('')
         self.amt.set('')
         self.cat.set('')
-        self.notes_entry.delete(1.0, tkinter.END)
+        # fixme: this does not clear the text entry
+        self.notes_entry.delete('1.0', tkinter.END)
 
     def save_btn(self):
         """Save new expense"""

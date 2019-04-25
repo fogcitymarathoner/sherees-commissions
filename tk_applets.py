@@ -1,6 +1,8 @@
 # pylint: disable=too-many-lines
 """"""
 from datetime import datetime as dt
+import logging
+import json
 import tkinter
 from tkinter.scrolledtext import ScrolledText
 
@@ -9,8 +11,19 @@ import tabulate
 import tk_applet_applets
 import api
 import lib
-from app import session
-from rrg import models
+import sys
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - {%(pathname)s:%(lineno)d} - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.debug('This message should go to the log file')
+logger.info('So should this')
+logger.warning('And this, too')
 
 
 def set_edit_timecard_msg(ui_var, timecard):
@@ -29,7 +42,7 @@ def set_edit_timecard_msg(ui_var, timecard):
     ui_var.set(summary)
 
 
-class AppletCreateClient(object):  # pylint: disable=too-many-instance-attributes
+class AppletCreateClient():  # pylint: disable=too-many-instance-attributes
     """"""
 
     def __init__(self, parent, states):  # pylint: disable=too-many-statements
@@ -135,7 +148,7 @@ class AppletCreateClient(object):  # pylint: disable=too-many-instance-attribute
         """"""
 
         self._form_to_obj()
-        print(self.client_obj.to_dict())
+        logger.debug(json.dumps(self.client_obj.to_dict(), indent=2))
         result = api.ClientSchema().load(self.client_obj.to_dict())
         if result.errors:
             print(result.errors)
@@ -146,7 +159,7 @@ class AppletCreateClient(object):  # pylint: disable=too-many-instance-attribute
             self.parent.load()
 
 
-class AppletCreateClientMemo(object):
+class AppletCreateClientMemo():
     """"""
 
     def __init__(self, parent):
@@ -217,7 +230,7 @@ class AppletCreateClientMemo(object):
             self.parent.root.deiconify()
             self.parent.load()
 
-class AppletCreateVendor(object):  # pylint: disable=too-many-instance-attributes
+class AppletCreateVendor():  # pylint: disable=too-many-instance-attributes
     """"""
 
     def __init__(self, parent, states):  # pylint: disable=too-many-locals
@@ -360,7 +373,7 @@ class AppletCreateVendor(object):  # pylint: disable=too-many-instance-attribute
             self.parent.load()
 
 
-class AppletCreateVendorMemo(object):
+class AppletCreateVendorMemo():
     """"""
 
     def __init__(self, parent):
@@ -543,7 +556,8 @@ class AppletEditClient():  # pylint: disable=too-many-instance-attributes
 
     def set_edit_form(self, client_dict):
         """Set up tk client edit form"""
-
+        logger.debug('Setting Client Edit Form')
+        logger.debug(json.dumps(client_dict, indent=2))
         self.client_obj = api.Client(**client_dict)
         self.msgvar.set(
             '%s: %s' % (
@@ -572,7 +586,7 @@ class AppletEditClient():  # pylint: disable=too-many-instance-attributes
             self.parent.load()
 
 
-class AppletEditClientMemo(object):
+class AppletEditClientMemo():
     """"""
 
     def __init__(self, parent):
@@ -646,7 +660,7 @@ class AppletEditClientMemo(object):
             self.parent.load()
 
 
-class AppletEditTimecard(object):  # pylint: disable=too-many-instance-attributes
+class AppletEditTimecard():  # pylint: disable=too-many-instance-attributes
     """"""
 
     def __init__(self, parent):
@@ -793,7 +807,7 @@ class AppletEditTimecard(object):  # pylint: disable=too-many-instance-attribute
         set_edit_timecard_msg(self.msgvar, self.timecard_obj)
 
 
-class AppletEditTimecardAmounts(object):  # pylint: disable=too-many-instance-attributes
+class AppletEditTimecardAmounts():  # pylint: disable=too-many-instance-attributes
     """"""
 
     def __init__(self, parent):
@@ -904,7 +918,7 @@ class AppletEditTimecardAmounts(object):  # pylint: disable=too-many-instance-at
             self.items_quantities_entries[indx].pack(side='left')
 
 
-class AppletEditVendor(object):  # pylint: disable=too-many-instance-attributes
+class AppletEditVendor():  # pylint: disable=too-many-instance-attributes
     """"""
 
     def __init__(self, parent, states):  # pylint: disable=too-many-statements
@@ -1069,7 +1083,7 @@ class AppletEditVendor(object):  # pylint: disable=too-many-instance-attributes
         self.active.set(self.vendor_obj.active if self.vendor_obj.active else False)
 
 
-class AppletEditVendorMemo(object):
+class AppletEditVendorMemo():
     """"""
 
     def __init__(self, parent):

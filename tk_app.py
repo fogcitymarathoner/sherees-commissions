@@ -3,7 +3,9 @@ tk application - clients, contracts, invoices ...
 """
 # pylint: disable=too-many-lines
 import os
+import sys
 from subprocess import call
+import logging
 from datetime import datetime as dt
 from datetime import timedelta as td
 
@@ -16,6 +18,19 @@ import sheets_lib
 import tk_applets
 import tk_expenses
 import tk_forms
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - {%(pathname)s:%(lineno)d} - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.debug('This message should go to the log file')
+logger.info('So should this')
+logger.warning('And this, too')
 
 # todo: fix unittests
 
@@ -76,7 +91,7 @@ def generate_pdf(timecard_dict):
         os.chdir(cpwd)
 
 
-class AppletReceiveCheck(object):
+class AppletReceiveCheck():
     # pylint: disable=too-many-instance-attributes
     """Displays selected client's open invoices for applying to a received check written
     with child applet AppletWriteCheck"""
@@ -148,7 +163,7 @@ class AppletReceiveCheck(object):
         self.fill_client_open_invoice_box()
 
 
-class AppletWriteCheck(object):
+class AppletWriteCheck():
     # pylint: disable=too-many-instance-attributes
     """"""
 
@@ -215,7 +230,7 @@ class AppletWriteCheck(object):
             command=self.cancel_btn,
             padx=7, pady=2
         ).grid(row=5 + len(self.selected_invoice_dicts), column=2)
-        print('Total credit to apply %s' % self.total(listbox_selection))
+        logger.info('Total credit to apply %s' % self.total(listbox_selection))
 
     def cancel_btn(self):
         """"""
@@ -228,7 +243,7 @@ class AppletWriteCheck(object):
 
         self.check_obj = api.Check(client_id=client_id)
         self.check_date.set(dt.now().strftime(api.DATE_INPUT_FORMAT))
-        self.notes_entry.delete(1.0, tkinter.END)
+        self.notes_entry.delete('1.0', tkinter.END)
         self.check_number.set('')
 
     def recalculate_button_callback(self):
@@ -275,7 +290,7 @@ class AppletWriteCheck(object):
         return total
 
 
-class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
+class ApplicationClient:  # pylint: disable=too-many-instance-attributes
     """"""
     # pylint: disable=too-many-locals
 
@@ -291,6 +306,16 @@ class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
         self.root = tkinter.Tk()
         self.root.iconify()
         self.root.geometry('535x%s' % 600)
+        self.invoices_window = tkinter.Tk()
+        self.invoices_window.iconify()
+        self.invoices_window_frame = tkinter.Frame(self.invoices_window)
+        self.invoices_window.geometry('700x%s' % 600)
+        scrollbar = tkinter.Scrollbar(self.invoices_window_frame)
+        scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+        self.invoices_window_log = tkinter.Text(self.invoices_window_frame, height=60, width=200, yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.invoices_window_log.yview)
+        self.invoices_window_log.pack()
+        self.invoices_window_frame.pack()
         self.messagebox = messagebox
         search_frame = tkinter.Frame(self.root)
         search_frame.pack(side='top')
@@ -310,6 +335,14 @@ class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
         self.root.title('Clients')
         button_frame = tkinter.Frame(self.root)
         button_frame.pack(side='top')
+        home_button = tkinter.Button(
+            button_frame,
+            text="Home",
+            name="home-button",
+            command=self.home_btn,
+            padx=7, pady=2
+        )
+        home_button.pack(side='left')
         select_client_button = tkinter.Button(
             button_frame,
             text="Select Client Check is From",
@@ -342,15 +375,6 @@ class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
             padx=7, pady=2
         )
         edit_button.pack(side='left')
-        home_button = tkinter.Button(
-            button_frame,
-            text="Home",
-            name="home-button",
-            command=self.home_btn,
-            padx=7, pady=2
-        )
-        home_button.pack(side='left')
-
         reload_button = tkinter.Button(
             button_frame,
             text="Reload",
@@ -368,6 +392,14 @@ class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
             padx=7, pady=2
         )
         search_button.pack(side='left')
+        invoices_report_button = tkinter.Button(
+            button_frame,
+            text="Invoices",
+            name="invoices-report-button",
+            command=self.client_invoices_report_btn,
+            padx=7, pady=2
+        )
+        invoices_report_button.pack(side='left')
         quit_button = tkinter.Button(
             button_frame,
             text="Quit",
@@ -409,7 +441,7 @@ class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
                 else:
                     self.load()
             else:
-                print("Delete canceled.")
+                logger.info("Delete canceled.")
         else:
             self.messagebox.showinfo(
                 "Warning",
@@ -432,6 +464,21 @@ class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
             self.edit_app.set_edit_form(self.dicts[self.listbox.curselection()[0]])
             self.edit_app.root.deiconify()
             self.root.iconify()
+        else:
+            self.messagebox.showinfo(
+                "Warning",
+                "Please select a client.",
+                icon='warning'
+            )
+
+    def client_invoices_report_btn(self):
+        """"""
+
+        if self.listbox.curselection() != ():
+            logger.debug(self.dicts[self.listbox.curselection()[0]])
+            # self.edit_app.set_edit_form(self.dicts[self.listbox.curselection()[0]])
+            # self.edit_app.root.deiconify()
+            # self.root.iconify()
         else:
             self.messagebox.showinfo(
                 "Warning",
@@ -479,13 +526,11 @@ class ApplicationClient(object):  # pylint: disable=too-many-instance-attributes
 
     def search_btn(self):
         """"""
-
         self.search()
 
 
-class ApplicationReminder(object):
+class ApplicationReminder():
     """"""
-
     def __init__(self, parent):
         """"""
         self.parent = parent
@@ -603,24 +648,24 @@ class ApplicationReminder(object):
 
         t_set = lib.timecards_set()
         if selected_period_number == 1:
-            print("Week")
+            logger.info("Week")
             self.reminders = lib.reminders(
                 dt.now() - td(days=REMINDERS_DAYS_BACK), dt.now(), t_set, 'week')
         elif selected_period_number == 2:
-            print("BiWeek")
+            logger.info("BiWeek")
             self.reminders = lib.reminders(
                 dt.now() - td(days=REMINDERS_DAYS_BACK), dt.now(), t_set, 'biweek')
         elif selected_period_number == 3:
-            print("SemiMonth")
+            logger.info("SemiMonth")
             self.reminders = lib.reminders(
                 dt.now() - td(days=REMINDERS_DAYS_BACK), dt.now(), t_set,
                 'semimonth')
         elif selected_period_number == 4:
-            print("Month")
+            logger.info("Month")
             self.reminders = lib.reminders(
                 dt.now() - td(days=REMINDERS_DAYS_BACK), dt.now(), t_set, 'month')
         else:
-            print("Error Bad Selection")
+            logger.error("Error Bad Selection")
             return
         self.listbox.delete(0, tkinter.END)
         for reminder in self.reminders:
@@ -660,7 +705,7 @@ class ApplicationReminder(object):
         self.root.iconify()
 
 
-class ApplicationSheet(object):
+class ApplicationSheet():
     """Sheet uploading Application"""
 
     def __init__(self, parent, title='Update Sheets'):
@@ -675,7 +720,7 @@ class ApplicationSheet(object):
         sheets_lib.update_vendors_sheet()
         self.root.iconify()
 
-class ApplicationTimecard(object):
+class ApplicationTimecard():
     """"""
 
     def __init__(self, parent):
@@ -706,6 +751,14 @@ class ApplicationTimecard(object):
             padx=7, pady=2
         )
         edit_invoice_button.pack(side='left')
+        void_invoice_button = tkinter.Button(
+            button_frame,
+            text="Void Invoice",
+            name="void-invoice-button",
+            command=self.void_btn,
+            padx=7, pady=2
+        )
+        void_invoice_button.pack(side='left')
         post_invoice_button = tkinter.Button(
             button_frame,
             text="Post Invoice",
@@ -750,6 +803,25 @@ class ApplicationTimecard(object):
         self.listbox.pack(side='top')
         scrollbar.config(command=self.listbox.yview)
 
+    def void_btn(self):
+        """void selected invoice"""
+
+        if self.listbox.curselection() != ():
+            result = tkinter.messagebox.askquestion(
+                "Void", "Are you sure?", icon='warning')
+            if result == 'yes':
+                self.selected_invoice_index = self.listbox.curselection()[0]
+                lib.void_invoice(self.timecard_dicts[self.selected_invoice_index]['id'])
+                self.load()
+            else:
+                logger.info("Delete canceled.")
+        else:
+            tkinter.messagebox.showinfo(
+                'Warning',
+                "Please select a contact.",
+                icon='warning'
+            )
+
     def edit_btn(self):
         """"""
 
@@ -783,7 +855,7 @@ class ApplicationTimecard(object):
         if self.listbox.curselection() != ():
             selected_timecard = self.timecard_dicts[self.listbox.curselection()[0]]
             generate_pdf(selected_timecard)
-            print('posting %s' % selected_timecard['id'])
+            logger.info('posting %s' % selected_timecard['id'])
             lib.set_invoice_posted(selected_timecard['id'])
             self.load()
         else:
@@ -796,12 +868,10 @@ class ApplicationTimecard(object):
         self.parent.remind_app.root.deiconify()
 
 
-class ApplicationVendor(object):  # pylint: disable=too-many-instance-attributes
+class ApplicationVendor():  # pylint: disable=too-many-instance-attributes
     """"""
-
     def __init__(self, parent, states):
         """"""
-
         self.parent = parent
         self.states = states
         self.dicts = []
@@ -907,7 +977,7 @@ class ApplicationVendor(object):  # pylint: disable=too-many-instance-attributes
                 else:
                     self.load()
             else:
-                print("Delete canceled.")
+                logger.info("Delete canceled.")
         else:
             self.messagebox.showinfo(
                 "Warning",
