@@ -97,6 +97,17 @@ def list_page_clients_memos(client_id, offset=0, page_size=30):
         ]
 
 
+def list_year_expenses(year=2017, category=1):
+    """Get list of expenses dictionaries."""
+
+    # fixme: this filter should be models.Expense.cleared is False, per lint
+    return [
+        c.to_dict() for c in session.query(models.Expense).filter(models.Expense.date < '%s-01-01'%str(year+1)).filter(models.Expense.date >= '%s-01-01'%str(year)). \
+            filter(models.Expense.cleared == false()). \
+            filter(models.Expense.category_id == category). \
+            order_by(desc(models.Expense.date))
+        ]
+
 def list_page_expenses(offset=0, page_size=100):
     """Get list of expenses dictionaries."""
 

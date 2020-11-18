@@ -57,6 +57,92 @@ def tobias_invoices():
     contract = session.query(models.Contract).get(2)
     _invoices_report(contract)
 
+@manager.command
+def exp2018():
+    total1 = 0.0
+    exps1 = lib.list_year_expenses(year=2018, category=1)
+    for exp in exps1:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total1 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total1)
+    total2 = 0.0
+    exps2 = lib.list_year_expenses(year=2018, category=2)
+    for exp in exps2:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total2 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total2)
+    total3 = 0.0
+    exps3 = lib.list_year_expenses(year=2018, category=3)
+    for exp in exps3:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total3 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total3)
+    total4 = 0.0
+    exps4 = lib.list_year_expenses(year=2018, category=4)
+    for exp in exps4:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total4 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total4)
+    total5 = 0.0
+    exps5 = lib.list_year_expenses(year=2018, category=5)
+    for exp in exps5:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total5 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total5)
+    total6 = 0.0
+    exps6 = lib.list_year_expenses(year=2018, category=6)
+    for exp in exps6:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total6 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total6)
+    total7 = 0.0
+    exps7 = lib.list_year_expenses(year=2018, category=7)
+    for exp in exps7:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total7 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total7)
+    total8 = 0.0
+    exps8 = lib.list_year_expenses(year=2018, category=8)
+    for exp in exps8:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total8 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total8)
+    total9 = 0.0
+    exps9 = lib.list_year_expenses(year=2018, category=9)
+    for exp in exps9:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total9 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total9)
+    total10 = 0.0
+    exps10 = lib.list_year_expenses(year=2018, category=10)
+    for exp in exps10:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total10 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total10)
+    total11 = 0.0
+    exps11 = lib.list_year_expenses(year=2018, category=11)
+    for exp in exps11:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total11 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total11)
+    total12 = 0.0
+    exps12 = lib.list_year_expenses(year=2018, category=12)
+    for exp in exps12:
+        print('%s %s %s %s' % (exp['category'], exp['id'], exp['date'], exp['amount']))
+        total12 += exp['amount']
+    print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    print('Total %s' % total12)
 
 @manager.command
 def jmp_invoices():

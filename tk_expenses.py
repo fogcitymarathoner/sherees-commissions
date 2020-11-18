@@ -417,7 +417,7 @@ class ApplicationExpense(object):  # pylint: disable=too-many-instance-attribute
 
         self.dicts = []
         self.listbox.delete(0, tkinter.END)
-        for diction in lib.list_page_expenses():
+        for diction in lib.list_page_expenses(offset=0, page_size=99999):
             self.dicts.append(diction)
             self.listbox.insert(tkinter.END, api.formatted_list_expense_line(diction))
 
